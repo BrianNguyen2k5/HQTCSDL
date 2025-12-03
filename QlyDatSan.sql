@@ -262,9 +262,10 @@ CREATE TABLE TaiSanChoThue (
 -- Bảng này được tham chiếu trong Hóa Đơn và Chi Tiết, cần tạo để tránh lỗi FK
 CREATE TABLE PhieuThueTaiSan (
     MaPhieuThue CHAR(5) PRIMARY KEY,
-    NgayThue DATETIME,
+    NgayBatDau DATETIME,
+    NgayKetThuc DATETIME,
     MaKhachHang CHAR(5),
-    MaNhanVien CHAR(5)
+    MaNhanVien CHAR(5),
 );
 
 CREATE TABLE ChiTietPhieuThueTaiSan (
