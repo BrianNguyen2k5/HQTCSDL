@@ -9,295 +9,295 @@ Go
 
 CREATE TABLE TaiKhoan (
     TenDangNhap VARCHAR(50) PRIMARY KEY,
-    MatKhauMaHoa VARCHAR(255),
-    Email VARCHAR(100),
-    TrangThai BIT DEFAULT 1,
+    MatKhauMaHoa VARCHAR(255) NOT NULL,
+    Email VARCHAR(100) NOT NULL,
+    TrangThai BIT DEFAULT 1, -- Trạng thái: 1: là còn hoạt động, 0: bị khóa 
     NgayTao DATETIME DEFAULT GETDATE(),
-    MaKhachHang CHAR(5),
-    MaNhanVien CHAR(5)
+    MaKhachHang CHAR(10),
+    MaNhanVien CHAR(10) 
 );
 
 -- 2. BẢNG: QUẢN LÝ NHÂN SỰ --
 
 CREATE TABLE ChucVu (
-    MaChucVu CHAR(5) PRIMARY KEY,
-    TenChucVu NVARCHAR(50)
+    MaChucVu CHAR(10) PRIMARY KEY,
+    TenChucVu NVARCHAR(50) NOT NULL -- TenChucVu =  'Quản lý' hoặc 'Lễ tân' hoặc 'Kỹ thuật' hoặc 'Thu ngân' hoặc ‘Huấn luyện viên’.
+
 );
 
 CREATE TABLE NhanVien (
-    MaNhanVien CHAR(5) PRIMARY KEY,
-    HoTen NVARCHAR(100),
-    NgaySinh DATE,
-    GioiTinh NVARCHAR(5),
-    SoCCCD CHAR(12),
-    DiaChi NVARCHAR(255),
-    SoDienThoai CHAR(10),
-    LuongCoBan INT,
+    MaNhanVien CHAR(10) PRIMARY KEY,
+    HoTen NVARCHAR(100) NOT NULL,
+    NgaySinh DATE NOT NULL,
+    GioiTinh NVARCHAR(5) NOT NULL, -- GioiTinh = ‘Nam’ hoặc ‘Nữ’.
+    SoCCCD CHAR(12) NOT NULL, UNIQUE,
+    DiaChi NVARCHAR(255) NOT NULL,
+    SoDienThoai CHAR(10) NOT NULL,
+    LuongCoBan INT NOT NULL,
     PhuCap INT DEFAULT 0,
-    NgayVaoLam DATE,
-    TrangThai NVARCHAR(20),
-    MaQuanLy CHAR(5),
-    MaCoSo CHAR(5),
-    MaChucVu CHAR(5)
+    NgayVaoLam DATE NOT NULL,
+    TrangThai NVARCHAR(20) NOT NULL, -- Trạng thái: 'Đang làm', 'Nghỉ việc'
+    MaQuanLy CHAR(10),
+    MaCoSo CHAR(10) NOT NULL,
+    MaChucVu CHAR(10) NOT NULL
 );
 
 CREATE TABLE HuanLuyenVien (
-    MaHLV CHAR(5) PRIMARY KEY,
-    ChuyenMon NVARCHAR(100),
-    MucLuongTheoGio INT,
-    KinhNghiem NVARCHAR(255)
+    MaHLV CHAR(10) PRIMARY KEY,
+    ChuyenMon NVARCHAR(100) NOT NULL, 
+    GiaThuTheoGio INT NOT NULL,
+    KinhNghiem NVARCHAR(255) NOT NULL
 );
 
 CREATE TABLE LichLamViec (
-    MaHLV CHAR(5),
+    MaHLV CHAR(10),
     NgayTrongTuan INT,
-    NgayCuThe DATE,
-    GioBatDau TIME,
-    GioKetThuc TIME,
-    TrangThai NVARCHAR(20)
-    -- Lưu ý: Tài liệu không ghi rõ PK cho bảng này, tạm thời để trống PK
+    GioBatDau TIME NOT NULL,
+    GioKetThuc TIME NOT NULL,
+    PRIMARY KEY (MaHLV, NgayTrongTuan)
 );
 
 CREATE TABLE CaTruc (
-    MaCa CHAR(5) PRIMARY KEY,
-    TenCa NVARCHAR(50),
-    GioBatDau TIME,
-    GioKetThuc TIME
+    MaCa CHAR(10) PRIMARY KEY,
+    TenCa NVARCHAR(50) NOT NULL,
+    GioBatDau TIME NOT NULL,
+    GioKetThuc TIME NOT NULL
 );
 
 CREATE TABLE PhanCongCaTruc (
-    MaCa CHAR(5),
-    MaNhanVien CHAR(5),
+    MaCa CHAR(10),
+    MaNhanVien CHAR(10),
     NgayLamViec DATE,
-    MaQuanLy CHAR(5),
+    MaQuanLy CHAR(10) NOT NULL,
     PRIMARY KEY (MaCa, MaNhanVien, NgayLamViec)
 );
 
 CREATE TABLE DonNghiPhep (
-    MaDon CHAR(5) PRIMARY KEY,
-    NgayXinNghi DATE,
+    MaDon CHAR(10) PRIMARY KEY,
+    NgayXinNghi DATE NOT NULL,
     LyDo NVARCHAR(255),
-    TrangThai NVARCHAR(20),
-    MaNhanVien CHAR(5),
-    MaQuanLy CHAR(5)
+    TrangThai NVARCHAR(20), --Trạng thái: 'Đang chờ duyệt', 'Đã Duyệt', 'Hủy'
+    MaNhanVienLap CHAR(10) NOT NULL,
+    MaQuanLy CHAR(10) NOT NULL,
+    MaNhanVienThayThe CHAR(10)
 );
 
 -- 3. BẢNG: KHÁCH HÀNG & ƯU ĐÃI --
 
 CREATE TABLE KhachHang (
-    MaKhachHang CHAR(5) PRIMARY KEY,
-    HoTen NVARCHAR(100),
-    NgaySinh DATE,
-    SoCCCD CHAR(12),
-    SoDienThoai CHAR(10),
-    Email VARCHAR(100)
+    MaKhachHang CHAR(10) PRIMARY KEY,
+    HoTen NVARCHAR(100) NOT NULL,
+    NgaySinh DATE NOT NULL,
+    SoCCCD CHAR(12) NOT NULL UNIQUE,
+    SoDienThoai CHAR(10) NOT NULL,
+    Email VARCHAR(100) 
 );
 
 CREATE TABLE UuDai (
-    MaUuDai CHAR(5) PRIMARY KEY,
-    LoaiUuDai NVARCHAR(100),
-    PhanTramGiamGia INT
+    MaUuDai CHAR(10) PRIMARY KEY,
+    LoaiUuDai NVARCHAR(100) NOT NULL, --LoaiUuDai = ‘Silver’ hoặc ‘Gold’  hoặc ‘Platinum’ hoặc ‘HSSV’ hoặc ‘Người cao tuổi’.
+    PhanTramGiamGia INT NOT NULL
 );
 
 CREATE TABLE ApDung (
-    MaKhachHang CHAR(5),
-    MaUuDai CHAR(5),
-    NgayBatDau DATETIME,
-    NgayKetThuc DATETIME,
+    MaKhachHang CHAR(10),
+    MaUuDai CHAR(10),
+    NgayBatDau DATETIME NOT NULL,
+    NgayKetThuc DATETIME NOT NULL,
     PRIMARY KEY (MaKhachHang, MaUuDai)
 );
 
 -- 4. BẢNG: CƠ SỞ & SÂN BÃI --
 
 CREATE TABLE CoSo (
-    MaCoSo CHAR(5) PRIMARY KEY,
-    TenCoSo NVARCHAR(100),
-    DiaChi NVARCHAR(255)
+    MaCoSo CHAR(10) PRIMARY KEY,
+    TenCoSo NVARCHAR(100) NOT NULL,
+    DiaChi NVARCHAR(255) NOT NULL
 );
 
 CREATE TABLE LoaiSan (
-    MaLoaiSan CHAR(5) PRIMARY KEY,
-    TenLoaiSan NVARCHAR(50),
-    DonViTinh NVARCHAR(20),
-    GiaGoc INT,
+    MaLoaiSan CHAR(10) PRIMARY KEY,
+    TenLoaiSan NVARCHAR(50) NOT NULL, --TenloaiSan =  ‘Bóng đá mini’ hoặc ‘Cầu lông’ hoặc ‘Tennis’ hoặc ‘Bóng rổ’ hoặc ‘Futsal’.
+    DonViTinhTheoPhut INT NOT NULL, 
+    GiaGoc INT NOT NULL,
     MoTa NVARCHAR(255)
+   -- sân cầu lông và bóng rổ cho thuê giờ: 60 phút, sân tennis cho thuê theo ca 120 phút , sân 
+   -- bóng đá mini cho thuê theo trận (90 phút).
 );
 
 CREATE TABLE San (
-    MaSan CHAR(5) PRIMARY KEY,
-    TenSan NVARCHAR(50),
-    TinhTrang NVARCHAR(20),
-    SucChua INT,
-    MaCoSo CHAR(5),
-    MaLoaiSan CHAR(5)
+    MaSan CHAR(10) PRIMARY KEY,
+    TenSan NVARCHAR(50) NOT NULL,
+    TinhTrang NVARCHAR(20) NOT NULL, -- Trạng thái: 'Trống', 'Đã đặt', 'Đang sử dụng', 'Bảo trì'
+    SucChua INT NOT NULL,
+    MaCoSo CHAR(10) NOT NULL,
+    MaLoaiSan CHAR(10) NOT NULL
 );
 
 CREATE TABLE BaoTri (
-    MaNhanVien CHAR(5),
-    MaSan CHAR(5),
-    NgayBaoTri DATETIME,
+    MaNhanVien CHAR(10),
+    MaSan CHAR(10),
+    NgayBaoTri DATETIME NOT NULL,
     NgayHoanThanh DATETIME,
-    TrangThai NVARCHAR(20),
+    TrangThai NVARCHAR(20) NOT NULL, -- Trạng thái = 'Đang bảo trì', 'Hoàn thành'
     ChiPhi INT DEFAULT 0,
     MoTa NVARCHAR(255),
     PRIMARY KEY (MaNhanVien, MaSan)
 );
 
 CREATE TABLE KhungGio (
-    MaKhungGio CHAR(5) PRIMARY KEY,
-    GioBatDau TIME,
-    GioKetThuc TIME
+    MaKhungGio CHAR(10) PRIMARY KEY,
+    GioBatDau TIME NOT NULL,
+    GioKetThuc TIME NOT NULL
 );
 
 CREATE TABLE NgayLe (
     MaNgayLe DATE PRIMARY KEY,
-    TenNgayLe NVARCHAR(100)
+    TenNgayLe NVARCHAR(100) NOT NULL
 );
 
 -- Bảng giá phụ thu
 CREATE TABLE BangGiaTangKhungGio (
-    MaLoaiSan CHAR(5),
-    MaKhungGio CHAR(5),
-    GiaTang INT,
+    MaLoaiSan CHAR(10),
+    MaKhungGio CHAR(10),
+    GiaTang INT NOT NULL,
     PRIMARY KEY (MaLoaiSan, MaKhungGio)
 );
 
 CREATE TABLE BangGiaTangNgayLe (
-    MaLoaiSan CHAR(5),
+    MaLoaiSan CHAR(10),
     MaNgayLe DATE,
-    GiaTang INT,
+    GiaTang INT NOT NULL,
     PRIMARY KEY (MaLoaiSan, MaNgayLe)
 );
 
 CREATE TABLE BangGiaTangCuoiTuan (
-    MaLoaiSan CHAR(5) PRIMARY KEY,
-    GiaTang INT
+    MaLoaiSan CHAR(10) PRIMARY KEY,
+    GiaTang INT NOT NULL
 );
 
 -- 5. BẢNG: GIAO DỊCH & DỊCH VỤ --
 
 CREATE TABLE PhieuDatSan (
-    MaPhieuDat CHAR(5) PRIMARY KEY,
-    NgayDat DATETIME,
-    NgayNhanSan DATE,
-    GioBatDau TIME,
-    GioKetThuc TIME,
-    HinhThucDat NVARCHAR(50),
-    TrangThaiPhieu NVARCHAR(20),
-    MaKhachHang CHAR(5),
-    MaNhanVien CHAR(5),
-    MaSan CHAR(5)
+    MaPhieuDat CHAR(10) PRIMARY KEY,
+    NgayDat DATETIME NOT NULL,
+    NgayNhanSan DATE NOT NULL,
+    GioBatDau TIME NOT NULL,
+    GioKetThuc TIME NOT NULL,
+    HinhThucDat NVARCHAR(50) NOT NULL, --Hình thức: 'Online', 'Tại quầy'
+    TrangThaiPhieu NVARCHAR(20) NOT NULL, --Trạng thái: 'Chờ thanh toán', 'Hoàn thành', 'Đã hủy', 'Vắng mặt'
+    ThoiGianCheckin TIME, 
+    MaKhachHang CHAR(10) NOT NULL,
+    MaNhanVien CHAR(10) NOT NULL,
+    MaSan CHAR(10) NOT NULL
 );
 
 CREATE TABLE DatLichHLV (
-    MaChiTietPDS CHAR(5) PRIMARY KEY,
-    MaHLV CHAR(5),
-    GioBatDauDV DATETIME,
-    GioKetThucDV DATETIME
+    MaChiTietPDS CHAR(10) PRIMARY KEY,
+    MaHLV CHAR(10) NOT NULL,
+    GioBatDauDV DATETIME NOT NULL,
+    GioKetThucDV DATETIME NOT NULL
 );
 
 CREATE TABLE DichVu (
-    MaDichVu CHAR(5) PRIMARY KEY,
-    TenDichVu NVARCHAR(100),
-    LoaiDichVu NVARCHAR(20),
-    DonGia INT,
-    DonViTinh NVARCHAR(10),
-    TrangThaiKhaDung BIT
+    MaDichVu CHAR(10) PRIMARY KEY,
+    TenDichVu NVARCHAR(100) NOT NULL,
+    LoaiDichVu NVARCHAR(20) NOT NULL, -- LoaiDichVu = 'Dụng cụ thể thao' hoặc 'Khác'
+    DonGia INT NOT NULL,
+    DonViTinh NVARCHAR(10) NOT NULL,
 );
 
 CREATE TABLE TonKho (
-    MaDichVu CHAR(5),
-    MaCoSo CHAR(5),
-    SoLuong INT,
+    MaDichVu CHAR(10),
+    MaCoSo CHAR(10),
+    SoLuong INT NOT NULL,
     PRIMARY KEY (MaDichVu, MaCoSo)
+    TrangThaiKhaDung BIT --TrangThaiKhaDung = 0 -> Không khả dụng, TrangThaiKhaDung = 1 -> Khả dụng
 );
 
 CREATE TABLE ChiTietPhieuDatSan (
-    MaChiTietPDS CHAR(5) PRIMARY KEY,
-    SoLuong INT,
-    ThanhTien INT,
-    LoaiYeuCau NVARCHAR(100),
-    MaPhieuDat CHAR(5),
-    MaNhanVien CHAR(5),
-    MaDichVu CHAR(5),
-    MaHLV CHAR(5)
+    MaChiTietPDS CHAR(10) PRIMARY KEY,
+    SoLuong INT NOT NULL,
+    ThanhTien INT  NOT NULL,
+    LoaiYeuCau NVARCHAR(100) NOT NULL,
+    MaPhieuDat CHAR(10) NOT NULL,
+    MaNhanVien CHAR(10)  NOT NULL,
+    MaDichVu CHAR(10)  NOT NULL,
+    MaHLV CHAR(10)
 );
 
 CREATE TABLE LichSuThayDoi (
-    MaPhieuDat CHAR(5),
-    ThoiDiemThayDoi DATETIME,
-    LoaiThayDoi NVARCHAR(100),
-    SoTienPhat INT,
+    MaPhieuDat CHAR(10) PRIMARY KEY,
+    ThoiDiemThayDoi DATETIME  NOT NULL,
+    LoaiThayDoi NVARCHAR(100)  NOT NULL,
+    SoTienPhat INT  NOT NULL,
     LyDo NVARCHAR(255),
-    SoTienHoanTra INT,
-    MaPhieuDatThayDoi CHAR(5)
+    SoTienHoanTra INT  NOT NULL
 );
 
 CREATE TABLE LichSuHuyDichVu (
-    MaChiTietPDS CHAR(5),
-    ThoiGianHuy DATETIME,
+    MaChiTietPDS CHAR(10) PRIMARY KEY,
+    ThoiGianHuy DATETIME  NOT NULL,
     LyDoHuy NVARCHAR(255),
-    TrangThaiDichVu NVARCHAR(50),
-    DuocHoanTien BIT,
-    SoTienHoan INT
+    SoTienHoan INT NOT NULL
 );
 
 -- 6. BẢNG: THUÊ TÀI SẢN & GÓI --
 
 CREATE TABLE GoiDichVu (
-    MaGoi CHAR(5) PRIMARY KEY,
-    TenGoi NVARCHAR(100),
-    LoaiTaiSan NVARCHAR(20),
-    DonGia INT,
-    ThoiGianSuDung INT
+    MaGoi CHAR(10) PRIMARY KEY,
+    TenGoi NVARCHAR(100) NOT NULL,
+    LoaiTaiSan NVARCHAR(20) NOT NULL,
+    DonGia INT NOT NULL,
+    ThoiGianSuDung INT NOT NULL
 );
 
 CREATE TABLE TaiSanChoThue (
-    MaTaiSan CHAR(5) PRIMARY KEY,
-    LoaiTaiSan NVARCHAR(20),
-    TrangThai NVARCHAR(50),
-    MaCoSo CHAR(5)
+    MaTaiSan CHAR(10) PRIMARY KEY,
+    LoaiTaiSan NVARCHAR(20) NOT NULL,
+    TrangThai NVARCHAR(50) NOT NULL, --Trạng thái = 'Trống', 'Đang thuê', 'Bảo trì'
+    MaCoSo CHAR(10) NOT NULL
 );
 
 -- Bảng này được tham chiếu trong Hóa Đơn và Chi Tiết, cần tạo để tránh lỗi FK
 CREATE TABLE PhieuThueTaiSan (
-    MaPhieuThue CHAR(5) PRIMARY KEY,
-    NgayBatDau DATETIME,
-    NgayKetThuc DATETIME,
-    MaKhachHang CHAR(5),
-    MaNhanVien CHAR(5),
+    MaPhieuThue CHAR(10) PRIMARY KEY,
+    NgayBatDau DATETIME NOT NULL,
+    NgayKetThuc DATETIME NOT NULL,
+    MaKhachHang CHAR(10) NOT NULL,
+    MaNhanVien CHAR(10) NOT NULL,
 );
 
 CREATE TABLE ChiTietPhieuThueTaiSan (
-    MaChiTietPTTS CHAR(5) PRIMARY KEY,
-    MaPhieuThue CHAR(5),
-    MaTaiSan CHAR(5),
-    MaGoi CHAR(5)
+    MaChiTietPTTS CHAR(10) PRIMARY KEY,
+    MaPhieuThue CHAR(10) NOT NULL,
+    MaTaiSan CHAR(10) NOT NULL,
+    MaGoi CHAR(10)
 );
 
 -- 7. BẢNG: HÓA ĐƠN & HỆ THỐNG --
 
 CREATE TABLE HoaDon (
-    MaHoaDon CHAR(5) PRIMARY KEY,
-    NgayXuat DATETIME,
-    TongTienSan INT,
-    TongTienDichVu INT,
-    TongTienGiamGia INT,
-    TongThanhToan INT,
-    HinhThucThanhToan NVARCHAR(50),
-    TrangThaiThanhToan NVARCHAR(50),
-    MaNhanVien CHAR(5),
-    MaPhieuDat CHAR(5),
-    MaPhieuThue CHAR(5)
+    MaHoaDon CHAR(10) PRIMARY KEY,
+    NgayXuat DATETIME NOT NULL,
+    TongTienSan INT NOT NULL,
+    TongTienDichVu INT NOT NULL,
+    TongTienGiamGia INT NOT NULL,
+    TongThanhToan INT NOT NULL,
+    HinhThucThanhToan NVARCHAR(50), -- HinhThucThanhToan = 'Ví điện tử', 'Tiền mặt'
+    TrangThaiThanhToan NVARCHAR(50), -- TrangThaiThanhToan = 'Chưa thanh toán', 'Đã thanh toán'
+    MaNhanVien CHAR(10) NOT NULL,
+    MaPhieuDat CHAR(10) NOT NULL,
+    MaPhieuThue CHAR(10)
 );
 
 CREATE TABLE ThamSoHeThong (
-    MaThamSo CHAR(5) PRIMARY KEY,
-    TenThamSo VARCHAR(50),
-    GiaTri INT,
-    DonVi NVARCHAR(50),
+    MaThamSo CHAR(10) PRIMARY KEY,
+    TenThamSo VARCHAR(50) NOT NULL,
+    GiaTri INT NOT NULL,
+    DonVi NVARCHAR(50) NOT NULL,
     MoTa VARCHAR(100),
-    CapNhatLanCuoi DATE
+    CapNhatLanCuoi DATE NOT NULL
 );
 
 /* ====================================================
@@ -355,7 +355,6 @@ ALTER TABLE ChiTietPhieuDatSan ADD CONSTRAINT FK_CTPDS_HLV FOREIGN KEY (MaHLV) R
 
 -- LichSuThayDoi & Huy
 ALTER TABLE LichSuThayDoi ADD CONSTRAINT FK_LSTD_PDS FOREIGN KEY (MaPhieuDat) REFERENCES PhieuDatSan(MaPhieuDat);
-ALTER TABLE LichSuThayDoi ADD CONSTRAINT FK_LSTD_PDS_Moi FOREIGN KEY (MaPhieuDatThayDoi) REFERENCES PhieuDatSan(MaPhieuDat);
 ALTER TABLE LichSuHuyDichVu ADD CONSTRAINT FK_LSHDV_CTPDS FOREIGN KEY (MaChiTietPDS) REFERENCES ChiTietPhieuDatSan(MaChiTietPDS);
 
 -- DatLichHLV
@@ -378,6 +377,7 @@ ALTER TABLE HoaDon ADD CONSTRAINT FK_HoaDon_NV FOREIGN KEY (MaNhanVien) REFERENC
 ALTER TABLE HoaDon ADD CONSTRAINT FK_HoaDon_PDS FOREIGN KEY (MaPhieuDat) REFERENCES PhieuDatSan(MaPhieuDat);
 ALTER TABLE HoaDon ADD CONSTRAINT FK_HoaDon_PTS FOREIGN KEY (MaPhieuThue) REFERENCES PhieuThueTaiSan(MaPhieuThue);
 
+--Ràng buộc check
 -- USE master
 -- ALTER DATABASE QLDatSan SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
 -- DROP DATABASE QLDatSan;
