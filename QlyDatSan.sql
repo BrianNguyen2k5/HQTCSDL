@@ -221,7 +221,7 @@ CREATE TABLE ChiTietPhieuDatSan (
     ThanhTien INT  NOT NULL,
     LoaiYeuCau NVARCHAR(100) NOT NULL,
     MaPhieuDat CHAR(10) NOT NULL,
-    MaNhanVien CHAR(10)  NOT NULL,
+    MaNhanVien CHAR(10),
     MaDichVu CHAR(10)  NOT NULL,
     MaHLV CHAR(10)
 );
