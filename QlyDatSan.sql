@@ -188,7 +188,7 @@ CREATE TABLE PhieuDatSan (
     TrangThaiPhieu NVARCHAR(20) NOT NULL, --Trạng thái: 'Chờ thanh toán', 'Hoàn thành', 'Đã hủy', 'Vắng mặt'
     ThoiGianCheckin TIME, 
     MaKhachHang CHAR(10) NOT NULL,
-    MaNhanVien CHAR(10) NOT NULL,
+    MaNhanVien CHAR(10),
     MaSan CHAR(10) NOT NULL
 );
 
