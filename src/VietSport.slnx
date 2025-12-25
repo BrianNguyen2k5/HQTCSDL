@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="VietSport.BLL/VietSport.BLL.csproj" />
+  <Project Path="VietSport.DAL/VietSport.DAL.csproj" />
+  <Project Path="VietSport.DTO/VietSport.DTO.csproj" />
+  <Project Path="VietSport.Web/VietSport.Web.csproj" />
+</Solution>

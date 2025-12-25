@@ -8,9 +8,11 @@ Go
 -- 1. BẢNG: QUẢN LÝ NGƯỜI DÙNG --
 
 CREATE TABLE TaiKhoan (
-    TenDangNhap VARCHAR(50) PRIMARY KEY,
-    MatKhauMaHoa VARCHAR(255) NOT NULL,
-    Email VARCHAR(100) NOT NULL,
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    TenDangNhap VARCHAR(50) UNIQUE,
+    Salt CHAR(32) NOT NULL,
+    MatKhauMaHoa CHAR(64) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
     TrangThai BIT DEFAULT 1, -- Trạng thái: 1: là còn hoạt động, 0: bị khóa 
     NgayTao DATETIME DEFAULT GETDATE(),
     MaKhachHang CHAR(10),
@@ -469,4 +471,8 @@ ADD CONSTRAINT CK_CTPDS_ThanhTien CHECK (ThanhTien >= 0);
 
  --USE master
  --ALTER DATABASE VietSport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+<<<<<<< HEAD:QlyDatSan.sql
  --DROP DATABASE VietSport;
+=======
+ --DROP DATABASE VietSport;
+>>>>>>> feat/init-3-layer:database/schema/vietsport-schema.sql
