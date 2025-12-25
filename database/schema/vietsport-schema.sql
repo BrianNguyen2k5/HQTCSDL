@@ -471,8 +471,4 @@ ADD CONSTRAINT CK_CTPDS_ThanhTien CHECK (ThanhTien >= 0);
 
  --USE master
  --ALTER DATABASE VietSport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-<<<<<<< HEAD:QlyDatSan.sql
  --DROP DATABASE VietSport;
-=======
- --DROP DATABASE VietSport;
->>>>>>> feat/init-3-layer:database/schema/vietsport-schema.sql
