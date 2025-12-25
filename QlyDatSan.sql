@@ -262,17 +262,18 @@ CREATE TABLE TaiSanChoThue (
 -- Bảng này được tham chiếu trong Hóa Đơn và Chi Tiết, cần tạo để tránh lỗi FK
 CREATE TABLE PhieuThueTaiSan (
     MaPhieuThue CHAR(10) PRIMARY KEY,
-    NgayBatDau DATETIME NOT NULL,
-    NgayKetThuc DATETIME NOT NULL,
     MaKhachHang CHAR(10) NOT NULL,
     MaNhanVien CHAR(10) NOT NULL,
+    TrangThai NCHAR(20) NOT NULL, --TrangThai ('Chờ thanh toán', 'Hoàn thành', 'Đã hủy')
 );
 
 CREATE TABLE ChiTietPhieuThueTaiSan (
     MaChiTietPTTS CHAR(10) PRIMARY KEY,
     MaPhieuThue CHAR(10) NOT NULL,
     MaTaiSan CHAR(10) NOT NULL,
-    MaGoi CHAR(10)
+    MaGoi CHAR(10) NOT NULL,
+    NgayBatDau DATETIME NOT NULL,
+    NgayKetThuc DATETIME NOT NULL,
 );
 
 -- 7. BẢNG: HÓA ĐƠN & HỆ THỐNG --
