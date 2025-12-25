@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\VietSport.DTO\VietSport.DTO.csproj" />
+    <ProjectReference Include="..\DTO\VietSport.DTO.csproj" />
   </ItemGroup>
 
   <ItemGroup>

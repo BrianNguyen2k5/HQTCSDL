@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\VietSport.DTO\VietSport.DTO.csproj" />
-    <ProjectReference Include="..\VietSport.DAL\VietSport.DAL.csproj" />
+    <ProjectReference Include="..\DTO\VietSport.DTO.csproj" />
+    <ProjectReference Include="..\DAL\VietSport.DAL.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
