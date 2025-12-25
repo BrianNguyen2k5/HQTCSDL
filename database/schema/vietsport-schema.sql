@@ -5,11 +5,13 @@ CREATE DATABASE QLDatSan
 GO
 USE QLDatSan
 Go
--- 1. BẢNG: QUẢN LÝ NGƯỜI DÙNG --
 
+-- 1. BẢNG: QUẢN LÝ NGƯỜI DÙNG --
 CREATE TABLE TaiKhoan (
-    TenDangNhap VARCHAR(50) PRIMARY KEY,
-    MatKhauMaHoa VARCHAR(255) NOT NULL,
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    TenDangNhap VARCHAR(50) UNIQUE NOT NULL,
+    Salt CHAR(32) NOT NULL,
+    MatKhauMaHoa CHAR(64) NOT NULL,
     Email VARCHAR(100) NOT NULL,
     TrangThai BIT DEFAULT 1, -- Trạng thái: 1: là còn hoạt động, 0: bị khóa 
     NgayTao DATETIME DEFAULT GETDATE(),
