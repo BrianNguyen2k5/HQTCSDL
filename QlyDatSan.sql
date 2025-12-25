@@ -1,9 +1,9 @@
 /* ====================================================
    DATABASE SCHEMA - SPORTS CENTER
    ==================================================== */
-CREATE DATABASE QLDatSan
+CREATE DATABASE VietSport
 GO
-USE QLDatSan
+USE VietSport
 Go
 -- 1. BẢNG: QUẢN LÝ NGƯỜI DÙNG --
 
@@ -30,7 +30,7 @@ CREATE TABLE NhanVien (
     HoTen NVARCHAR(100) NOT NULL,
     NgaySinh DATE NOT NULL,
     GioiTinh NVARCHAR(5) NOT NULL, -- GioiTinh = ‘Nam’ hoặc ‘Nữ’.
-    SoCCCD CHAR(12) NOT NULL, UNIQUE,
+    SoCCCD CHAR(12) NOT NULL UNIQUE,
     DiaChi NVARCHAR(255) NOT NULL,
     SoDienThoai CHAR(10) NOT NULL,
     LuongCoBan INT NOT NULL,
@@ -211,7 +211,7 @@ CREATE TABLE TonKho (
     MaDichVu CHAR(10),
     MaCoSo CHAR(10),
     SoLuong INT NOT NULL,
-    PRIMARY KEY (MaDichVu, MaCoSo)
+    PRIMARY KEY (MaDichVu, MaCoSo),
     TrangThaiKhaDung BIT --TrangThaiKhaDung = 0 -> Không khả dụng, TrangThaiKhaDung = 1 -> Khả dụng
 );
 
@@ -379,6 +379,94 @@ ALTER TABLE HoaDon ADD CONSTRAINT FK_HoaDon_PDS FOREIGN KEY (MaPhieuDat) REFEREN
 ALTER TABLE HoaDon ADD CONSTRAINT FK_HoaDon_PTS FOREIGN KEY (MaPhieuThue) REFERENCES PhieuThueTaiSan(MaPhieuThue);
 
 --Ràng buộc check
--- USE master
--- ALTER DATABASE QLDatSan SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
--- DROP DATABASE QLDatSan;
+--1. Bảng ChucVu
+ALTER TABLE ChucVu 
+ADD CONSTRAINT CK_ChucVu_Ten CHECK (TenChucVu IN (N'Quản lý', N'Lễ tân', N'Kỹ thuật', N'Thu ngân', N'Huấn luyện viên'));
+
+--2. Bảng NhanVien
+ALTER TABLE NhanVien
+ADD CONSTRAINT CK_NhanVien_GioiTinh CHECK (GioiTinh IN (N'Nam', N'Nữ'));
+
+ALTER TABLE NhanVien
+ADD CONSTRAINT CK_NhanVien_TrangThai CHECK (TrangThai IN (N'Đang làm', N'Nghỉ việc'));
+
+ALTER TABLE NhanVien
+ADD CONSTRAINT CK_NhanVien_Luong CHECK (LuongCoBan >= 0);
+
+--3. Bảng DonNghiPhep
+ALTER TABLE DonNghiPhep
+ADD CONSTRAINT CK_DonNghiPhep_TrangThai CHECK (TrangThai IN (N'Đang chờ duyệt', N'Đã Duyệt', N'Hủy'));
+
+--4. Bảng UuDai
+ALTER TABLE UuDai
+ADD CONSTRAINT CK_UuDai_Loai CHECK (LoaiUuDai IN (N'Silver', N'Gold', N'Platinum', N'HSSV', N'Người cao tuổi'));
+
+ALTER TABLE UuDai
+ADD CONSTRAINT CK_UuDai_PhanTram CHECK (PhanTramGiamGia >= 0 AND PhanTramGiamGia <= 100);
+
+--5. Bảng LoaiSan
+ALTER TABLE LoaiSan
+ADD CONSTRAINT CK_LoaiSan_Ten CHECK (TenLoaiSan IN (N'Bóng đá mini', N'Cầu lông', N'Tennis', N'Bóng rổ', N'Futsal'));
+
+--6. Bảng San
+ALTER TABLE San
+ADD CONSTRAINT CK_San_TinhTrang CHECK (TinhTrang IN (N'Trống', N'Đã đặt', N'Đang sử dụng', N'Bảo trì'));
+
+ALTER TABLE San
+ADD CONSTRAINT CK_San_SucChua CHECK (SucChua > 0);
+
+--7. Bảng BaoTri
+ALTER TABLE BaoTri
+ADD CONSTRAINT CK_BaoTri_TrangThai CHECK (TrangThai IN (N'Đang bảo trì', N'Hoàn thành'));
+
+--8. Bảng PhieuDatSan
+ALTER TABLE PhieuDatSan
+ADD CONSTRAINT CK_PDS_HinhThuc CHECK (HinhThucDat IN (N'Online', N'Tại quầy'));
+
+ALTER TABLE PhieuDatSan
+ADD CONSTRAINT CK_PDS_TrangThai CHECK (TrangThaiPhieu IN (N'Chờ thanh toán', N'Hoàn thành', N'Đã hủy', N'Vắng mặt'));
+
+--9. Bảng DichVu
+ALTER TABLE DichVu
+ADD CONSTRAINT CK_DichVu_Loai CHECK (LoaiDichVu IN (N'Dụng cụ thể thao', N'Khác'));
+
+ALTER TABLE DichVu 
+ADD CONSTRAINT CK_DichVu_DonGia CHECK (DonGia >= 0);
+
+--10. Bảng TaiSanChoThue
+ALTER TABLE TaiSanChoThue
+ADD CONSTRAINT CK_TaiSan_TrangThai CHECK (TrangThai IN (N'Trống', N'Đang thuê', N'Bảo trì'));
+
+--11. Bảng HoaDon
+ALTER TABLE HoaDon
+ADD CONSTRAINT CK_HoaDon_HinhThucTT CHECK (HinhThucThanhToan IN (N'Ví điện tử', N'Tiền mặt'));
+
+ALTER TABLE HoaDon
+ADD CONSTRAINT CK_HoaDon_TrangThaiTT CHECK (TrangThaiThanhToan IN (N'Chưa thanh toán', N'Đã thanh toán'));
+
+ALTER TABLE HoaDon 
+ADD CONSTRAINT CK_HoaDon_TongTien CHECK (TongThanhToan >= 0);
+ALTER TABLE HoaDon
+ADD CONSTRAINT CK_HoaDon_CacKhoan CHECK (TongTienSan >= 0 AND TongTienDichVu >= 0 AND TongTienGiamGia >= 0);
+
+--12. Bảng BangGiaTang...
+ALTER TABLE BangGiaTangKhungGio 
+ADD CONSTRAINT CK_BGTKG_Gia CHECK (GiaTang >= 0);
+ALTER TABLE BangGiaTangNgayLe 
+ADD CONSTRAINT CK_BGTNL_Gia CHECK (GiaTang >= 0);
+ALTER TABLE BangGiaTangCuoiTuan 
+ADD CONSTRAINT CK_BGTCT_Gia CHECK (GiaTang >= 0);
+
+--13. TonKho
+ALTER TABLE TonKho ADD CONSTRAINT CK_TonKho_SoLuong CHECK (SoLuong >= 0);
+
+--14. Bảng ChiTietPhieuDatSan
+ALTER TABLE ChiTietPhieuDatSan 
+ADD CONSTRAINT CK_CTPDS_SoLuong CHECK (SoLuong > 0);
+ALTER TABLE ChiTietPhieuDatSan
+ADD CONSTRAINT CK_CTPDS_ThanhTien CHECK (ThanhTien >= 0);
+
+
+ --USE master
+ --ALTER DATABASE VietSport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+ --DROP DATABASE VietSport;
