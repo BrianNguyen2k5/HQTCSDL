@@ -326,8 +326,8 @@ ALTER TABLE PhanCongCaTruc ADD CONSTRAINT FK_PhanCong_NV FOREIGN KEY (MaNhanVien
 ALTER TABLE PhanCongCaTruc ADD CONSTRAINT FK_PhanCong_QL FOREIGN KEY (MaQuanLy) REFERENCES NhanVien(MaNhanVien);
 
 -- DonNghiPhep
-ALTER TABLE DonNghiPhep ADD CONSTRAINT FK_NghiPhep_NV FOREIGN KEY (MaNhanVienLap) REFERENCES NhanVien(MaNhanVien);
-alter table DonNghiPhep add constraint fk_NghiPhep_NV foreign key (MaNhanVienThayThe) references NhanVien(MaNhanVien);
+ALTER TABLE DonNghiPhep ADD CONSTRAINT FK_NghiPhep_NVLap FOREIGN KEY (MaNhanVienLap) REFERENCES NhanVien(MaNhanVien);
+alter table DonNghiPhep add constraint FK_NghiPhep_NVTT foreign key (MaNhanVienThayThe) references NhanVien(MaNhanVien);
 ALTER TABLE DonNghiPhep ADD CONSTRAINT FK_NghiPhep_QL FOREIGN KEY (MaQuanLy) REFERENCES NhanVien(MaNhanVien);
 
 -- ApDung UuDai
@@ -469,7 +469,12 @@ ADD CONSTRAINT CK_CTPDS_SoLuong CHECK (SoLuong > 0);
 ALTER TABLE ChiTietPhieuDatSan
 ADD CONSTRAINT CK_CTPDS_ThanhTien CHECK (ThanhTien >= 0);
 
+-- 15. PhieuThueTaiSan
+ALTER TABLE PhieuThueTaiSan
+ADD CONSTRAINT CK_PTS_TrangThai CHECK (
+    TrangThai IN (N'Chờ thanh toán', N'Hoàn thành', N'Đã hủy')
+);
 
- --USE master
- --ALTER DATABASE VietSport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
- --DROP DATABASE VietSport;
+--USE master
+--ALTER DATABASE VietSport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+--DROP DATABASE VietSport;
