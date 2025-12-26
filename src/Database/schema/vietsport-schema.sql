@@ -326,7 +326,8 @@ ALTER TABLE PhanCongCaTruc ADD CONSTRAINT FK_PhanCong_NV FOREIGN KEY (MaNhanVien
 ALTER TABLE PhanCongCaTruc ADD CONSTRAINT FK_PhanCong_QL FOREIGN KEY (MaQuanLy) REFERENCES NhanVien(MaNhanVien);
 
 -- DonNghiPhep
-ALTER TABLE DonNghiPhep ADD CONSTRAINT FK_NghiPhep_NV FOREIGN KEY (MaNhanVien) REFERENCES NhanVien(MaNhanVien);
+ALTER TABLE DonNghiPhep ADD CONSTRAINT FK_NghiPhep_NV FOREIGN KEY (MaNhanVienLap) REFERENCES NhanVien(MaNhanVien);
+alter table DonNghiPhep add constraint fk_NghiPhep_NV foreign key (MaNhanVienThayThe) references NhanVien(MaNhanVien);
 ALTER TABLE DonNghiPhep ADD CONSTRAINT FK_NghiPhep_QL FOREIGN KEY (MaQuanLy) REFERENCES NhanVien(MaNhanVien);
 
 -- ApDung UuDai
