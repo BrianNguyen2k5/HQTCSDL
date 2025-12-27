@@ -249,14 +249,14 @@ CREATE TABLE LichSuHuyDichVu (
 CREATE TABLE GoiDichVu (
     MaGoi CHAR(10) PRIMARY KEY,
     TenGoi NVARCHAR(100) NOT NULL,
-    LoaiTaiSan NVARCHAR(20) NOT NULL,
+    LoaiTaiSan NVARCHAR(20) NOT NULL, -- LoaiTaiSan = 'Phòng tắm VIP', 'Tủ đồ'
     DonGia INT NOT NULL,
     ThoiGianSuDung INT NOT NULL
 );
 
 CREATE TABLE TaiSanChoThue (
     MaTaiSan CHAR(10) PRIMARY KEY,
-    LoaiTaiSan NVARCHAR(20) NOT NULL,
+    LoaiTaiSan NVARCHAR(20) NOT NULL, -- LoaiTaiSan = 'Phòng tắm VIP', 'Tủ đồ'
     TrangThai NVARCHAR(50) NOT NULL, --Trạng thái = 'Trống', 'Đang thuê', 'Bảo trì'
     MaCoSo CHAR(10) NOT NULL
 );
@@ -439,6 +439,7 @@ ADD CONSTRAINT CK_DichVu_DonGia CHECK (DonGia >= 0);
 --10. Bảng TaiSanChoThue
 ALTER TABLE TaiSanChoThue
 ADD CONSTRAINT CK_TaiSan_TrangThai CHECK (TrangThai IN (N'Trống', N'Đang thuê', N'Bảo trì'));
+alter table TaiSanChoThue add check (LoaiTaiSan in (N'Phòng tắm VIP', N'Tủ đồ'));
 
 --11. Bảng HoaDon
 ALTER TABLE HoaDon
@@ -474,6 +475,11 @@ ALTER TABLE PhieuThueTaiSan
 ADD CONSTRAINT CK_PTS_TrangThai CHECK (
     TrangThai IN (N'Chờ thanh toán', N'Hoàn thành', N'Đã hủy')
 );
+
+-- 16. GoiDichVu
+alter table GoiDichVu add check (DonGia >= 0);
+alter table GoiDichVu add check (ThoiGianSuDung > 0);
+alter table GoiDichVu add check (LoaiTaiSan in (N'Phòng tắm VIP', N'Tủ đồ'));
 
 --USE master
 --ALTER DATABASE VietSport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
