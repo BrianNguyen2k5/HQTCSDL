@@ -1,41 +1,3 @@
-﻿-- Xóa theo thứ tự FK (child trước, parent sau)
-DELETE FROM HoaDon;
-PRINT N'✓ Đã xóa HoaDon';
-
-DELETE FROM LichSuHuyDichVu;
-PRINT N'✓ Đã xóa LichSuHuyDichVu';
-
-DELETE FROM LichSuThayDoi;
-PRINT N'✓ Đã xóa LichSuThayDoi';
-
-DELETE FROM DatLichHLV;
-PRINT N'✓ Đã xóa DatLichHLV';
-
-DELETE FROM ChiTietPhieuDatSan;
-PRINT N'✓ Đã xóa ChiTietPhieuDatSan';
-
-DELETE FROM PhieuDatSan;
-PRINT N'✓ Đã xóa PhieuDatSan';
-
-DELETE FROM ChiTietPhieuThueTaiSan;
-PRINT N'✓ Đã xóa ChiTietPhieuThueTaiSan';
-
-DELETE FROM PhieuThueTaiSan;
-PRINT N'✓ Đã xóa PhieuThueTaiSan';
-
-DELETE FROM TaiSanChoThue;
-PRINT N'✓ Đã xóa TaiSanChoThue';
-
-DELETE FROM DonNghiPhep;
-PRINT N'✓ Đã xóa DonNghiPhep';
-
-DELETE FROM PhanCongCaTruc;
-PRINT N'✓ Đã xóa PhanCongCaTruc';
-
-PRINT N'✅ Hoàn tất xóa dữ liệu cũ';
-GO
-
-
 --Phân Công Ca Trực
 --CS1
 INSERT INTO PhanCongCaTruc VALUES
@@ -781,4 +743,5 @@ INSERT INTO ApDung (MaKhachHang, MaUuDai, NgayBatDau, NgayKetThuc, TrangThai) VA
 -- 1 KH có nhiều ưu đãi (để test chọn ưu đãi)
 ('KH019','UD01','2024-01-01','2024-12-31',1),
 ('KH019','UD04','2024-09-01','2025-06-30',1);
+
 
