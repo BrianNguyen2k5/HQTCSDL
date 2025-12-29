@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Web/">
+    <Project Path="Web/HQTCSDL.csproj" />
+  </Folder>
+  <Project Path="BLL/BLL.csproj" />
+  <Project Path="DAL/DAL.csproj" />
+  <Project Path="DTO/DTO.csproj" />
+</Solution>
