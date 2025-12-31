@@ -1,0 +1,320 @@
+@{
+	ViewData["Title"] = "Employer Dashboard";
+	ViewBag.Title = "Lịch làm việc nhân viên";
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/Employer/Dashboard.css" />
+}
+
+<div class="employer-dsb bg-background font-sans text-slate-900">
+	<div class="content-container">
+		<div class="navigate-bar">
+
+			<div class="navigate-bar bg-white border-r p-4">
+				<div class="navigate-items space-y-2">
+					<button onclick="switchTab('dashboard')" id="btn-dashboard"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-active">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-grid-fill"></i> Dashboard
+						</div>
+					</button>
+
+					<button onclick="switchTab('employees')" id="btn-employees"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-people-fill"></i> Quản lý nhân viên
+						</div>
+					</button>
+
+					<button onclick="switchTab('arrangement')" id="btn-arrangement"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-calendar-check"></i> Phân công ca trực
+						</div>
+					</button>
+
+					<button onclick="switchTab('skipform')" id="btn-skipform"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-file-earmark-text"></i> Đơn nghỉ phép
+						</div>
+					</button>
+
+					<button onclick="switchTab('schedule')" id="btn-schedule"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-calendar3"></i> Lịch làm việc
+						</div>
+					</button>
+
+					<button onclick="switchTab('report')" id="btn-report"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-bar-chart-line"></i> Báo cáo kinh doanh
+						</div>
+					</button>
+				</div>
+
+				<button onclick="switchTab('profile')" id="btn-profile"
+					class="w-full text-left py-4 px-2 font-medium transition-colors tab-inactive">
+					<div class="flex items-center gap-2">
+						<i class="bi bi-person-circle"></i> Thông tin cá nhân
+					</div>
+				</button>
+			</div>
+		</div>
+
+		<main class="max-w-6xl mx-auto px-4 py-8">
+
+			<div id="tab-content-dashboard" class="space-y-4">
+			</div>
+
+			<div id="tab-content-employees" class="space-y-4">
+			</div>
+
+			<div id="tab-content-arrangement" class="space-y-4">
+			</div>
+
+			<div id="tab-content-skipform" class="space-y-4">
+			</div>
+
+			<div id="tab-content-schedule" class="space-y-4">
+			</div>
+
+			<div id="tab-content-report" class="space-y-4">
+				<div class="date-picker-group">
+					<select id="dp_year" name="NamSinh" class="dp-select">
+						<option value="">Năm</option>
+					</select>
+
+					<select id="dp_month" name="ThangSinh" class="dp-select" disabled>
+						<option value="">Tháng</option>
+					</select>
+
+					<select id="dp_day" name="NgaySinh" class="dp-select" disabled>
+						<option value="">Ngày</option>
+					</select>
+
+					<button type="button" onclick="loadRevenue()" class="btn btn-primary ml-2">Xem Doanh Thu</button>
+				</div>
+				<div class="mt-4">
+					<h3>Tổng doanh thu: <span id="lblDoanhThu" class="text-success font-bold">0 VNĐ</span></h3>
+				</div>
+
+			</div>
+
+			<div id="tab-content-profile" class="space-y-4 hidden">
+				<h2>Thông tin cá nhân</h2>
+
+				<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+					<h3 class="font-semibold text-slate-900 mb-4">Thông tin cơ bản</h3>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Họ và tên</p>
+							<p class="font-medium text-slate-900">Trần Thị B</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Ngày sinh</p>
+							<p class="font-medium text-slate-900">15/05/1995</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Giới tính</p>
+							<p class="font-medium text-slate-900">Nữ</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Số CMND/CCCD</p>
+							<p class="font-medium text-slate-900">012345678901</p>
+						</div>
+						<div class="md:col-span-2">
+							<p class="text-sm text-slate-500 mb-2">Địa chỉ</p>
+							<p class="font-medium text-slate-900">123 Đường Trần Hưng Đạo, Hà Nội</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Số điện thoại</p>
+							<p class="font-medium text-slate-900">0912345678</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+					<h3 class="font-semibold text-slate-900 mb-4">Thông tin công việc</h3>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Chức vụ</p>
+							<p class="font-medium text-slate-900">Nhân viên lễ tân</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Chi nhánh</p>
+							<p class="font-medium text-slate-900">Hà Nội</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Mã nhân viên</p>
+							<p class="font-medium text-slate-900">EMP001</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Lương cơ bản</p>
+							<p class="font-medium text-slate-900">5.000.000 VND</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+
+</div>
+
+<script>
+	const tabIds = [
+		'dashboard',
+		'employees',
+		'arrangement',
+		'skipform',
+		'schedule',
+		'report',
+		'profile'
+	];
+
+	function switchTab(selectedTabName) {
+		// Dùng vòng lặp để xử lý, ngắn gọn và không bao giờ sót trường hợp
+		tabIds.forEach(tabName => {
+			const contentEl = document.getElementById('tab-content-' + tabName);
+			const btnEl = document.getElementById('btn-' + tabName);
+
+			// Kiểm tra an toàn: nếu element không tồn tại thì bỏ qua để không crash JS
+			if (!contentEl || !btnEl) return;
+
+			if (tabName === selectedTabName) {
+				// tab chọn
+				contentEl.classList.remove('hidden');
+
+				// Style Active
+				btnEl.classList.add('tab-active');
+				btnEl.classList.remove('tab-inactive');
+			} else {
+				// tab không đc chọn
+				contentEl.classList.add('hidden');
+
+				// Style Inactive
+				btnEl.classList.add('tab-inactive');
+				btnEl.classList.remove('tab-active');
+			}
+		});
+	}
+
+	// --- PHẦN 2: LOGIC DATE PICKER (Năm - Tháng - Ngày) ---
+	// Sử dụng IIFE (Hàm tự chạy) để cô lập biến, không sợ trùng tên
+	(function () {
+		// 1. Lấy các element dựa trên ID trong HTML
+		const elYear = document.getElementById('dp_year');
+		const elMonth = document.getElementById('dp_month');
+		const elDay = document.getElementById('dp_day');
+
+		// Kiểm tra an toàn: Nếu trang này không có date picker thì dừng lại (tránh lỗi JS)
+		if (!elYear || !elMonth || !elDay) return;
+
+		// 2. Khởi tạo danh sách NĂM (Từ năm hiện tại lùi về 1950)
+		const currentYear = new Date().getFullYear();
+		for (let i = currentYear; i >= 1950; i--) {
+			let opt = document.createElement('option');
+			opt.value = i;
+			opt.text = i;
+			elYear.appendChild(opt);
+		}
+
+		// 3. Hàm tạo danh sách THÁNG
+		function populateMonths() {
+			elMonth.innerHTML = '<option value="">Tháng</option>'; // Reset về rỗng
+			for (let i = 1; i <= 12; i++) {
+				let opt = document.createElement('option');
+				opt.value = i;
+				opt.text = "Tháng " + i;
+				elMonth.appendChild(opt);
+			}
+		}
+
+		// 4. Hàm tính số NGÀY trong tháng (Tự động tính năm nhuận)
+		function populateDays(year, month) {
+			// Giữ lại ngày đang chọn (nếu có) để UX mượt hơn
+			const selectedDay = elDay.value;
+
+			elDay.innerHTML = '<option value="">Ngày</option>'; // Reset về rỗng
+
+			// Magic code: Ngày 0 của tháng sau chính là ngày cuối của tháng trước
+			// Ví dụ: new Date(2024, 2, 0) -> Trả về ngày 29/02/2024
+			const daysInMonth = new Date(year, month, 0).getDate();
+
+			for (let i = 1; i <= daysInMonth; i++) {
+				let opt = document.createElement('option');
+				opt.value = i;
+				opt.text = i;
+				elDay.appendChild(opt);
+			}
+
+			// Nếu ngày cũ vẫn hợp lệ trong tháng mới thì chọn lại nó (VD: đang chọn ngày 15 thì giữ nguyên 15)
+			if (selectedDay && selectedDay <= daysInMonth) {
+				elDay.value = selectedDay;
+			}
+		}
+
+		// 5. BẮT SỰ KIỆN
+
+		// Khi chọn NĂM
+		elYear.addEventListener('change', function () {
+			if (this.value) {
+				elMonth.disabled = false; // Mở khóa Tháng
+				if (elMonth.options.length <= 1) populateMonths(); // Chỉ điền tháng nếu chưa có
+
+				// Nếu đang chọn tháng rồi mà đổi năm (VD: Đổi từ năm nhuận sang năm thường) -> Tính lại ngày
+				if (elMonth.value) populateDays(this.value, elMonth.value);
+			} else {
+				// Nếu bỏ chọn năm -> Reset hết
+				elMonth.value = "";
+				elDay.value = "";
+				elMonth.disabled = true;
+				elDay.disabled = true;
+			}
+		});
+
+		// Khi chọn THÁNG
+		elMonth.addEventListener('change', function () {
+			if (this.value) {
+				elDay.disabled = false; // Mở khóa Ngày
+				populateDays(elYear.value, this.value);
+			} else {
+				elDay.value = "";
+				elDay.disabled = true;
+			}
+		});
+
+	})(); // Kết thúc IIFE
+
+	function loadRevenue() {
+		// 1. Lấy giá trị từ 3 ô select
+		const nam = document.getElementById('dp_year').value;
+		const thang = document.getElementById('dp_month').value;
+		const ngay = document.getElementById('dp_day').value;
+
+		// Validate: Bắt buộc phải chọn năm
+		if (!nam) {
+			alert("Vui lòng chọn ít nhất là Năm!");
+			return;
+		}
+
+		// 2. Gọi AJAX về Controller
+		// Tạo URL với query string: /Employer/GetRevenueReport?nam=2024&thang=12&ngay=...
+		let url = `/Employer/GetRevenueReport?nam=${nam}`;
+		if (thang) url += `&thang=${thang}`;
+		if (ngay) url += `&ngay=${ngay}`;
+
+		fetch(url)
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					// 3. Cập nhật số tiền lên màn hình
+					document.getElementById('lblDoanhThu').innerText = data.formatted;
+				}
+			})
+			.catch(err => console.error(err));
+	}
+</script>
