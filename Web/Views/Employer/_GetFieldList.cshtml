@@ -1,0 +1,15 @@
+@model DTO.LoaiSan
+
+<div class="field-info">
+	<p>@Model.TenLoaiSan</p>
+	<p>@Model.GiaGoc.ToString("N0") / <span>@Model.DonViTinhTheoPhut</span> phút</p>
+	<p>@Model.MoTa</p>
+	<button onclick="handlePriceChanging('@Model.MaLoaiSan')">Cập nhật giá</button>
+
+	<div id="input-price-@Model.MaLoaiSan" class="hidden">
+		<input type="number" id="new-price-@Model.MaLoaiSan" placeholder="Nhập giá mới..." />
+		<button id="cancel-price-button" onclick="cancelPriceChanging('@Model.MaLoaiSan')">Hủy</button>
+		<button id="update-price-button" onclick="updateFieldPrice('@Model.MaLoaiSan')">Cập nhật</button>
+	</div>
+</div>
+
