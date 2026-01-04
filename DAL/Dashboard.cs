@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using DTO;
 
 namespace DAL
 {
@@ -10,6 +11,24 @@ namespace DAL
 		public Dashboard(string connectionString)
 		{
 			_connectionString = connectionString ?? throw new InvalidOperationException("Không tìm thấy Connection String 'VietSport' trong Dashboard");
+		}
+
+		public bool UpdateGiaSan(string maLoaiSan, int giaMoi) {
+			if(giaMoi < 0) {
+				return false;
+			}
+
+			using SqlConnection conn = new SqlConnection(_connectionString);
+			conn.Open();
+
+			string spName = "SP_ThayDoiGiaSan";
+			using SqlCommand cmd = new SqlCommand(spName, conn);
+			cmd.CommandType = CommandType.StoredProcedure;
+			cmd.Parameters.AddWithValue("@maloaisan", maLoaiSan);
+			cmd.Parameters.AddWithValue("@giamoi", giaMoi);
+			int rowsAffected = cmd.ExecuteNonQuery();
+
+			return rowsAffected > 0;
 		}
 
 		public decimal GetDoanhThu(int nam, int? thang, int? ngay)
@@ -73,6 +92,58 @@ namespace DAL
 
 			return ketQua;
 		}
-	}
+		
+		public decimal GetThongKe(string type) {
+			using SqlConnection conn = new SqlConnection(_connectionString);
+			conn.Open();
 
+			string query = "select * from dbo.F_ThongKeSoLuong()";
+			using SqlCommand cmd = new SqlCommand(query, conn);
+			cmd.CommandType = CommandType.Text; // QUAN TRỌNG: Báo đây là FUNCTION
+
+			using SqlDataReader reader = cmd.ExecuteReader();
+			string returnType = "";
+			int returnValue = 0;
+			while (reader.Read())
+			{
+				returnType = reader.GetString(0);
+				returnValue = reader.GetInt32(1);
+
+				if(returnType == type)
+				{
+					return returnValue;
+				}
+			}
+			return -1;
+		}
+
+		public List<LoaiSan> GetDanhSachLoaiSan()
+		{
+			var danhSach = new List<LoaiSan>();
+			using SqlConnection conn = new SqlConnection(_connectionString);
+			conn.Open();
+
+			string query = "select * from dbo.F_DanhSachGiaLoaiSan()";
+			using SqlCommand cmd = new SqlCommand(query, conn);
+			cmd.CommandType = CommandType.Text;
+
+			using SqlDataReader reader = cmd.ExecuteReader();
+			while(reader.Read())
+			{
+				var data = new LoaiSan()
+				{
+					MaLoaiSan = reader.GetString(0),
+					TenLoaiSan = reader.GetString(1),
+					DonViTinhTheoPhut = reader.GetInt32(2),
+					GiaGoc = reader.GetInt32(3),
+					MoTa = reader.GetString(4)
+				};
+
+				danhSach.Add(data);
+			}
+
+			return danhSach;
+		}
+	}
+	
 }

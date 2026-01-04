@@ -1,6 +1,7 @@
 using HQTCSDL.Models;
 var builder = WebApplication.CreateBuilder(args);
 
+//_____________________________________________________
 // --- KHU VỰC ĐĂNG KÝ ---
 builder.Services.AddSession(options =>
 {
@@ -27,10 +28,8 @@ builder.Services.AddScoped<DAL.NhanVien>();
 
 
 // --- KẾT THÚC KHU VỰC ĐĂNG KÝ ---
-
+//_____________________________________________________
 var app = builder.Build();
-
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
