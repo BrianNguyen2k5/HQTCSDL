@@ -1,0 +1,299 @@
+<!-- Booking Detail Panel (Right Sidebar) -->
+<div id="bookingDetailPanel" style="display: none; position: fixed; right: 0; top: 0; width: 400px; height: 100vh; background-color: white; border-left: 1px solid var(--border-color); z-index: 1000; box-shadow: -2px 0 8px rgba(0,0,0,0.1); overflow-y: auto;">
+    <div style="padding: 1.5rem;">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 600; margin: 0;">Chi tiết đặt sân</h3>
+            <button onclick="closeBookingDetail()" style="background: none; border: none; cursor: pointer; color: var(--color-gray-500);">
+                <i class="fas fa-times" style="font-size: 1.25rem;"></i>
+            </button>
+        </div>
+
+        <!-- Booking Info -->
+        <div class="card" style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <div>
+                    <div style="font-size: 0.875rem; color: var(--color-gray-500); margin-bottom: 0.25rem;">Mã đặt sân</div>
+                    <div style="font-weight: 600; font-size: 1.125rem;" id="detailBookingId">#---</div>
+                </div>
+                <span class="badge badge-outline" id="detailBookingStatus">---</span>
+            </div>
+
+            <div style="padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <div style="margin-bottom: 0.75rem;">
+                    <div style="font-size: 0.75rem; color: var(--color-gray-500);">Khách hàng</div>
+                    <div style="font-weight: 600;" id="detailCustomerName">---</div>
+                    <div style="font-size: 0.875rem; color: var(--color-gray-600);" id="detailCustomerPhone">---</div>
+                </div>
+
+                <div style="margin-bottom: 0.75rem;">
+                    <div style="font-size: 0.75rem; color: var(--color-gray-500);">Sân</div>
+                    <div style="font-weight: 500;" id="detailCourtName">---</div>
+                </div>
+
+                <div style="margin-bottom: 0.75rem;">
+                    <div style="font-size: 0.75rem; color: var(--color-gray-500);">Thời gian</div>
+                    <div style="font-weight: 500;" id="detailTime">---</div>
+                    <div style="font-size: 0.75rem; color: var(--color-gray-500);" id="detailDuration">---</div>
+                </div>
+
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--color-gray-500);">Loại thành viên</div>
+                    <span class="badge badge-outline" id="detailMemberType">---</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Addons -->
+        <div class="card" style="margin-bottom: 1rem;">
+            <h4 style="font-weight: 600; margin-bottom: 1rem;">Dịch vụ bổ sung</h4>
+            
+            <div id="addonsList">
+                <!-- Addons will be populated by JavaScript -->
+                <div style="color: var(--color-gray-500); font-size: 0.875rem; text-align: center;">Không có dịch vụ bổ sung</div>
+            </div>
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="card" style="margin-bottom: 1rem;">
+            <h4 style="font-weight: 600; margin-bottom: 1rem;">Chi phí</h4>
+            
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="color: var(--color-gray-600);">Tiền sân:</span>
+                <span id="detailCourtFee">0 VNĐ</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="color: var(--color-gray-600);">Dịch vụ:</span>
+                <span id="detailAddonsFee">0 VNĐ</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="color: var(--color-gray-600);">Thuế:</span>
+                <span id="detailTax">0 VNĐ</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="color: var(--color-gray-600);">Giảm giá:</span>
+                <span style="color: var(--color-danger);" id="detailDiscount">0 VNĐ</span>
+            </div>
+
+            <div style="padding-top: 1rem; margin-top: 1rem; border-top: 2px solid var(--border-color); display: flex; justify-content: space-between; font-size: 1.125rem; font-weight: bold;">
+                <span>Tổng cộng:</span>
+                <span style="color: var(--color-primary);" id="detailTotal">0 VNĐ</span>
+            </div>
+
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <span class="badge badge-outline" id="detailPaymentStatus">---</span>
+                
+                <div id="paymentCountdown" style="display: none; margin-top: 0.5rem; font-size: 0.875rem; color: var(--color-warning);">
+                    <i class="fas fa-clock"></i> <span id="countdownText">30 phút</span> để thanh toán
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;" id="bookingActions">
+            <button class="btn btn-primary" id="checkInButton" style="width: 100%; display: none;" onclick="checkInBooking()">
+                <i class="fas fa-check" style="margin-right: 0.5rem;"></i>
+                Check-in
+            </button>
+
+            <button class="btn btn-primary" id="paymentButton" style="width: 100%; display: none;" onclick="processPayment()">
+                <i class="fas fa-credit-card" style="margin-right: 0.5rem;"></i>
+                Thanh toán
+            </button>
+
+            <button class="btn btn-outline" id="cancelButton" style="width: 100%; border-color: var(--color-danger); color: var(--color-danger); display: none;" onclick="showCancellationConfirm()">
+                <i class="fas fa-times" style="margin-right: 0.5rem;"></i>
+                Hủy đặt sân
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Cancellation Modal -->
+<div id="cancellationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 500px; max-width: 90%;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Xác nhận hủy đặt sân</h3>
+        
+        <div style="background-color: var(--color-gray-50); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+            <div style="font-size: 0.875rem; margin-bottom: 0.5rem;">
+                <strong>Chính sách hủy:</strong>
+            </div>
+            <div style="font-size: 0.875rem; color: var(--color-gray-600);" id="cancellationReason">
+                Hủy trước 24 giờ: phí 10%
+            </div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Tổng tiền:</span>
+                    <span id="cancelTotal">0 VNĐ</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Phí hủy:</span>
+                    <span style="color: var(--color-danger);" id="cancelFee">0 VNĐ</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: 600; padding-top: 0.5rem; border-top: 1px solid var(--border-color);">
+                    <span>Hoàn trả:</span>
+                    <span style="color: var(--color-success);" id="cancelRefund">0 VNĐ</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+            <button class="btn btn-outline" onclick="closeCancellationModal()">Hủy bỏ</button>
+            <button class="btn" style="background-color: var(--color-danger); color: white;" onclick="confirmCancellation()">
+                Xác nhận hủy
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentBookingData = null;
+    let countdownInterval = null;
+
+    function viewBookingDetail(bookingId) {
+        // Fetch booking details via AJAX
+        fetch('/Receptionist/GetBookingDetail?id=' + bookingId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentBookingData = data.booking;
+                    populateBookingDetail(data.booking);
+                    document.getElementById('bookingDetailPanel').style.display = 'block';
+                    startPaymentCountdown(data.booking);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function populateBookingDetail(booking) {
+        document.getElementById('detailBookingId').textContent = '#' + booking.id;
+        document.getElementById('detailCustomerName').textContent = booking.customerName;
+        document.getElementById('detailCustomerPhone').textContent = booking.customerPhone;
+        document.getElementById('detailCourtName').textContent = booking.courtName;
+        document.getElementById('detailTime').textContent = booking.startTime + ' - ' + booking.endTime;
+        document.getElementById('detailDuration').textContent = booking.durationMinutes + ' phút';
+        
+        // Update totals
+        const addonsFee = (booking.addons?.coach || 0) * 50 + 
+                         (booking.addons?.uniform || 0) * 10 + 
+                         (booking.addons?.drink || 0) * 3 + 
+                         (booking.addons?.locker || 0) * 5;
+        
+        document.getElementById('detailAddonsFee').textContent = addonsFee.toLocaleString() + ' VNĐ';
+        
+        const total = booking.courtFee + addonsFee + booking.tax - booking.discount;
+        document.getElementById('detailTotal').textContent = total.toLocaleString() + ' VNĐ';
+    }
+
+    function closeBookingDetail() {
+        document.getElementById('bookingDetailPanel').style.display = 'none';
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+    }
+
+    function startPaymentCountdown(booking) {
+        if (booking.paymentStatus !== 'pay-at-counter') return;
+        
+        const createdAt = new Date(booking.createdAt);
+        const updateCountdown = () => {
+            const now = new Date();
+            const elapsed = (now - createdAt) / 1000 / 60; // minutes
+            const remaining = Math.max(0, 30 - Math.floor(elapsed));
+            
+            const countdownEl = document.getElementById('countdownText');
+            if (countdownEl) {
+                countdownEl.textContent = remaining + ' phút';
+                if (remaining === 0) {
+                    countdownEl.parentElement.style.color = 'var(--color-danger)';
+                    countdownEl.textContent = 'Hết hạn';
+                    clearInterval(countdownInterval);
+                }
+            }
+        };
+        
+        updateCountdown();
+        countdownInterval = setInterval(updateCountdown, 60000); // Update every minute
+    }
+
+    function checkInBooking() {
+        if (!currentBookingData) return;
+        
+        if (confirm('Xác nhận check-in cho đặt sân #' + currentBookingData.id + '?')) {
+            fetch('/Receptionist/CheckIn', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookingId: currentBookingData.id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) location.reload();
+            });
+        }
+    }
+
+    function processPayment() {
+        if (!currentBookingData) return;
+        
+        const total = currentBookingData.courtFee + currentBookingData.tax - currentBookingData.discount;
+        
+        if (confirm(`Xác nhận thanh toán ${total.toLocaleString()} VNĐ?`)) {
+            fetch('/Receptionist/Payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bookingId: currentBookingData.id,
+                    amount: total,
+                    paymentMethod: 'cash'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) location.reload();
+            });
+        }
+    }
+
+    function showCancellationConfirm() {
+        if (!currentBookingData) return;
+        
+        // Calculate cancellation fee
+        const total = currentBookingData.courtFee + currentBookingData.tax - currentBookingData.discount;
+        const fee = total * 0.1; // Simplified - 10% fee
+        const refund = total - fee;
+        
+        document.getElementById('cancelTotal').textContent = total.toLocaleString() + ' VNĐ';
+        document.getElementById('cancelFee').textContent = fee.toLocaleString() + ' VNĐ';
+        document.getElementById('cancelRefund').textContent = refund.toLocaleString() + ' VNĐ';
+        
+        document.getElementById('cancellationModal').style.display = 'flex';
+    }
+
+    function closeCancellationModal() {
+        document.getElementById('cancellationModal').style.display = 'none';
+    }
+
+    function confirmCancellation() {
+        if (!currentBookingData) return;
+        
+        fetch('/Receptionist/CancelBooking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId: currentBookingData.id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            if (data.success) {
+                closeCancellationModal();
+                closeBookingDetail();
+                location.reload();
+            }
+        });
+    }
+</script>

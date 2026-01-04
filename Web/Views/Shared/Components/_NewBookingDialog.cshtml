@@ -1,0 +1,385 @@
+<!-- New Booking Dialog Modal -->
+<div id="newBookingModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; overflow-y: auto;">
+    <div class="card" style="width: 900px; max-width: 95%; max-height: 90vh; overflow-y: auto; margin: 2rem auto; animation: slideDown 0.3s ease-out;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+            <div>
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin: 0; color: var(--color-gray-900);">Tạo đặt sân mới</h3>
+                <p style="font-size: 0.875rem; color: var(--color-gray-500); margin: 0.25rem 0 0 0;">Thực hiện các bước để hoàn tất đặt sân</p>
+            </div>
+            <button onclick="closeNewBookingDialog()" style="background: none; border: none; cursor: pointer; color: var(--color-gray-500); font-size: 1.5rem; padding: 0.5rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-gray-700)'" onmouseout="this.style.color='var(--color-gray-500)'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Progress Steps -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
+            <div class="step-progress-bar" id="stepBar1" style="flex: 1; height: 8px; background-color: #007BFF; border-radius: 4px; transition: all 0.3s;"></div>
+            <div class="step-progress-bar" id="stepBar2" style="flex: 1; height: 8px; background-color: #e5e7eb; border-radius: 4px; transition: all 0.3s;"></div>
+            <div class="step-progress-bar" id="stepBar3" style="flex: 1; height: 8px; background-color: #e5e7eb; border-radius: 4px; transition: all 0.3s;"></div>
+            <div class="step-progress-bar" id="stepBar4" style="flex: 1; height: 8px; background-color: #e5e7eb; border-radius: 4px; transition: all 0.3s;"></div>
+        </div>
+
+        <!-- Step 1: Customer Selection -->
+        <div id="bookingStep1" class="booking-step-content" style="min-height: 400px;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--color-gray-900);">Bước 1: Xác định khách hàng</h3>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color);">
+                    <button class="customer-tab active" id="searchCustomerTab" onclick="switchCustomerTab('search')" style="border: none; background: transparent; padding: 0.75rem 1rem; cursor: pointer; font-weight: 500; border-bottom: 3px solid #007BFF; color: #007BFF; transition: all 0.2s;">
+                        <i class="fas fa-search" style="margin-right: 0.5rem;"></i>Tìm kiếm
+                    </button>
+                    <button class="customer-tab" id="newCustomerTab" onclick="switchCustomerTab('new')" style="border: none; background: transparent; padding: 0.75rem 1rem; cursor: pointer; font-weight: 500; border-bottom: 3px solid transparent; color: var(--color-gray-600); transition: all 0.2s;">
+                        <i class="fas fa-user-plus" style="margin-right: 0.5rem;"></i>Tạo mới
+                    </button>
+                </div>
+
+                <!-- Search Customer -->
+                <div id="searchCustomerContent">
+                    <div style="margin-bottom: 1rem;">
+                        <label class="label" style="margin-bottom: 0.5rem;">Tìm kiếm khách hàng</label>
+                        <input type="text" class="input" placeholder="Nhập tên hoặc số điện thoại..." id="customerSearchInput" onkeyup="searchCustomers()" style="font-size: 1rem;" />
+                    </div>
+                    
+                    <div style="margin-bottom: 0.75rem;">
+                        <label class="label" style="font-size: 0.875rem; color: var(--color-gray-600);">Danh sách khách hàng</label>
+                    </div>
+                    <div id="customerSearchResults" style="max-height: 320px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; background-color: var(--color-gray-50);">
+                        <div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                            <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                            <p>Nhập tên hoặc số điện thoại để tìm kiếm</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Customer Form -->
+                <div id="newCustomerContent" style="display: none;">
+                    <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--color-gray-900);">Thông tin khách hàng mới</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label class="label">Họ và tên <span style="color: var(--color-danger);">*</span></label>
+                            <input type="text" class="input" id="newCustomerName" placeholder="Nguyễn Văn A" />
+                        </div>
+                        <div>
+                            <label class="label">Số điện thoại <span style="color: var(--color-danger);">*</span></label>
+                            <input type="tel" class="input" id="newCustomerPhone" placeholder="0901234567" />
+                        </div>
+                        <div>
+                            <label class="label">Email</label>
+                            <input type="email" class="input" id="newCustomerEmail" placeholder="email@example.com" />
+                        </div>
+                        <div>
+                            <label class="label">Ngày sinh <span style="color: var(--color-danger);">*</span></label>
+                            <input type="date" class="input" id="newCustomerDob" />
+                        </div>
+                        <div>
+                            <label class="label">CCCD/CMND <span style="color: var(--color-danger);">*</span></label>
+                            <input type="text" class="input" id="newCustomerCccd" placeholder="001234567890" />
+                        </div>
+                        <div>
+                            <label class="label">Loại thành viên</label>
+                            <select class="input" id="newCustomerMemberType">
+                                <option value="general">Thường</option>
+                                <option value="student">Sinh viên</option>
+                                <option value="silver">Silver</option>
+                                <option value="gold">Gold</option>
+                                <option value="platinum">Platinum</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="createNewCustomer()" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-save" style="margin-right: 0.5rem;"></i>Lưu khách hàng
+                    </button>
+                </div>
+            </div>
+
+            <div id="selectedCustomerInfo" style="display: none; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1.25rem; border-radius: 12px; margin-top: 1rem; border: 2px solid #007BFF;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-user-check" style="color: #007BFF; font-size: 1.5rem;"></i>
+                            <div>
+                                <div style="font-weight: 600; font-size: 1.125rem; color: var(--color-gray-900);" id="selectedCustomerName"></div>
+                                <div style="font-size: 0.875rem; color: var(--color-gray-600);" id="selectedCustomerPhone"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline" onclick="clearSelectedCustomer()" style="background: white;">
+                        <i class="fas fa-sync-alt" style="margin-right: 0.5rem;"></i>Thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Court & Time Selection -->
+        <div id="bookingStep2" class="booking-step-content" style="display: none; min-height: 400px;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--color-gray-900);">Bước 2: Chọn sân và thời gian</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label class="label">Chọn sân <span style="color: var(--color-danger);">*</span></label>
+                    <select class="input" id="bookingCourt" onchange="updateCourtInfo()">
+                        <option value="">-- Chọn sân --</option>
+                        <option value="1|mini-football|100">Sân bóng đá Mini 1 (100.000 VNĐ)</option>
+                        <option value="2|mini-football|100">Sân bóng đá Mini 2 (100.000 VNĐ)</option>
+                        <option value="3|badminton|60">Sân cầu lông 1 (60.000 VNĐ)</option>
+                        <option value="4|badminton|60">Sân cầu lông 2 (60.000 VNĐ)</option>
+                        <option value="5|tennis|80">Sân tennis 1 (80.000 VNĐ)</option>
+                        <option value="6|tennis|80">Sân tennis 2 (80.000 VNĐ)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="label">Ngày <span style="color: var(--color-danger);">*</span></label>
+                    <input type="date" class="input" id="bookingDate" />
+                </div>
+                <div>
+                    <label class="label">Giờ bắt đầu <span style="color: var(--color-danger);">*</span></label>
+                    <select class="input" id="bookingStartTime" onchange="updateEndTime()">
+                        <option value="">-- Chọn giờ --</option>
+                        <option value="07:00">07:00</option>
+                        <option value="08:00">08:00</option>
+                        <option value="09:00">09:00</option>
+                        <option value="10:00">10:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="16:00">16:00</option>
+                        <option value="18:00">18:00</option>
+                        <option value="19:00">19:00</option>
+                        <option value="20:00">20:00</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="label">Số buổi</label>
+                    <input type="number" class="input" id="bookingSessions" value="1" min="1" max="3" onchange="updateEndTime()" />
+                </div>
+            </div>
+
+            <div id="courtDurationInfo" style="background-color: var(--color-gray-50); padding: 1rem; border-radius: var(--radius-md);">
+                <div style="font-size: 0.875rem; color: var(--color-gray-600);">
+                    Thời gian: <span id="durationText">--</span><br />
+                    Kết thúc: <span id="endTimeText">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Services & Addons -->
+        <div id="bookingStep3" class="booking-step-content" style="display: none; min-height: 400px;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--color-gray-900);">Bước 3: Thêm dịch vụ</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span>🏃 Huấn luyện viên</span>
+                        <span>50.000 VNĐ/buổi</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('coach', -1)">-</button>
+                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonCoach" value="0" readonly />
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('coach', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span>👕 Áo đồng phục</span>
+                        <span>10.000 VNĐ/bộ</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('uniform', -1)">-</button>
+                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonUniform" value="0" readonly />
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('uniform', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span>🥤 Nước uống</span>
+                        <span>3.000 VNĐ/chai</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('drink', -1)">-</button>
+                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonDrink" value="0" readonly />
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('drink', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span>🔐 Tủ đồ</span>
+                        <span>5.000 VNĐ/tủ</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('locker', -1)">-</button>
+                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonLocker" value="0" readonly />
+                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('locker', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Payment -->
+        <div id="bookingStep4" class="booking-step-content" style="display: none; min-height: 400px;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--color-gray-900);">Bước 4: Xác nhận và thanh toán</h3>
+            
+            <div class="card" style="background-color: var(--color-gray-50); margin-bottom: 1rem;">
+                <h4 style="font-weight: 600; margin-bottom: 1rem;">Tóm tắt đặt sân</h4>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Tiền sân:</span>
+                    <span id="summaryCourtFee">0 VNĐ</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Dịch vụ:</span>
+                    <span id="summaryAddonsFee">0 VNĐ</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Thuế (10%):</span>
+                    <span id="summaryTax">0 VNĐ</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Giảm giá (thành viên):</span>
+                    <span style="color: var(--color-success);" id="summaryDiscount">0 VNĐ</span>
+                </div>
+                <div style="padding-top: 1rem; margin-top: 1rem; border-top: 2px solid var(--border-color); display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: bold;">
+                    <span>Tổng cộng:</span>
+                    <span style="color: var(--color-primary);" id="summaryTotal">0 VNĐ</span>
+                </div>
+            </div>
+
+            <div>
+                <label class="label">Phương thức thanh toán</label>
+                <div style="display: flex; gap: 1rem;">
+                    <label style="flex: 1; cursor: pointer;">
+                        <input type="radio" name="paymentMethod" value="online" checked onchange="updatePaymentMethod()" />
+                        <span style="margin-left: 0.5rem;">Thanh toán online</span>
+                    </label>
+                    <label style="flex: 1; cursor: pointer;">
+                        <input type="radio" name="paymentMethod" value="counter" onchange="updatePaymentMethod()" />
+                        <span style="margin-left: 0.5rem;">Thanh toán tại quầy</span>
+                    </label>
+                </div>
+                
+                <div id="counterPaymentWarning" style="display: none; margin-top: 1rem; padding: 1rem; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: var(--radius-md);">
+                    <div style="display: flex; gap: 0.75rem;">
+                        <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
+                        <div style="font-size: 0.875rem;">
+                            <strong>Lưu ý:</strong> Khách hàng phải thanh toán trong vòng 30 phút kể từ khi đặt sân.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+            <button class="btn btn-outline" id="backButton" onclick="previousStep()" style="display: none;">
+                <i class="fas fa-arrow-left" style="margin-right: 0.5rem;"></i>
+                Quay lại
+            </button>
+            <div style="flex: 1;"></div>
+            <button class="btn btn-outline" onclick="closeNewBookingDialog()">Hủy</button>
+            <button class="btn btn-primary" id="nextButton" onclick="nextStep()" style="margin-left: 0.75rem;">
+                Tiếp theo
+                <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i>
+            </button>
+            <button class="btn btn-primary" id="submitButton" onclick="submitBooking()" style="margin-left: 0.75rem; display: none;">
+                <i class="fas fa-check" style="margin-right: 0.5rem;"></i>
+                Xác nhận đặt sân
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--color-gray-700);
+}
+
+.booking-step.active .step-circle {
+    background-color: var(--color-primary) !important;
+}
+
+.customer-tab:hover {
+    color: #007BFF !important;
+    background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+.customer-tab.active {
+    border-bottom: 3px solid #007BFF !important;
+    color: #007BFF !important;
+}
+
+.step-progress-bar {
+    position: relative;
+    overflow: hidden;
+}
+
+.step-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+@@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.booking-step-content {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Custom scrollbar for search results */
+#customerSearchResults::-webkit-scrollbar {
+    width: 8px;
+}
+
+#customerSearchResults::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#customerSearchResults::-webkit-scrollbar-thumb {
+    background: #007BFF;
+    border-radius: 4px;
+}
+
+#customerSearchResults::-webkit-scrollbar-thumb:hover {
+    background: #0056b3;
+}
+</style>
+</style>
+
+<script src="~/js/receptionist/new-booking-dialog.js" asp-append-version="true"></script>

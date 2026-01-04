@@ -1,0 +1,212 @@
+@model List<HQTCSDL.Controllers.BookingViewModel>
+
+@{
+    ViewData["PageTitle"] = "Lịch đặt sân";
+    ViewData["CurrentPage"] = "schedule";
+    
+    var timeSlots = new List<string> { "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00" };
+    var courts = new List<(string Name, string Type)> 
+    { 
+        ("Sân bóng đá Mini 1", "mini-football"),
+        ("Sân bóng đá Mini 2", "mini-football"),
+        ("Sân tennis 1", "tennis"),
+        ("Sân tennis 2", "tennis"),
+        ("Sân cầu lông 1", "badminton"),
+        ("Sân cầu lông 2", "badminton")
+    };
+}
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem; height: 100%;">
+    <!-- Header with Date Navigation -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.5rem; font-weight: bold;">Lịch đặt sân</h2>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <button class="btn btn-outline" onclick="changeDate(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div style="font-weight: 600; min-width: 200px; text-align: center;">
+                <i class="fas fa-calendar-alt" style="margin-right: 0.5rem;"></i>
+                <span id="currentDate">@DateTime.Today.ToString("dd/MM/yyyy")</span>
+            </div>
+            <button class="btn btn-outline" onclick="changeDate(1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="btn btn-primary" onclick="openNewBookingDialog()">
+                <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                Đặt sân mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Court Type Filter -->
+    <div class="card" style="padding: 1rem;">
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <label style="font-weight: 600;">Loại sân:</label>
+            <button class="btn btn-primary active" data-court-type="all" onclick="filterCourtType('all')">
+                Tất cả
+            </button>
+            <button class="btn btn-outline" data-court-type="mini-football" onclick="filterCourtType('mini-football')">
+                ⚽ Bóng đá Mini
+            </button>
+            <button class="btn btn-outline" data-court-type="tennis" onclick="filterCourtType('tennis')">
+                🎾 Tennis
+            </button>
+            <button class="btn btn-outline" data-court-type="badminton" onclick="filterCourtType('badminton')">
+                🏸 Cầu lông
+            </button>
+        </div>
+    </div>
+
+    <!-- Schedule Grid -->
+    <div class="card" style="flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 0;">
+        <div class="scroll-area" style="flex: 1; overflow-x: auto;">
+            <div style="min-width: 1400px;">
+                <!-- Header Row - Time slots horizontal -->
+                <div style="display: flex;">
+                    <div style="width: 192px; padding: 0.75rem; font-weight: 600; color: var(--color-gray-700); border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); background-color: var(--color-gray-50); position: sticky; left: 0; z-index: 10;">
+                        Sân
+                    </div>
+                    @foreach (var timeSlot in timeSlots)
+                    {
+                        <div style="width: 64px; flex-shrink: 0; padding: 0.75rem; text-align: center; font-weight: 500; color: var(--color-gray-600); border-bottom: 1px solid var(--border-color); background-color: var(--color-gray-50); font-size: 0.75rem;">
+                            @timeSlot
+                        </div>
+                    }
+
+                </div>
+
+                <!-- Court Rows -->
+                @foreach (var court in courts)
+                {
+                    <div style="display: flex; border-bottom: 1px solid var(--border-color);">
+                        <div style="width: 192px; padding: 0.75rem; font-weight: 500; color: var(--color-gray-700); border-right: 1px solid var(--border-color); background-color: var(--background); position: sticky; left: 0; z-index: 10;" data-court-type="@court.Type">
+                            @court.Name
+                        </div>
+                        @for (var i = 0; i < timeSlots.Count; i++)
+                        {
+                            var timeSlot = timeSlots[i];
+                            var booking = Model.FirstOrDefault(b => b.CourtName == court.Name && b.StartTime == timeSlot);
+                            
+                            // Check if this slot is part of a previous booking
+                            var isPartOfPreviousBooking = Model.Any(b => {
+                                if (b.CourtName != court.Name) return false;
+                                var startIndex = timeSlots.IndexOf(b.StartTime);
+                                var span = b.DurationMinutes / 30;
+                                var endIndex = startIndex + span;
+                                return i > startIndex && i < endIndex;
+                            });
+                            
+                            if (isPartOfPreviousBooking)
+                            {
+                                continue;
+                            }
+                            
+                            if (booking != null)
+                            {
+                                var span = booking.DurationMinutes / 30;
+                                var bgColor = booking.Status == "active" ? "#dbeafe" : 
+                                             booking.Status == "booked" ? "#fee2e2" : "#dcfce7";
+                                var borderColor = booking.Status == "active" ? "#3b82f6" : 
+                                                booking.Status == "booked" ? "#ef4444" : "#10b981";
+                                var textColor = booking.Status == "active" ? "#1e40af" : 
+                                              booking.Status == "booked" ? "#991b1b" : "#166534";
+                                
+                                <div style="width: @(span * 64)px; flex-shrink: 0; padding: 0.5rem; border-left: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); background-color: @bgColor; border-left: 2px solid @borderColor; color: @textColor; cursor: pointer; transition: opacity 0.2s;"
+                                     data-court-type="@court.Type"
+                                     onclick="viewBookingDetail('@booking.Id')"
+                                     onmouseover="this.style.opacity='0.8'"
+                                     onmouseout="this.style.opacity='1'">
+                                    <div style="font-size: 0.875rem; font-weight: 600;">@booking.CustomerName</div>
+                                    <div style="font-size: 0.75rem; margin-top: 0.25rem;">
+                                        @(booking.PaymentStatus == "paid-online" ? "✓ Đã thanh toán" : "⏳ Chưa thanh toán")
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div style="width: 64px; flex-shrink: 0; padding: 0.5rem; border-left: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); background-color: var(--background); cursor: pointer; transition: background-color 0.2s;"
+                                     data-court-type="@court.Type"
+                                     onclick="quickBook('@court.Name', '@timeSlot')"
+                                     onmouseover="this.style.backgroundColor='var(--color-gray-50)'"
+                                     onmouseout="this.style.backgroundColor='var(--background)'">
+                                    <div style="font-size: 0.75rem; color: var(--color-gray-400); text-align: center;">Trống</div>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div style="padding: 1rem; border-top: 1px solid var(--border-color); display: flex; gap: 2rem; background-color: var(--color-gray-50);">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 16px; height: 16px; background-color: var(--background); border: 2px solid #9ca3af; border-radius: 2px;"></div>
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Còn trống</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 16px; height: 16px; background-color: #fee2e2; border: 2px solid #ef4444; border-radius: 2px;"></div>
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đã đặt</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 16px; height: 16px; background-color: #dbeafe; border: 2px solid #3b82f6; border-radius: 2px;"></div>
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đang diễn ra</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedDate = new Date();
+
+        function changeDate(days) {
+            selectedDate.setDate(selectedDate.getDate() + days);
+            document.getElementById('currentDate').textContent = selectedDate.toLocaleDateString('vi-VN');
+            // TODO: Reload schedule for new date
+        }
+
+        function filterCourtType(courtType) {
+            // Update button states
+            document.querySelectorAll('[data-court-type]').forEach(btn => {
+                if (btn.tagName === 'BUTTON') {
+                    btn.classList.remove('btn-primary', 'active');
+                    btn.classList.add('btn-outline');
+                }
+            });
+            
+            const activeBtn = document.querySelector(`button[data-court-type="${courtType}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('btn-outline');
+                activeBtn.classList.add('btn-primary', 'active');
+            }
+
+            // Filter courts
+            document.querySelectorAll('[data-court-type]').forEach(cell => {
+                if (cell.tagName !== 'BUTTON') {
+                    if (courtType === 'all') {
+                        cell.style.display = '';
+                    } else {
+                        cell.style.display = cell.getAttribute('data-court-type') === courtType ? '' : 'none';
+                    }
+                }
+            });
+        }
+
+        function quickBook(courtName, timeSlot) {
+            if (confirm(`Đặt sân ${courtName} lúc ${timeSlot}?`)) {
+                // TODO: Open booking dialog with pre-filled data
+                alert('Chức năng đang phát triển');
+            }
+        }
+
+        function viewBookingDetail(bookingId) {
+            // TODO: Open booking detail modal
+            alert('Chi tiết đặt sân #' + bookingId);
+        }
+
+        function openNewBookingDialog() {
+            document.getElementById('newBookingModal').style.display = 'flex';
+        }
+    </script>
+}

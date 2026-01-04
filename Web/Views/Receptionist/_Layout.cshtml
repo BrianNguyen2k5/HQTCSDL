@@ -1,0 +1,109 @@
+@{
+    ViewData["Title"] = "Sportify - Quản lý lễ tân";
+    var currentPage = ViewData["CurrentPage"]?.ToString() ?? "dashboard";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/receptionist/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.25rem;">
+                        S
+                    </div>
+                    <div>
+                        <h1 style="font-size: 1.25rem; font-weight: bold; margin: 0;">Sportify</h1>
+                        <p style="font-size: 0.75rem; color: var(--color-gray-500); margin: 0;">Quản lý lễ tân</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="nav" style="flex: 1; padding: 1rem;">
+                <a href="@Url.Action("Dashboard", "Receptionist")" class="nav-item @(currentPage == "dashboard" ? "active" : "")">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Tổng quan</span>
+                </a>
+                <a href="@Url.Action("Schedule", "Receptionist")" class="nav-item @(currentPage == "schedule" ? "active" : "")">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Lịch đặt sân</span>
+                </a>
+                <a href="@Url.Action("Bookings", "Receptionist")" class="nav-item @(currentPage == "bookings" ? "active" : "")">
+                    <i class="fas fa-book-open"></i>
+                    <span>Danh sách đặt sân</span>
+                </a>
+                <a href="@Url.Action("POS", "Receptionist")" class="nav-item @(currentPage == "pos" ? "active" : "")">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Thanh toán</span>
+                </a>
+                <a href="@Url.Action("Customers", "Receptionist")" class="nav-item @(currentPage == "customers" ? "active" : "")">
+                    <i class="fas fa-users"></i>
+                    <span>Khách hàng</span>
+                </a>
+            </nav>
+
+            <div style="padding: 1rem; border-top: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background-color: var(--color-gray-50); border-radius: 0.5rem;">
+                    <div style="width: 32px; height: 32px; background-color: var(--color-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.875rem;">
+                        LT
+                    </div>
+                    <div style="flex: 1;">
+                        <p style="font-weight: 600; font-size: 0.875rem; margin: 0;">Lễ tân</p>
+                        <p style="font-size: 0.75rem; color: var(--color-gray-500); margin: 0;">Cơ sở TP.HCM</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+                    <div>
+                        <h2 style="font-size: 1.5rem; font-weight: bold; margin: 0;">@ViewData["PageTitle"]</h2>
+                        <p style="font-size: 0.875rem; color: var(--color-gray-500); margin: 0;" id="currentDateTime">
+                            @DateTime.Now.ToString("dddd, dd MMMM yyyy - HH:mm", new System.Globalization.CultureInfo("vi-VN"))
+                        </p>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <!-- Branch Selector -->
+                    <div class="dropdown" style="position: relative;">
+                        <button class="btn btn-outline" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="selectedBranch">Cơ sở TP.HCM</span>
+                            <i class="fas fa-chevron-down" style="font-size: 0.75rem;"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <!-- Booking Detail Panel -->
+    <partial name="~/Views/Shared/Components/_BookingDetailPanel.cshtml" />
+
+    <!-- New Booking Dialog -->
+    <partial name="~/Views/Shared/Components/_NewBookingDialog.cshtml" />
+
+    <!-- Scripts -->
+    <script src="~/js/receptionist/dashboard.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

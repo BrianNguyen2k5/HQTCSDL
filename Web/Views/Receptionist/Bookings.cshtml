@@ -1,0 +1,264 @@
+@model List<HQTCSDL.Controllers.BookingViewModel>
+
+@{
+    ViewData["PageTitle"] = "Danh sách đặt sân";
+    ViewData["CurrentPage"] = "bookings";
+}
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem; height: 100%;">
+    <!-- Header with Actions -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.5rem; font-weight: bold;">Danh sách đặt sân</h2>
+        <button class="btn btn-primary" onclick="openNewBookingDialog()">
+            <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+            Đặt sân mới
+        </button>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="card" style="padding: 1rem;">
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 250px;">
+                <input type="text" class="input" placeholder="Tìm kiếm theo tên, số điện thoại..." id="searchInput" />
+            </div>
+            
+            <select class="input" style="flex: 0 0 150px;" id="statusFilter">
+                <option value="">Tất cả trạng thái</option>
+                <option value="booked">Đã đặt</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="completed">Hoàn thành</option>
+                <option value="cancelled">Đã hủy</option>
+            </select>
+
+            <select class="input" style="flex: 0 0 150px;" id="paymentFilter">
+                <option value="">Thanh toán</option>
+                <option value="paid-online">Đã thanh toán</option>
+                <option value="pay-at-counter">Thanh toán tại quầy</option>
+                <option value="unpaid">Chưa thanh toán</option>
+            </select>
+
+            <button class="btn btn-outline">
+                <i class="fas fa-filter"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="card" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div style="padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+            <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">
+                Tổng số: <span id="totalBookings">@Model.Count</span> đặt sân
+            </h3>
+        </div>
+
+        <div class="scroll-area" style="flex: 1;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mã đặt</th>
+                        <th>Khách hàng</th>
+                        <th>Số điện thoại</th>
+                        <th>Sân</th>
+                        <th>Thời gian</th>
+                        <th>Thành viên</th>
+                        <th>Trạng thái</th>
+                        <th>Thanh toán</th>
+                        <th>Tổng tiền</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingsTableBody">
+                    @foreach (var booking in Model)
+                    {
+                        var totalAmount = booking.CourtFee + booking.Tax - booking.Discount;
+                        var statusBadge = booking.Status switch
+                        {
+                            "active" => "badge-primary",
+                            "booked" => "badge-warning",
+                            _ => "badge-outline"
+                        };
+                        var paymentBadge = booking.PaymentStatus == "paid-online" ? "badge-success" : "badge-warning";
+
+                        <tr data-booking-id="@booking.Id">
+                            <td style="font-weight: 600;">#@booking.Id</td>
+                            <td>@booking.CustomerName</td>
+                            <td>@booking.CustomerPhone</td>
+                            <td>
+                                <div>
+                                    <div style="font-weight: 500;">@booking.CourtName</div>
+                                    <div style="font-size: 0.75rem; color: var(--color-gray-500);">
+                                        @(booking.CourtType == "mini-football" ? "Bóng đá Mini" : 
+                                          booking.CourtType == "badminton" ? "Cầu lông" : "Tennis")
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>@booking.StartTime - @booking.EndTime</div>
+                                <div style="font-size: 0.75rem; color: var(--color-gray-500);">
+                                    @booking.DurationMinutes phút
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge @(booking.MemberType == "platinum" ? "badge-primary" : 
+                                                      booking.MemberType == "gold" ? "badge-warning" : "badge-outline")">
+                                    @(booking.MemberType == "platinum" ? "Platinum" :
+                                      booking.MemberType == "gold" ? "Gold" :
+                                      booking.MemberType == "student" ? "Sinh viên" : "Thường")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @statusBadge">
+                                    @(booking.Status == "active" ? "Đang hoạt động" :
+                                      booking.Status == "booked" ? "Đã đặt" : "Khác")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @paymentBadge">
+                                    @(booking.PaymentStatus == "paid-online" ? "✓ Đã TT" :
+                                      booking.PaymentStatus == "pay-at-counter" ? "Tại quầy" : "Chưa TT")
+                                </span>
+                            </td>
+                            <td style="font-weight: 600; color: var(--color-primary);">
+                                @totalAmount.ToString("N0") VNĐ
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    @if (booking.Status == "booked")
+                                    {
+                                        <button class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
+                                                onclick="checkIn('@booking.Id')">
+                                            Check-in
+                                        </button>
+                                    }
+                                    <button class="btn btn-outline" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
+                                            onclick="viewBookingDetail('@booking.Id')">
+                                        Chi tiết
+                                    </button>
+                                    @if (booking.Status != "completed" && booking.Status != "cancelled")
+                                    {
+                                        <button class="btn btn-ghost" style="padding: 0.25rem 0.5rem; color: var(--color-danger);"
+                                                onclick="cancelBooking('@booking.Id')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#bookingsTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+            
+            updateBookingsCount();
+        });
+
+        // Filter functionality
+        document.getElementById('statusFilter').addEventListener('change', filterBookings);
+        document.getElementById('paymentFilter').addEventListener('change', filterBookings);
+
+        function filterBookings() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const paymentFilter = document.getElementById('paymentFilter').value;
+            const rows = document.querySelectorAll('#bookingsTableBody tr');
+            
+            rows.forEach(row => {
+                let show = true;
+                
+                if (statusFilter) {
+                    const statusBadge = row.querySelector('td:nth-child(7) .badge');
+                    if (!statusBadge || !statusBadge.textContent.includes(getStatusText(statusFilter))) {
+                        show = false;
+                    }
+                }
+                
+                if (paymentFilter && show) {
+                    const paymentBadge = row.querySelector('td:nth-child(8) .badge');
+                    if (!paymentBadge || !paymentBadge.textContent.includes(getPaymentText(paymentFilter))) {
+                        show = false;
+                    }
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+            
+            updateBookingsCount();
+        }
+
+        function updateBookingsCount() {
+            const visibleRows = document.querySelectorAll('#bookingsTableBody tr[style=""]').length;
+            document.getElementById('totalBookings').textContent = visibleRows;
+        }
+
+        function getStatusText(status) {
+            const map = {
+                'booked': 'Đã đặt',
+                'active': 'Đang hoạt động',
+                'completed': 'Hoàn thành',
+                'cancelled': 'Đã hủy'
+            };
+            return map[status] || '';
+        }
+
+        function getPaymentText(payment) {
+            const map = {
+                'paid-online': 'Đã TT',
+                'pay-at-counter': 'Tại quầy',
+                'unpaid': 'Chưa TT'
+            };
+            return map[payment] || '';
+        }
+
+        function checkIn(bookingId) {
+            if (confirm('Xác nhận check-in cho đặt sân #' + bookingId + '?')) {
+                fetch('/Receptionist/CheckIn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) location.reload();
+                });
+            }
+        }
+
+        function cancelBooking(bookingId) {
+            if (confirm('Bạn có chắc muốn hủy đặt sân #' + bookingId + '?')) {
+                fetch('/Receptionist/CancelBooking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) location.reload();
+                });
+            }
+        }
+
+        function viewBookingDetail(bookingId) {
+            // TODO: Open modal or navigate to detail page
+            alert('Chi tiết đặt sân #' + bookingId);
+        }
+
+        function openNewBookingDialog() {
+            document.getElementById('newBookingModal').style.display = 'flex';
+        }
+    </script>
+}
