@@ -9,15 +9,11 @@ namespace HQTCSDL.Web.Controllers
 	[Authorize(Roles = "QuanLy")]
 	public class EmployerController : Controller
 	{
-
 		private readonly Dashboard _dashboardDAL;
-		public EmployerController(IConfiguration config)
+		
+		public EmployerController(Dashboard dashboardDAL)
 		{
-			// Lấy chuỗi kết nối từ file appsettings.json
-			string connectionString = config.GetConnectionString("VietSport")
-				?? throw new InvalidOperationException("Không tìm thấy 'VietSport' trong appsettings.json");
-
-			_dashboardDAL = new Dashboard(connectionString);
+			_dashboardDAL = dashboardDAL;
 		}
 
 		public IActionResult Dashboard()

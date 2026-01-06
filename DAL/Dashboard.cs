@@ -5,12 +5,10 @@ using DTO;
 
 namespace DAL
 {
-	public class Dashboard
+	public class Dashboard : DatabaseConnection
 	{
-		private readonly string _connectionString;
-		public Dashboard(string connectionString)
+		public Dashboard(IConfiguration configuration) : base(configuration)
 		{
-			_connectionString = connectionString ?? throw new InvalidOperationException("Không tìm thấy Connection String 'VietSport' trong Dashboard");
 		}
 
 		public bool UpdateGiaSan(string maLoaiSan, int giaMoi) {

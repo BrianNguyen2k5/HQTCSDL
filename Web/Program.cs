@@ -22,8 +22,10 @@ builder.Services.AddAuthentication("MyCookieAuth")
 builder.Services.AddControllersWithViews();
 
 //Đăng ký DTO
-// Đăng ký DAL (Scopsed: Tạo mới mỗi khi có request)
+// Đăng ký DAL (Scoped: Tạo mới mỗi khi có request)
+builder.Services.AddScoped<DAL.DatabaseConnection>();
 builder.Services.AddScoped<DAL.NhanVien>();
+builder.Services.AddScoped<DAL.Dashboard>();
 // Đăng ký BLL
 
 

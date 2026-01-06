@@ -30,11 +30,6 @@
                 <option value="student">Sinh viên</option>
                 <option value="general">Thường</option>
             </select>
-
-            <button class="btn btn-outline">
-                <i class="fas fa-download" style="margin-right: 0.5rem;"></i>
-                Xuất Excel
-            </button>
         </div>
     </div>
 
@@ -84,14 +79,7 @@
                         <tr data-customer-id="@customer.Id">
                             <td style="font-weight: 600;">#@customer.Id</td>
                             <td>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #007BFF 0%, #0056b3 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
-                                        @(customer.Name.Split(' ').LastOrDefault()?.Substring(0, 1).ToUpper() ?? "?")
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 500;">@customer.Name</div>
-                                    </div>
-                                </div>
+                                <div style="font-weight: 500;">@customer.Name</div>
                             </td>
                             <td>@customer.Phone</td>
                             <td>@(customer.Email ?? "-")</td>
@@ -170,6 +158,9 @@
     </div>
 </div>
 
+<!-- Add Customer Dialog -->
+<partial name="~/Views/Shared/Components/_AddCustomerDialog.cshtml" />
+
 @section Scripts {
     <script>
         // Search functionality
@@ -224,11 +215,6 @@
                 // TODO: Send upgrade request
                 alert('Chức năng đang phát triển');
             }
-        }
-
-        function openAddCustomerModal() {
-            // TODO: Open add customer modal
-            alert('Chức năng đang phát triển');
         }
     </script>
 }

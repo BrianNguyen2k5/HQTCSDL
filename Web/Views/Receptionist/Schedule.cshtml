@@ -62,13 +62,13 @@
         <div class="scroll-area" style="flex: 1; overflow-x: auto;">
             <div style="min-width: 1400px;">
                 <!-- Header Row - Time slots horizontal -->
-                <div style="display: flex;">
-                    <div style="width: 192px; padding: 0.75rem; font-weight: 600; color: var(--color-gray-700); border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); background-color: var(--color-gray-50); position: sticky; left: 0; z-index: 10;">
+                <div style="display: grid; grid-template-columns: 250px repeat(@timeSlots.Count, 64px);">
+                    <div style="padding: 0.75rem; font-weight: 600; color: var(--color-gray-700); border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); background-color: var(--color-gray-50); position: sticky; left: 0; z-index: 10; box-sizing: border-box;">
                         Sân
                     </div>
                     @foreach (var timeSlot in timeSlots)
                     {
-                        <div style="width: 64px; flex-shrink: 0; padding: 0.75rem; text-align: center; font-weight: 500; color: var(--color-gray-600); border-bottom: 1px solid var(--border-color); background-color: var(--color-gray-50); font-size: 0.75rem;">
+                        <div style="padding: 0.75rem; text-align: center; font-weight: 500; color: var(--color-gray-600); border-bottom: 1px solid var(--border-color); background-color: var(--color-gray-50); font-size: 0.75rem; box-sizing: border-box;">
                             @timeSlot
                         </div>
                     }
@@ -78,8 +78,8 @@
                 <!-- Court Rows -->
                 @foreach (var court in courts)
                 {
-                    <div style="display: flex; border-bottom: 1px solid var(--border-color);">
-                        <div style="width: 192px; padding: 0.75rem; font-weight: 500; color: var(--color-gray-700); border-right: 1px solid var(--border-color); background-color: var(--background); position: sticky; left: 0; z-index: 10;" data-court-type="@court.Type">
+                    <div style="display: grid; grid-template-columns: 250px repeat(@timeSlots.Count, 64px); border-bottom: 1px solid var(--border-color);">
+                        <div style="padding: 0.75rem; font-weight: 500; color: var(--color-gray-700); border-right: 1px solid var(--border-color); background-color: var(--background); position: sticky; left: 0; z-index: 10; box-sizing: border-box;" data-court-type="@court.Type">
                             @court.Name
                         </div>
                         @for (var i = 0; i < timeSlots.Count; i++)
@@ -111,7 +111,7 @@
                                 var textColor = booking.Status == "active" ? "#1e40af" : 
                                               booking.Status == "booked" ? "#991b1b" : "#166534";
                                 
-                                <div style="width: @(span * 64)px; flex-shrink: 0; padding: 0.5rem; border-left: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); background-color: @bgColor; border-left: 2px solid @borderColor; color: @textColor; cursor: pointer; transition: opacity 0.2s;"
+                                <div style="grid-column: span @span; min-height: 48px; padding: 0.5rem; border-left: 2px solid @borderColor; background-color: @bgColor; color: @textColor; cursor: pointer; transition: opacity 0.2s; box-sizing: border-box;"
                                      data-court-type="@court.Type"
                                      onclick="viewBookingDetail('@booking.Id')"
                                      onmouseover="this.style.opacity='0.8'"
@@ -124,7 +124,7 @@
                             }
                             else
                             {
-                                <div style="width: 64px; flex-shrink: 0; padding: 0.5rem; border-left: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); background-color: var(--background); cursor: pointer; transition: background-color 0.2s;"
+                                <div style="min-height: 48px; padding: 0.5rem; border-left: 1px solid var(--border-color); background-color: var(--background); cursor: pointer; transition: background-color 0.2s; box-sizing: border-box;"
                                      data-court-type="@court.Type"
                                      onclick="quickBook('@court.Name', '@timeSlot')"
                                      onmouseover="this.style.backgroundColor='var(--color-gray-50)'"
