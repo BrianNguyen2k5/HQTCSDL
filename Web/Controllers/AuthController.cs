@@ -21,11 +21,16 @@ public class AuthController : Controller
 		// Ví dụ giả lập:
 		if (loginId == "admin" && password == "123")
 		{
+			// TODO: Lấy thông tin từ database
+			// var nhanVien = nhanVienDAL.GetByLoginId(loginId);
+			
 			// 2. Tạo "Thẻ căn cước" (Claims) cho user
 			var claims = new List<Claim>
 			{
 				new Claim(ClaimTypes.Name, loginId),
-				new Claim(ClaimTypes.Role, "QuanLy") // Ví dụ role
+				new Claim(ClaimTypes.Role, "QuanLy"), // Ví dụ role
+				new Claim("MaCoSo", "CS01"), // Thêm mã cơ sở
+				new Claim("MaNhanVien", "NV001") // Thêm mã nhân viên
 			};
 
 			var identity = new ClaimsIdentity(claims, "MyCookieAuth");

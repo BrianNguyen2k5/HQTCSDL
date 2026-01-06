@@ -30,6 +30,7 @@ namespace DTO
 		public required string LoaiDichVu { get; set; }
 		public int DonGia { get; set; }
 		public required string DonViTinh { get; set; }
+		public int SoLuongTonKho { get; set; } = 0;
 	}
 
 	public class TonKho

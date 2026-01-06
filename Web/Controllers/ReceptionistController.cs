@@ -1,10 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
 using HQTCSDL.Models;
+using DAL;
 
 namespace HQTCSDL.Controllers
 {
     public class ReceptionistController : Controller
     {
+        private readonly IConfiguration _configuration;
+
+        public ReceptionistController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+        // Helper method to get MaCoSo from claims
+        private string GetMaCoSo()
+        {
+            var maCoSo = User.FindFirst("MaCoSo")?.Value;
+            if (string.IsNullOrEmpty(maCoSo))
+            {
+                // Fallback nếu chưa đăng nhập hoặc claim không có
+                return "CS01";
+            }
+            return maCoSo;
+        }
+
         // GET: /Receptionist
         public IActionResult Index()
         {
@@ -36,8 +56,12 @@ namespace HQTCSDL.Controllers
         // GET: /Receptionist/POS
         public IActionResult POS()
         {
-            var bookings = GetMockBookings();
-            return View(bookings);
+            string maCoSo = GetMaCoSo();
+            
+            var dichVuDAL = new DichVuDAL(_configuration);
+            var danhSachDichVu = dichVuDAL.LayDanhSachDichVu(maCoSo);
+            
+            return View(danhSachDichVu);
         }
 
         // GET: /Receptionist/Customers

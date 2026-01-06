@@ -8,8 +8,8 @@ namespace DAL
 
 		public DatabaseConnection(IConfiguration configuration)
 		{
-			_connectionString = configuration.GetConnectionString("DefaultConnection") 
-				?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+			_connectionString = configuration.GetConnectionString("VietSport") 
+				?? throw new InvalidOperationException("Connection string 'VietSport' not found.");
 		}
 
 		protected string GetConnectionString()
