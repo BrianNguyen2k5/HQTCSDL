@@ -41,6 +41,7 @@ go
 
 create or alter function F_DanhSachGiaLoaiSan ()
 returns @dsLoaiSan table (
+	MaLoaiSan varchar(10),
     TenLoaiSan nvarchar(50),
 	DonViTinhTheoPhut int,
 	GiaGoc int,
@@ -49,7 +50,7 @@ returns @dsLoaiSan table (
 as
 begin
 	insert into @dsLoaiSan
-		select distinct ls.TenLoaiSan, ls.DonViTinhTheoPhut, ls.GiaGoc, ls.MoTa
+		select distinct ls.MaLoaiSan, ls.TenLoaiSan, ls.DonViTinhTheoPhut, ls.GiaGoc, ls.MoTa
 		from LoaiSan ls
 	return
 end
