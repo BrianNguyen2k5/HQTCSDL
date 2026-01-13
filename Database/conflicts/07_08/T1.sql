@@ -7,14 +7,14 @@ create or alter proc sp_KT_BaoTriSan
 	@masan char(10)
 as
 begin
-	set transaction isolation level committed read
+	set transaction isolation level read committed
 	begin tran
 		-- Kiểm tra sân có tồn tại hay không
 		if not exists (
 			select top 1 *
 			from San s
 			where s.MaSan = @masan
-		) 
+		)
 		begin
 			print N'Sân không tồn tại'
 			rollback tran
