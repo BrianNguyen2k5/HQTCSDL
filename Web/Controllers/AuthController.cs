@@ -76,6 +76,16 @@ public class AuthController : Controller
                 new Claim("UserId", userId),
             };
 
+            // Add MaCoSo for employees
+            if (!string.IsNullOrEmpty(user.MaNhanVien))
+            {
+                string? maCoSo = _taiKhoanDAL.LayMaCoSo(user.MaNhanVien);
+                if (!string.IsNullOrEmpty(maCoSo))
+                {
+                    claims.Add(new Claim("MaCoSo", maCoSo));
+                }
+            }
+
             var identity = new ClaimsIdentity(claims, "MyCookieAuth");
             var principal = new ClaimsPrincipal(identity);
 
@@ -99,7 +109,7 @@ public class AuthController : Controller
             }
             else if (role == "Thu ngân")
             {
-                return RedirectToAction("", "Cashier");
+                return RedirectToAction("Index", "Cashier");
             }
             else if (role == "Huấn luyện viên")
             {

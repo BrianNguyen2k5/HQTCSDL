@@ -5,7 +5,7 @@ using Microsoft.Data.SqlClient;
 class Program
 {
     // Cấu hình database
-    const string CONNECTION_STRING = "Server=localhost,1433;Database=VietSport;User Id=sa;Password=MyStrongPass123;TrustServerCertificate=True;MultipleActiveResultSets=true";
+    const string CONNECTION_STRING = "Server=DESKTOP-SB9LD9F\\TRAMY;Database=VietSport;Trusted_Connection=True;TrustServerCertificate=True";
     
     // Danh sách nhân viên cần update
     static readonly string[] EMPLOYEES = { "NV001", "NV006", "NV002", "NV003", "NV009" };
