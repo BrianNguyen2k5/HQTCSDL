@@ -1,0 +1,221 @@
+<!-- Add Customer Dialog -->
+<div id="addCustomerDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 0;">
+        <!-- Dialog Header -->
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 1.25rem; font-weight: 600; margin: 0;">Thêm khách hàng mới</h3>
+            <button onclick="closeAddCustomerDialog()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--color-gray-500); padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Dialog Content -->
+        <form id="addCustomerForm" style="padding: 1.5rem;">
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Họ tên -->
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                        Họ tên <span style="color: var(--color-danger);">*</span>
+                    </label>
+                    <input type="text" id="customerName" name="name" class="input" placeholder="Nhập họ tên..." required />
+                    <span id="nameError" class="error-message" style="display: none; color: var(--color-danger); font-size: 0.75rem; margin-top: 0.25rem;"></span>
+                </div>
+
+                <!-- Ngày sinh -->
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                        Ngày sinh <span style="color: var(--color-danger);">*</span>
+                    </label>
+                    <input type="date" id="customerDob" name="dob" class="input" required />
+                    <span id="dobError" class="error-message" style="display: none; color: var(--color-danger); font-size: 0.75rem; margin-top: 0.25rem;"></span>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                        Số điện thoại <span style="color: var(--color-danger);">*</span>
+                    </label>
+                    <input type="tel" id="customerPhone" name="phone" class="input" placeholder="Nhập số điện thoại..." required />
+                    <span id="phoneError" class="error-message" style="display: none; color: var(--color-danger); font-size: 0.75rem; margin-top: 0.25rem;"></span>
+                </div>
+
+                <!-- CCCD/CMND -->
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                        CCCD/CMND <span style="color: var(--color-danger);">*</span>
+                    </label>
+                    <input type="text" id="customerCCCD" name="cccd" class="input" placeholder="Nhập số CCCD/CMND..." required />
+                    <span id="cccdError" class="error-message" style="display: none; color: var(--color-danger); font-size: 0.75rem; margin-top: 0.25rem;"></span>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                        Email <span style="color: var(--color-danger);">*</span>
+                    </label>
+                    <input type="email" id="customerEmail" name="email" class="input" placeholder="Nhập email..." required />
+                    <span id="emailError" class="error-message" style="display: none; color: var(--color-danger); font-size: 0.75rem; margin-top: 0.25rem;"></span>
+                </div>
+
+                <!-- Loại thành viên -->
+                <div>
+                    <label style="display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                        Loại thành viên
+                    </label>
+                    <select id="customerMemberType" name="memberType" class="input">
+                        <option value="general">Thường</option>
+                        <option value="student">Sinh viên</option>
+                        <option value="silver">Silver</option>
+                        <option value="gold">Gold</option>
+                        <option value="platinum">Platinum</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <!-- Dialog Footer -->
+        <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 0.75rem;">
+            <button type="button" class="btn btn-outline" onclick="closeAddCustomerDialog()">
+                Hủy
+            </button>
+            <button type="button" class="btn btn-primary" onclick="handleAddCustomer()">
+                Lưu
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAddCustomerModal() {
+        document.getElementById('addCustomerDialog').style.display = 'flex';
+        document.getElementById('addCustomerForm').reset();
+        clearValidationErrors();
+    }
+
+    function closeAddCustomerDialog() {
+        document.getElementById('addCustomerDialog').style.display = 'none';
+        clearValidationErrors();
+    }
+
+    function clearValidationErrors() {
+        const errorElements = document.querySelectorAll('.error-message');
+        errorElements.forEach(el => {
+            el.style.display = 'none';
+            el.textContent = '';
+        });
+        
+        const inputs = document.querySelectorAll('#addCustomerForm input, #addCustomerForm select');
+        inputs.forEach(input => {
+            input.style.borderColor = '';
+        });
+    }
+
+    function showError(fieldId, message) {
+        const errorElement = document.getElementById(fieldId + 'Error');
+        const inputElement = document.getElementById('customer' + fieldId.charAt(0).toUpperCase() + fieldId.slice(1));
+        
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        if (inputElement) {
+            inputElement.style.borderColor = 'var(--color-danger)';
+        }
+    }
+
+    function validateCustomerForm() {
+        clearValidationErrors();
+        let isValid = true;
+
+        const name = document.getElementById('customerName').value.trim();
+        const dob = document.getElementById('customerDob').value;
+        const phone = document.getElementById('customerPhone').value.trim();
+        const cccd = document.getElementById('customerCCCD').value.trim();
+        const email = document.getElementById('customerEmail').value.trim();
+
+        if (!name) {
+            showError('name', 'Vui lòng nhập họ tên');
+            isValid = false;
+        }
+
+        if (!dob) {
+            showError('dob', 'Vui lòng chọn ngày sinh');
+            isValid = false;
+        }
+
+        if (!phone) {
+            showError('phone', 'Vui lòng nhập số điện thoại');
+            isValid = false;
+        } else if (!/^[0-9]{10}$/.test(phone)) {
+            showError('phone', 'Số điện thoại phải có 10 chữ số');
+            isValid = false;
+        }
+
+        if (!cccd) {
+            showError('cccd', 'Vui lòng nhập số CCCD/CMND');
+            isValid = false;
+        } else if (!/^[0-9]{9,12}$/.test(cccd)) {
+            showError('cccd', 'CCCD/CMND phải có 9-12 chữ số');
+            isValid = false;
+        }
+
+        if (!email) {
+            showError('email', 'Vui lòng nhập email');
+            isValid = false;
+        } else if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)) {
+            showError('email', 'Email không hợp lệ');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function handleAddCustomer() {
+        if (!validateCustomerForm()) {
+            return;
+        }
+
+        const formData = {
+            name: document.getElementById('customerName').value.trim(),
+            dob: document.getElementById('customerDob').value,
+            phone: document.getElementById('customerPhone').value.trim(),
+            cccd: document.getElementById('customerCCCD').value.trim(),
+            email: document.getElementById('customerEmail').value.trim(),
+            memberType: document.getElementById('customerMemberType').value
+        };
+
+        // TODO: Send to server
+        fetch('/Receptionist/AddCustomer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeAddCustomerDialog();
+                // Reload page or update table
+                window.location.reload();
+            } else {
+                alert('Có lỗi xảy ra: ' + (data.message || 'Vui lòng thử lại'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi thêm khách hàng');
+        });
+    }
+
+    // Close dialog when clicking outside
+    var addCustomerDialog = document.getElementById('addCustomerDialog');
+    if (addCustomerDialog) {
+        addCustomerDialog.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAddCustomerDialog();
+            }
+        });
+    }
+</script>

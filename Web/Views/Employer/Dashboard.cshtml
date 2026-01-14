@@ -1,0 +1,197 @@
+@model IEnumerable<DTO.LoaiSan>
+@{
+	ViewData["Title"] = "Employer Dashboard";
+	ViewBag.Title = "Cài đặt chi nhánh nhân viên";
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/Employer/Dashboard.css" />
+}
+
+<div class="employer-dsb bg-background font-sans">
+	<div class="content-container">
+		<div class="navigate-bar">
+
+			<div class="navigate-bar bg-white border-r p-4">
+				<div class="navigate-items space-y-2">
+					<button onclick="switchTab('dashboard')" id="btn-dashboard"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-active">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-grid-fill"></i> Dashboard
+						</div>
+					</button>
+
+					<button onclick="switchTab('employees')" id="btn-employees"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-people-fill"></i> Quản lý nhân viên
+						</div>
+					</button>
+
+					<button onclick="switchTab('arrangement')" id="btn-arrangement"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-calendar-check"></i> Phân công ca trực
+						</div>
+					</button>
+
+					<button onclick="switchTab('skipform')" id="btn-skipform"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-file-earmark-text"></i> Đơn nghỉ phép
+						</div>
+					</button>
+
+					<button onclick="switchTab('modification')" id="btn-modification"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-calendar3"></i> Cài đặt chi nhánh
+						</div>
+					</button>
+
+					<button onclick="switchTab('report')" id="btn-report"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-bar-chart-line"></i> Báo cáo kinh doanh
+						</div>
+					</button>
+				</div>
+
+				<button onclick="switchTab('profile')" id="btn-profile"
+					class="w-full text-left py-4 px-2 font-medium transition-colors tab-inactive">
+					<div class="flex items-center gap-2">
+						<i class="bi bi-person-circle"></i> Thông tin cá nhân
+					</div>
+				</button>
+			</div>
+		</div>
+
+		<main class="main-content">
+
+			<div id="tab-content-dashboard" class="space-y-4">
+				<p class="title">Trang quản lý</p>
+			</div>
+
+			<div id="tab-content-employees" class="space-y-4">
+				<p class="title">Quản lý thông tin nhân viên</p>
+			</div>
+
+			<div id="tab-content-arrangement" class="space-y-4">
+				<p class="title">Quản lý nhân viên và phân công trực</p>
+			</div>
+
+			<div id="tab-content-skipform" class="space-y-4">
+				<p class="title">Quản lý nhân viên và phân công trực</p>
+			</div>
+
+			<div id="tab-content-modification" class="space-y-4">
+				<p class="title">Cài đặt chi nhánh <span class="branches_name"></span></p>
+				<div class="price-modify">
+					<p class="title">Điều chỉnh giá sân</p>
+					<div class="fields-list">
+						@foreach (DTO.LoaiSan field in Model) {
+							@await Html.PartialAsync(partialViewName: "_GetFieldList", field)
+						}
+					</div>
+					<p class="title">Điều chỉnh giá dịch vụ</p>
+					<p class="title">Điều chỉnh giá tài sản</p>
+				</div>
+			</div>
+
+			<div id="tab-content-report" class="space-y-4">
+				<p class="title">Báo cáo doanh thu</p>
+				<div class="revenue-report">
+					<div class="date-picker-group">
+						<select id="dp_year" name="NamSinh" class="dp-select">
+							<option value="">Năm</option>
+						</select>
+
+						<select id="dp_month" name="ThangSinh" class="dp-select" disabled>
+							<option value="">Tháng</option>
+						</select>
+
+						<select id="dp_day" name="NgaySinh" class="dp-select" disabled>
+							<option value="">Ngày</option>
+						</select>
+
+						<button type="button" onclick="loadRevenue()" class="btn btn-primary ml-2">Xem Doanh Thu</button>
+					</div>
+					<div class="mt-4">
+						<h3>Tổng doanh thu: <span id="lblDoanhThu" class="text-success font-bold">0 VNĐ</span></h3>
+					</div>
+				</div>
+				
+				<div class="statistics-report">
+					<p class="title">Báo cáo thống kê dịch vụ</p>
+					<div class="statistics-list">
+						<p>Tổng số lượt đặt sân: <span id="San_total"></span></p> 
+						<p>Tổng số lượt đặt dịch vụ: <span id="DichVu_total"></span></p> 
+						<p>Tổng số lượt đặt tài sản: <span id="TaiSan_total"></span></p>
+						<p>Tổng số lần sân bị hủy: <span id="San_cancel"></span></p>
+						<p>Tổng số lần dịch vụ bị hủy: <span id="DichVu_cancel"></span></p>
+					</div>
+				</div>
+				
+			</div>
+
+			<div id="tab-content-profile" class="space-y-4 hidden">
+				<h2>Thông tin cá nhân</h2>
+
+				<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+					<h3 class="font-semibold text-slate-900 mb-4">Thông tin cơ bản</h3>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Họ và tên</p>
+							<p class="font-medium text-slate-900">Trần Thị B</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Ngày sinh</p>
+							<p class="font-medium text-slate-900">15/05/1995</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Giới tính</p>
+							<p class="font-medium text-slate-900">Nữ</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Số CMND/CCCD</p>
+							<p class="font-medium text-slate-900">012345678901</p>
+						</div>
+						<div class="md:col-span-2">
+							<p class="text-sm text-slate-500 mb-2">Địa chỉ</p>
+							<p class="font-medium text-slate-900">123 Đường Trần Hưng Đạo, Hà Nội</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Số điện thoại</p>
+							<p class="font-medium text-slate-900">0912345678</p>
+						</div>
+					</div>
+				</div>
+
+				<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+					<h3 class="font-semibold text-slate-900 mb-4">Thông tin công việc</h3>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Chức vụ</p>
+							<p class="font-medium text-slate-900">Nhân viên quản lý</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Chi nhánh</p>
+							<p class="font-medium text-slate-900">Hà Nội</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Mã nhân viên</p>
+							<p class="font-medium text-slate-900">EMP001</p>
+						</div>
+						<div>
+							<p class="text-sm text-slate-500 mb-2">Lương cơ bản</p>
+							<p class="font-medium text-slate-900">5.000.000 VND</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+
+@section Scripts {
+	<script src="~/js/Employer/Dashboard.js" asp-append-version="true"></script>
+}

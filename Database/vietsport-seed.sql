@@ -335,7 +335,6 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
     INSERT INTO TaiKhoan (
         TenDangNhap,
-        Salt,
         MatKhauMaHoa,
         Email,
         TrangThai,
@@ -345,7 +344,6 @@ BEGIN
     )
     VALUES (
         'kh_' + @MaKhachHang,                 -- tên đăng nhập
-        'ABCDEF1234567890ABCDEF1234567890',   -- salt demo
         'E10ADC3949BA59ABBE56E057F20F883E',    -- hash demo
         @Email,                               -- dùng email khách
         1,                                    -- còn hoạt động
@@ -374,7 +372,6 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
     INSERT INTO TaiKhoan (
         TenDangNhap,
-        Salt,
         MatKhauMaHoa,
         Email,
         TrangThai,
@@ -384,7 +381,6 @@ BEGIN
     )
     VALUES (
         'nv_' + RTRIM(@MaNhanVien),
-        'ABCDEF1234567890ABCDEF1234567890',
         'E10ADC3949BA59ABBE56E057F20F883E',
         RTRIM(@MaNhanVien) + '@vietsport.vn',
         1,
