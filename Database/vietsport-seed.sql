@@ -1100,3 +1100,9 @@ INSERT INTO ApDung (MaKhachHang, MaUuDai, NgayBatDau, NgayKetThuc, TrangThai) VA
 -- 1 KH có nhiều ưu đãi (để test chọn ưu đãi)
 ('KH019','UD01','2024-01-01','2024-12-31',1),
 ('KH019','UD04','2024-09-01','2025-06-30',1);
+
+update TaiKhoan set MatKhauMaHoa = '123456' where MaNhanVien = 'NV001'
+update TaiKhoan set MatKhauMaHoa = '123456' where MaNhanVien = 'NV006'
+update TaiKhoan set MatKhauMaHoa = '123456' where MaNhanVien = 'NV002'
+update TaiKhoan set MatKhauMaHoa = '123456' where MaNhanVien = 'NV003'
+update TaiKhoan set MatKhauMaHoa = '123456' where MaNhanVien = 'NV009'
