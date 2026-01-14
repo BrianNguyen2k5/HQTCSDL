@@ -1,0 +1,74 @@
+@{
+	Layout = "_Layout";
+}
+
+@section Styles {
+	@RenderSection("Styles", required: false)
+}
+
+<div class="employer-dsb bg-background font-sans">
+	<div class="content-container">
+		<div class="navigate-bar">
+			<div class="navigate-bar bg-white border-r p-4">
+				<div class="navigate-items space-y-2">
+					<button onclick="switchTab('dashboard')" id="btn-dashboard"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-active">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-grid-fill"></i> Dashboard
+						</div>
+					</button>
+
+					<button onclick="switchTab('employees')" id="btn-employees"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-people-fill"></i> Quản lý nhân viên
+						</div>
+					</button>
+
+					<button onclick="switchTab('arrangement')" id="btn-arrangement"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-calendar-check"></i> Phân công ca trực
+						</div>
+					</button>
+
+					<button onclick="switchTab('skipform')" id="btn-skipform"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-file-earmark-text"></i> Đơn nghỉ phép
+						</div>
+					</button>
+
+					<button onclick="switchTab('modification')" id="btn-modification"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-calendar3"></i> Cài đặt chi nhánh
+						</div>
+					</button>
+
+					<button onclick="switchTab('report')" id="btn-report"
+						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-bar-chart-line"></i> Báo cáo kinh doanh
+						</div>
+					</button>
+				</div>
+
+				<button onclick="switchTab('profile')" id="btn-profile"
+					class="w-full text-left py-4 px-2 font-medium transition-colors tab-inactive">
+					<div class="flex items-center gap-2">
+						<i class="bi bi-person-circle"></i> Thông tin cá nhân
+					</div>
+				</button>
+			</div>
+		</div>
+
+		<main class="main-content">
+			@RenderBody()
+		</main>
+	</div>
+</div>
+
+@section Scripts {
+	@RenderSection("Scripts", required: false)
+}

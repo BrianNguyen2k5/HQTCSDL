@@ -24,8 +24,6 @@ function loadStatistics(type) {
 		})
 }
 
-
-
 document.addEventListener('DOMContentLoaded', function () {
 	// Lấy tab đã lưu hoặc mặc định là dashboard
 	const savedTab = localStorage.getItem('activeTab') || 'dashboard';
