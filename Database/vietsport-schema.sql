@@ -1,7 +1,11 @@
 /* ====================================================
 DATABASE SCHEMA - SPORTS CENTER
 ==================================================== */
-CREATE DATABASE VietSport
+--USE master
+--ALTER DATABASE VietSport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+--DROP DATABASE VietSport;
+
+--CREATE DATABASE VietSport
 
 USE VietSport
 -- 1. BẢNG: QUẢN LÝ NGƯỜI DÙNG --
@@ -9,7 +13,6 @@ USE VietSport
 CREATE TABLE TaiKhoan (
     id INT IDENTITY (1, 1) PRIMARY KEY,
     TenDangNhap VARCHAR(50) UNIQUE,
-    Salt CHAR(32) NOT NULL,
     MatKhauMaHoa CHAR(64) NOT NULL,
     Email VARCHAR(100) NOT NULL UNIQUE,
     TrangThai BIT DEFAULT 1, -- Trạng thái: 1: là còn hoạt động, 0: bị khóa 
@@ -86,12 +89,16 @@ CREATE TABLE DonNghiPhep (
 
 CREATE TABLE KhachHang (
     MaKhachHang CHAR(10) PRIMARY KEY,
-    HoTen NVARCHAR (100) NOT NULL,
-    NgaySinh DATE NOT NULL,
-    SoCCCD CHAR(12) NOT NULL UNIQUE,
-    SoDienThoai CHAR(10) NOT NULL,
+    HoTen NVARCHAR (100),
+    NgaySinh DATE,
+    SoCCCD CHAR(12) UNIQUE,
+    SoDienThoai CHAR(10),
     Email VARCHAR(100)
 );
+
+CREATE UNIQUE INDEX IX_KhachHang_SoCCCD
+ON KhachHang(SoCCCD)
+WHERE soCCCD IS NOT NULL; -- Chỉ unique những thằng khác NULL
 
 CREATE TABLE UuDai (
     MaUuDai CHAR(10) PRIMARY KEY,
@@ -646,6 +653,3 @@ add check (
     LoaiTaiSan in (N'Phòng tắm VIP', N'Tủ đồ')
 );
 
---USE master
---ALTER DATABASE VietSport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
---DROP DATABASE VietSport;

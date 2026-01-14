@@ -1,56 +1,181 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 
 public class AuthController : Controller
 {
-	[HttpGet]
-	[Route("login")]
-	public IActionResult Login()
-	{
-		return View(); // Trả về form đăng nhập
-	}
+    private readonly IConfiguration _configuration;
+    private readonly DAL.TaiKhoan _taiKhoanDAL;
 
-	[HttpPost]
-	[Route("login")]
-	public async Task<IActionResult> Login(string loginId, string password)
-	{
-		// 1. Gọi BLL kiểm tra username/pass (Logic của bạn nằm ở đây)
-		// ...
+    public AuthController(IConfiguration configuration, DAL.TaiKhoan taiKhoanDAL)
+    {
+        _configuration = configuration;
+        _taiKhoanDAL = taiKhoanDAL;
+    }
 
-		// Ví dụ giả lập:
-		if (loginId == "admin" && password == "123")
-		{
-			// TODO: Lấy thông tin từ database
-			// var nhanVien = nhanVienDAL.GetByLoginId(loginId);
-			
-			// 2. Tạo "Thẻ căn cước" (Claims) cho user
-			var claims = new List<Claim>
-			{
-				new Claim(ClaimTypes.Name, loginId),
-				new Claim(ClaimTypes.Role, "QuanLy"), // Ví dụ role
-				new Claim("MaCoSo", "CS01"), // Thêm mã cơ sở
-				new Claim("MaNhanVien", "NV001") // Thêm mã nhân viên
-			};
+    [HttpGet]
+    [Route("login")]
+    public IActionResult Login()
+    {
+        return View(); // Trả về form đăng nhập
+    }
 
-			var identity = new ClaimsIdentity(claims, "MyCookieAuth");
-			var principal = new ClaimsPrincipal(identity);
+    [HttpPost]
+    [Route("login")]
+    public async Task<IActionResult> Login(string loginId, string password)
+    {
+        // 1. Gọi BLL/DAL kiểm tra username/pass
+        var user = _taiKhoanDAL.KiemTraDangNhap(loginId, password);
 
-			// 3. Ghi Cookie vào trình duyệt (Đăng nhập thành công)
-			await HttpContext.SignInAsync("MyCookieAuth", principal);
+        if (user != null)
+        {
+            // 2. Xác định Role
+            string role = "Khách hàng";
+            if (!string.IsNullOrEmpty(user.MaNhanVien))
+            {
+                role = _taiKhoanDAL.LayChucVu(user.MaNhanVien) ?? "Nhân viên";
+            }
 
-			// 4. Chuyển hướng về trang Dashboard
-			return RedirectToAction("Dashboard", "Employer");
-		}
+            // 3. Tạo Token JWT
+            string userId = !string.IsNullOrEmpty(user.MaNhanVien)
+                ? user.MaNhanVien
+                : (user.MaKhachHang ?? "");
+            var token = GenerateJwtToken(user.TenDangNhap, role, userId);
+            // role: Quản lý, Lễ tân, Kỹ thuật, Thu ngân, Huấn luyện viên, Khách hàng
+            // If role = Nhân viên: Nhân viên chưa có chức vụ gì cả
 
-		ViewBag.Error = "Sai tài khoản hoặc mật khẩu";
-		return View();
-	}
+            // 4. Lưu Token vào Cookie
+            Response.Cookies.Append(
+                "JwtToken",
+                token,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, // Chỉ chạy trên HTTPS
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddHours(1),
+                }
+            );
 
-	[Route("logout")]
-	public async Task<IActionResult> Logout()
-	{
-		await HttpContext.SignOutAsync("MyCookieAuth");
-		return RedirectToAction("Login");
-	}
+            // 5. Tạo "Thẻ căn cước" (Claims) cho Cookie Auth (MVC)
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.TenDangNhap),
+                new Claim(ClaimTypes.Role, role),
+                new Claim("UserId", userId),
+            };
+
+            var identity = new ClaimsIdentity(claims, "MyCookieAuth");
+            var principal = new ClaimsPrincipal(identity);
+
+            // 6. Ghi Cookie Auth vào trình duyệt
+            await HttpContext.SignInAsync("MyCookieAuth", principal);
+
+            // 7. Chuyển hướng trang
+            if (role == "Quản lý")
+            {
+                return RedirectToAction("Dashboard", "Employer");
+            }
+            else if (role == "Lễ tân")
+            {
+                return RedirectToAction("Dashboard", "Receptionist");
+            }
+            else if (role == "Kỹ thuật")
+            {
+                return RedirectToAction("", "Technician");
+            }
+            else if (role == "Thu ngân")
+            {
+                return RedirectToAction("", "Cashier");
+            }
+            else if (role == "Huấn luyện viên")
+            {
+                return RedirectToAction("", "Gymnast");
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        ViewBag.Error = "Sai tài khoản hoặc mật khẩu";
+        return View();
+    }
+
+    [Route("register")]
+    [HttpGet]
+    public IActionResult Register()
+    {
+        return View();
+    }
+
+    [Route("register")]
+    [HttpPost]
+    public IActionResult Register(string username, string email, string password)
+    {
+        if (
+            string.IsNullOrEmpty(username)
+            || string.IsNullOrEmpty(email)
+            || string.IsNullOrEmpty(password)
+        )
+        {
+            ViewBag.Error = "Vui lòng nhập đầy đủ thông tin";
+            return View();
+        }
+
+        bool result = _taiKhoanDAL.ThemTaiKhoan(username, email, password);
+
+        if (result)
+        {
+            // Đăng ký thành công -> Chuyển qua trang login
+            return RedirectToAction("Login");
+        }
+        else
+        {
+            ViewBag.Error = "Đăng ký thất bại. Tên đăng nhập hoặc Email có thể đã tồn tại.";
+            return View();
+        }
+    }
+
+    [Route("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        // Xóa Cookie Auth
+        await HttpContext.SignOutAsync("MyCookieAuth");
+
+        // Xóa Cookie JWT
+        Response.Cookies.Delete("JwtToken");
+
+        return RedirectToAction("Login");
+    }
+
+    private string GenerateJwtToken(string username, string role, string userId)
+    {
+        var jwtSettings = _configuration.GetSection("Jwt");
+        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.Role, role),
+            new Claim("UserId", userId), // Lưu MaNhanVien hoặc MaKhachHang vào token
+        };
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = DateTime.UtcNow.AddHours(1),
+            Issuer = jwtSettings["Issuer"],
+            Audience = jwtSettings["Audience"],
+            SigningCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature
+            ),
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
 }

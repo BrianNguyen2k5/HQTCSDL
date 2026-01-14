@@ -2,6 +2,10 @@
 	--main-color: #00ADEF;
 }
 
+* {
+	box-sizing: border-box;
+}
+
 body {
 	margin: 0;
 	padding: 0;
