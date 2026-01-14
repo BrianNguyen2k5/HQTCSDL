@@ -35,9 +35,6 @@ begin
 	return
 end
 go
-select *
-from dbo.F_ThongKeSoLuong ()
-go
 
 create or alter function F_DanhSachGiaLoaiSan ()
 returns @dsLoaiSan table (
@@ -194,10 +191,6 @@ begin
 	commit tran
 end
 go
-declare @masan char(10) = 'CS01LS0101'
-exec sp_LT_DatSan @masan
-go
-
 
 
 -- Dirty read (Tranh chấp No8)
@@ -214,14 +207,8 @@ begin
 		select @doanhthu = sum(hd.TongThanhToan)
 		from HoaDon hd
 		where year(hd.NgayXuat) = @nam
-
-		print N'Doanh thu hiện tại trong năm: '
-		print @doanhthu
 		
 	commit tran
 	set @output = @doanhthu
 end
-go
-declare @doanhthu int
-exec sp_QL_DoanhThuNam @doanhthu
 go
