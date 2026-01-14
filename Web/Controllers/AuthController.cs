@@ -29,6 +29,14 @@ public class AuthController : Controller
     {
         // 1. Gọi BLL/DAL kiểm tra username/pass
         var user = _taiKhoanDAL.KiemTraDangNhap(loginId, password);
+        if (user != null)
+        {
+            Console.WriteLine($"User: {user.TenDangNhap} - KH: {user.MaKhachHang}");
+        }
+        else
+        {
+            Console.WriteLine("User NULL (Login failed)");
+        }
 
         if (user != null)
         {
@@ -75,6 +83,8 @@ public class AuthController : Controller
             await HttpContext.SignInAsync("MyCookieAuth", principal);
 
             // 7. Chuyển hướng trang
+            Console.WriteLine($"LOGIN SUCCESS: {user.id}");
+
             if (role == "Quản lý")
             {
                 return RedirectToAction("Dashboard", "Employer");

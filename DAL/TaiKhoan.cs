@@ -68,8 +68,12 @@ namespace DAL
                         TenDangNhap = row["TenDangNhap"].ToString() ?? "",
                         MatKhauMaHoa = storedHash ?? "",
                         Email = row["Email"].ToString() ?? "",
-                        TrangThai = row["TrangThai"] != DBNull.Value && Convert.ToBoolean(row["TrangThai"]),
-                        NgayTao = row["NgayTao"] != DBNull.Value ? Convert.ToDateTime(row["NgayTao"]) : null,
+                        TrangThai =
+                            row["TrangThai"] != DBNull.Value && Convert.ToBoolean(row["TrangThai"]),
+                        NgayTao =
+                            row["NgayTao"] != DBNull.Value
+                                ? Convert.ToDateTime(row["NgayTao"])
+                                : null,
                         MaKhachHang =
                             row["MaKhachHang"] != DBNull.Value
                                 ? row["MaKhachHang"].ToString()
@@ -125,7 +129,12 @@ namespace DAL
             if (string.IsNullOrEmpty(maNhanVien))
                 return "KhachHang";
 
-            string query = "SELECT nv.MaChucVu FROM NhanVien nv WHERE nv.MaNhanVien = @MaNV";
+            string query =
+                @"
+                SELECT cv.TenChucVu 
+                FROM NhanVien nv 
+                JOIN ChucVu cv ON nv.MaChucVu = cv.MaChucVu 
+                WHERE nv.MaNhanVien = @MaNV";
             SqlParameter[] parameters = { new SqlParameter("@MaNV", maNhanVien) };
 
             object? result = _dbConnection.ExecuteScalar(query, parameters);
