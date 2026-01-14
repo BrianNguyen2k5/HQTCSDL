@@ -37,10 +37,6 @@ begin
 	commit tran
 end
 go
-declare @masan char(10) = 'CS01LS0101'
-exec sp_LT_DatSan @masan
-go
-
 
 
 -- Dirty read (Tranh chấp No8)
@@ -64,7 +60,4 @@ begin
 	commit tran
 	set @output = @doanhthu
 end
-go
-declare @doanhthu int
-exec sp_QL_DoanhThuNam @doanhthu
 go
