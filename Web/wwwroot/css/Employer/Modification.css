@@ -18,7 +18,7 @@
   font-weight: bold;
 }
 
-.field-price-modify {
+.field-price-modify, .service-price-modify {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -27,12 +27,12 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   padding: 30px;
 
-  .fields-list {
+  .fields-list, .services-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 10px;
 
-    .field-info {
+    .field-info, .service-field-item {
       padding: 30px;
       border: 1px solid #bbb;
       display: flex;
@@ -40,7 +40,7 @@
       gap: 10px;
     }
 
-    .field-info-input {
+    .field-info-input, .service-price-changing {
       display: flex;
       flex-direction: column;
       gap: 10px;

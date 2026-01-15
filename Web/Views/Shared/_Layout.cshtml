@@ -5,6 +5,7 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>@ViewData[index: "Title"] - VietSport</title>
+	<link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico?v=2" />
 	<script type="importmap"></script>
 	<script src="https://cdn.tailwindcss.com"></script>
 
@@ -19,49 +20,57 @@
 <body>
 	<header>
 		<nav class="header-display">
-			<a class="header-logo" asp-area="" asp-controller="Home" asp-action="Index">VietSport</a>
+			<div class="flex flex-row items-center gap-2">
+				<img src="~/favicon.ico?v=2" alt="Logo" class="w-8 h-8">
+				<a class="header-logo" asp-area="" asp-controller="Home" asp-action="Index">VietSport</a>
+			</div>
 			
 			<div class="nav-items">
-				<a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+				<a class="underline font-bold text-[#777] hover:text-blue-500" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
 				@if (User.IsInRole("Lễ tân"))
 				{
-					<a class="nav-link" asp-area="" asp-controller="Receptionist" asp-action="Dashboard">Lễ tân</a>
+					<a class="font-bold underline text-[#777] hover:text-blue-500" asp-area="" asp-controller="Receptionist" asp-action="Dashboard">Lễ tân</a>
 				}
 				@if (User.IsInRole("Quản lý"))
 				{
-					<a class="nav-link" asp-area="" asp-controller="Employer" asp-action="Dashboard">Quản lý</a>
+					<a class="font-bold underline text-[#777] hover:text-blue-500" asp-area="" asp-controller="Employer" asp-action="Dashboard">Quản lý</a>
 				}
+				@if (User.IsInRole("Thu ngân"))
+				{
+					<a class="font-bold underline text-[#777] hover:text-blue-500" asp-area="" asp-controller="Cashier" asp-action="Bill">Thu ngân</a>
+				}
+				
 				<!-- ... Tiếp tục thêm vào role của mn -->
 			</div>
 
 			@if (User.Identity.IsAuthenticated)
 			{
 				<a 
-					class="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+					class="white-button-decor flex items-center"
 					asp-area="" 
 					asp-controller="Auth" 
 					asp-action="Logout"
 				>
-					<p class="text-xs font-bold border px-1"><i class="bi bi-arrow-return-left"></i>Đăng xuất</p>
+					<p class="flex items-center gap-2"><i class="bi bi-arrow-return-left"></i>Đăng xuất</p>
 				</a>
 			}
 			else {
 				<div class="flex items-center gap-2">
 					<a 
-						class="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+						class="white-button-decor flex items-center"
 						asp-area="" 
 						asp-controller="Auth" 
 						asp-action="Register"
 					>
-						<p class="text-xs font-bold border px-1"><i class="bi bi-arrow-return-left"></i>Đăng ký</p>
+						<p class="flex items-center gap-2"><i class="bi bi-arrow-return-left"></i>Đăng ký</p>
 					</a>
 					<a 
-						class="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+						class="blue-button-decor flex items-center"
 						asp-area="" 
 						asp-controller="Auth" 
 						asp-action="Login"
 					>
-						<p class="text-xs font-bold border px-1"><i class="bi bi-arrow-return-left"></i>Đăng nhập</p>
+						<p class="flex items-center gap-2"><i class="bi bi-arrow-return-left"></i>Đăng nhập</p>
 					</a>
 				</div>
 			}
