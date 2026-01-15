@@ -68,12 +68,86 @@ namespace HQTCSDL.Controllers
         }
 
         // GET: /Receptionist/Schedule
-        public IActionResult Schedule()
+        public IActionResult Schedule(string? date = null)
         {
-            // Lấy tất cả phiếu đặt cho lịch
-            var phieuDatList = _leTanDAL.LayDanhSachPhieuDat();
+            // Parse date or default to today
+            DateTime selectedDate = DateTime.Today;
+            if (!string.IsNullOrEmpty(date) && DateTime.TryParse(date, out DateTime parsedDate))
+            {
+                selectedDate = parsedDate.Date;
+            }
+            
+            // Lấy phiếu đặt cho ngày được chọn
+            var phieuDatList = _leTanDAL.LayDanhSachPhieuDat(ngayNhanSan: selectedDate);
             var bookings = phieuDatList.Select(MapToBookingViewModel).ToList();
+            
+            // Lấy danh sách sân từ database
+            var courts = GetCourtsFromDatabase();
+            
+            ViewBag.Courts = courts;
+            ViewBag.SelectedDate = selectedDate;
             return View(bookings);
+        }
+        
+        /// <summary>
+        /// Lấy danh sách sân từ database cho Schedule view
+        /// </summary>
+        private List<CourtViewModel> GetCourtsFromDatabase()
+        {
+            try
+            {
+                string maCoSo = GetMaCoSo();
+                
+                using var connection = new Microsoft.Data.SqlClient.SqlConnection(_configuration.GetConnectionString("VietSport"));
+                connection.Open();
+
+                string query = @"
+                    SELECT 
+                        s.MaSan,
+                        s.TenSan,
+                        s.TinhTrang,
+                        ls.MaLoaiSan,
+                        ls.TenLoaiSan
+                    FROM San s
+                    JOIN LoaiSan ls ON s.MaLoaiSan = ls.MaLoaiSan
+                    WHERE s.MaCoSo = @MaCoSo 
+                      AND s.TinhTrang NOT IN (N'Bảo trì')
+                    ORDER BY ls.TenLoaiSan, s.TenSan";
+
+                using var cmd = new Microsoft.Data.SqlClient.SqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@MaCoSo", maCoSo);
+
+                var courts = new List<CourtViewModel>();
+                using var reader = cmd.ExecuteReader();
+                
+                while (reader.Read())
+                {
+                    string courtType = reader["TenLoaiSan"].ToString() switch
+                    {
+                        "Bóng đá mini" => "mini-football",
+                        "Futsal" => "mini-football",
+                        "Cầu lông" => "badminton",
+                        "Tennis" => "tennis",
+                        "Bóng rổ" => "basketball",
+                        _ => "mini-football"
+                    };
+
+                    courts.Add(new CourtViewModel
+                    {
+                        MaSan = reader["MaSan"].ToString() ?? "",
+                        TenSan = reader["TenSan"].ToString() ?? "",
+                        CourtType = courtType,
+                        TenLoaiSan = reader["TenLoaiSan"].ToString() ?? ""
+                    });
+                }
+
+                return courts;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading courts: {ex.Message}");
+                return new List<CourtViewModel>();
+            }
         }
 
         // GET: /Receptionist/POS
@@ -302,6 +376,36 @@ namespace HQTCSDL.Controllers
                 success = true,
                 danhSach = danhSach
             });
+        }
+
+        /// <summary>
+        /// API lấy lịch đặt sân theo ngày (cho Schedule tab AJAX reload)
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetScheduleByDate(string date)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(date) || !DateTime.TryParse(date, out DateTime selectedDate))
+                {
+                    return Json(new { success = false, message = "Ngày không hợp lệ" });
+                }
+
+                // Lấy phiếu đặt cho ngày được chọn
+                var phieuDatList = _leTanDAL.LayDanhSachPhieuDat(ngayNhanSan: selectedDate.Date);
+                var bookings = phieuDatList.Select(MapToBookingViewModel).ToList();
+
+                return Json(new
+                {
+                    success = true,
+                    bookings = bookings,
+                    date = selectedDate.ToString("yyyy-MM-dd")
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
         }
 
         #endregion
@@ -635,6 +739,7 @@ namespace HQTCSDL.Controllers
                 CustomerName = phieu.TenKhachHang,
                 CustomerPhone = phieu.SoDienThoai,
                 MemberType = "regular", // TODO: Lấy từ KhachHangChiTiet nếu cần
+                BookingDate = phieu.NgayNhanSan, // Map NgayNhanSan to BookingDate
                 StartTime = phieu.GioBatDau.ToString(@"hh\:mm"),
                 EndTime = phieu.GioKetThuc.ToString(@"hh\:mm"),
                 Duration = duration,
@@ -815,6 +920,7 @@ namespace HQTCSDL.Controllers
         public string CustomerName { get; set; } = string.Empty;
         public string CustomerPhone { get; set; } = string.Empty;
         public string MemberType { get; set; } = string.Empty;
+        public DateTime BookingDate { get; set; } // NgayNhanSan - the date the court is used
         public string StartTime { get; set; } = string.Empty;
         public string EndTime { get; set; } = string.Empty;
         public double Duration { get; set; }
@@ -837,6 +943,14 @@ namespace HQTCSDL.Controllers
         public DateTime? DateOfBirth { get; set; }
         public string? CCCD { get; set; }
         public string? Email { get; set; }
+    }
+
+    public class CourtViewModel
+    {
+        public string MaSan { get; set; } = string.Empty;
+        public string TenSan { get; set; } = string.Empty;
+        public string CourtType { get; set; } = string.Empty;
+        public string TenLoaiSan { get; set; } = string.Empty;
     }
 
     public class BookingCreateModel

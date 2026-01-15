@@ -5,15 +5,12 @@
     ViewData["CurrentPage"] = "schedule";
     
     var timeSlots = new List<string> { "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00" };
-    var courts = new List<(string Name, string Type)> 
-    { 
-        ("Sân bóng đá Mini 1", "mini-football"),
-        ("Sân bóng đá Mini 2", "mini-football"),
-        ("Sân tennis 1", "tennis"),
-        ("Sân tennis 2", "tennis"),
-        ("Sân cầu lông 1", "badminton"),
-        ("Sân cầu lông 2", "badminton")
-    };
+    
+    // Get courts from database via ViewBag
+    var courts = ViewBag.Courts as List<HQTCSDL.Controllers.CourtViewModel> ?? new List<HQTCSDL.Controllers.CourtViewModel>();
+    
+    // Get selected date (defaults to today if not set)
+    DateTime selectedDate = ViewBag.SelectedDate ?? DateTime.Today;
 }
 
 <div style="display: flex; flex-direction: column; gap: 1.5rem; height: 100%;">
@@ -26,7 +23,7 @@
             </button>
             <div style="font-weight: 600; min-width: 200px; text-align: center;">
                 <i class="fas fa-calendar-alt" style="margin-right: 0.5rem;"></i>
-                <span id="currentDate">@DateTime.Today.ToString("dd/MM/yyyy")</span>
+                <span id="currentDate">@selectedDate.ToString("dd/MM/yyyy")</span>
             </div>
             <button class="btn btn-outline" onclick="changeDate(1)">
                 <i class="fas fa-chevron-right"></i>
@@ -79,17 +76,22 @@
                 @foreach (var court in courts)
                 {
                     <div style="display: grid; grid-template-columns: 250px repeat(@timeSlots.Count, 64px); border-bottom: 1px solid var(--border-color);">
-                        <div style="padding: 0.75rem; font-weight: 500; color: var(--color-gray-700); border-right: 1px solid var(--border-color); background-color: var(--background); position: sticky; left: 0; z-index: 10; box-sizing: border-box;" data-court-type="@court.Type">
-                            @court.Name
+                        <div style="padding: 0.75rem; font-weight: 500; color: var(--color-gray-700); border-right: 1px solid var(--border-color); background-color: var(--background); position: sticky; left: 0; z-index: 10; box-sizing: border-box;" data-court-type="@court.CourtType">
+                            @court.TenSan
                         </div>
                         @for (var i = 0; i < timeSlots.Count; i++)
                         {
                             var timeSlot = timeSlots[i];
-                            var booking = Model.FirstOrDefault(b => b.CourtName == court.Name && b.StartTime == timeSlot);
+                            // FIX: Now comparing date, court name, and start time
+                            var booking = Model.FirstOrDefault(b => 
+                                b.BookingDate.Date == selectedDate.Date && 
+                                b.CourtName == court.TenSan && 
+                                b.StartTime == timeSlot);
                             
-                            // Check if this slot is part of a previous booking
+                            // Check if this slot is part of a previous booking (also check date)
                             var isPartOfPreviousBooking = Model.Any(b => {
-                                if (b.CourtName != court.Name) return false;
+                                if (b.BookingDate.Date != selectedDate.Date) return false;
+                                if (b.CourtName != court.TenSan) return false;
                                 var startIndex = timeSlots.IndexOf(b.StartTime);
                                 var span = b.DurationMinutes / 30;
                                 var endIndex = startIndex + span;
@@ -112,7 +114,7 @@
                                               booking.Status == "booked" ? "#991b1b" : "#166534";
                                 
                                 <div style="grid-column: span @span; min-height: 48px; padding: 0.5rem; border-left: 2px solid @borderColor; background-color: @bgColor; color: @textColor; cursor: pointer; transition: opacity 0.2s; box-sizing: border-box;"
-                                     data-court-type="@court.Type"
+                                     data-court-type="@court.CourtType"
                                      onclick="viewBookingDetail('@booking.Id')"
                                      onmouseover="this.style.opacity='0.8'"
                                      onmouseout="this.style.opacity='1'">
@@ -125,8 +127,8 @@
                             else
                             {
                                 <div style="min-height: 48px; padding: 0.5rem; border-left: 1px solid var(--border-color); background-color: var(--background); cursor: pointer; transition: background-color 0.2s; box-sizing: border-box;"
-                                     data-court-type="@court.Type"
-                                     onclick="quickBook('@court.Name', '@timeSlot')"
+                                     data-court-type="@court.CourtType"
+                                     onclick="quickBook('@court.TenSan', '@timeSlot')"
                                      onmouseover="this.style.backgroundColor='var(--color-gray-50)'"
                                      onmouseout="this.style.backgroundColor='var(--background)'">
                                     <div style="font-size: 0.75rem; color: var(--color-gray-400); text-align: center;">Trống</div>
@@ -158,12 +160,17 @@
 
 @section Scripts {
     <script>
-        let selectedDate = new Date();
+        // Initialize with the date from the server
+        let selectedDate = new Date('@selectedDate.ToString("yyyy-MM-dd")');
 
         function changeDate(days) {
             selectedDate.setDate(selectedDate.getDate() + days);
-            document.getElementById('currentDate').textContent = selectedDate.toLocaleDateString('vi-VN');
-            // TODO: Reload schedule for new date
+            const formattedDate = selectedDate.toLocaleDateString('vi-VN');
+            document.getElementById('currentDate').textContent = formattedDate;
+            
+            // Reload schedule for the new date
+            const dateStr = selectedDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            window.location.href = `/Receptionist/Schedule?date=${dateStr}`;
         }
 
         function filterCourtType(courtType) {
