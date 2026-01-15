@@ -1,0 +1,28 @@
+@model IEnumerable<DTO.LoaiSan>
+@{
+	Layout = "_EmployerLayout";
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/Employer/Dashboard.css" />
+	<link rel="stylesheet" href="~/css/Employer/Modification.css" />
+}
+
+@section Scripts {
+	<script src="~/js/Employer/Dashboard.js" asp-append-version="true"></script>
+}
+
+<div id="tab-content-modification" class="p-10 text-left w-[100%]">
+	<p class="title text-center">Cài đặt chi nhánh <span class="branches_name"></span></p>
+	<div class="field-price-modify mt-8">
+		<p class="title">Điều chỉnh giá sân</p>
+		<div class="fields-list">
+			@foreach (DTO.LoaiSan field in Model) {
+				@await Html.PartialAsync(partialViewName: "_GetFieldList", field)
+			}
+		</div>
+	</div>
+  <p class="title">Điều chỉnh giá dịch vụ</p>
+
+  <p class="title">Điều chỉnh giá tài sản</p>
+</div>

@@ -23,7 +23,15 @@
 			
 			<div class="nav-items">
 				<a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-				<a class="nav-link" asp-area="" asp-controller="Employer" asp-action="Dashboard">NVQL</a>
+				@if (User.IsInRole("Lễ tân"))
+				{
+					<a class="nav-link" asp-area="" asp-controller="Receptionist" asp-action="Dashboard">Lễ tân</a>
+				}
+				@if (User.IsInRole("Quản lý"))
+				{
+					<a class="nav-link" asp-area="" asp-controller="Employer" asp-action="Dashboard">Quản lý</a>
+				}
+				<!-- ... Tiếp tục thêm vào role của mn -->
 			</div>
 
 			@if (User.Identity.IsAuthenticated)

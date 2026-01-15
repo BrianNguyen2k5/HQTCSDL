@@ -21,10 +21,10 @@ namespace DAL
             // 1. Tìm user theo TenDangNhap trươc
             string query =
                 @"
-				SELECT tk.*
-				FROM TaiKhoan tk
-				WHERE tk.TenDangNhap = @TenDangNhap 
-				AND tk.TrangThai = 1";
+                SELECT tk.*
+                FROM TaiKhoan tk
+                WHERE tk.TenDangNhap = @TenDangNhap 
+                AND tk.TrangThai = 1";
 
             SqlParameter[] parameters = new SqlParameter[]
             {

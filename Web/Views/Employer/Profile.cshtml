@@ -1,0 +1,67 @@
+@{
+	Layout = "_EmployerLayout";
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/Employer/Dashboard.css" />
+}
+
+@section Scripts {
+	<script src="~/js/Employer/Dashboard.js" asp-append-version="true"></script>
+}
+
+<div id="tab-content-profile" class="space-y-4 hidden">
+	<h2>Thông tin cá nhân</h2>
+
+	<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+		<h3 class="font-semibold text-slate-900 mb-4">Thông tin cơ bản</h3>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div>
+				<p class="text-sm text-slate-500 mb-2">Họ và tên</p>
+				<p class="font-medium text-slate-900">Trần Thị B</p>
+			</div>
+			<div>
+				<p class="text-sm text-slate-500 mb-2">Ngày sinh</p>
+				<p class="font-medium text-slate-900">15/05/1995</p>
+			</div>
+			<div>
+				<p class="text-sm text-slate-500 mb-2">Giới tính</p>
+				<p class="font-medium text-slate-900">Nữ</p>
+			</div>
+			<div>
+				<p class="text-sm text-slate-500 mb-2">Số CMND/CCCD</p>
+				<p class="font-medium text-slate-900">012345678901</p>
+			</div>
+			<div class="md:col-span-2">
+				<p class="text-sm text-slate-500 mb-2">Địa chỉ</p>
+				<p class="font-medium text-slate-900">123 Đường Trần Hưng Đạo, Hà Nội</p>
+			</div>
+			<div>
+				<p class="text-sm text-slate-500 mb-2">Số điện thoại</p>
+				<p class="font-medium text-slate-900">0912345678</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+		<h3 class="font-semibold text-slate-900 mb-4">Thông tin công việc</h3>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div>
+				<p class="text-sm text-slate-500 mb-2">Chức vụ</p>
+				<p class="font-medium text-slate-900">Nhân viên quản lý</p>
+			</div>
+			<div>
+				<p class="text-sm text-slate-500 mb-2">Chi nhánh</p>
+				<p class="font-medium text-slate-900">Hà Nội</p>
+			</div>
+			<div>
+				<p class="text-sm text-slate-500 mb-2">Mã nhân viên</p>
+				<p class="font-medium text-slate-900">EMP001</p>
+			</div>
+			<div>
+				<p class="text-sm text-slate-500 mb-2">Lương cơ bản</p>
+				<p class="font-medium text-slate-900">5.000.000 VND</p>
+			</div>
+		</div>
+	</div>
+</div>
