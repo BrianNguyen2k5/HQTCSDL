@@ -655,4 +655,3 @@ alter table GoiDichVu
 add check (
     LoaiTaiSan in (N'Phòng tắm VIP', N'Tủ đồ')
 );
-
