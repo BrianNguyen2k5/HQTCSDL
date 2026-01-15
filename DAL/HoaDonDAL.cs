@@ -230,7 +230,7 @@ namespace DAL
                 return new PaymentResponseDTO
                 {
                     Success = false,
-                    Message = $"Lỗi: {ex.Message}"
+                    Message = ""
                 };
             }
         }
