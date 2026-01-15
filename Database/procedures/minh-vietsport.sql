@@ -390,11 +390,6 @@ BEGIN
             -- Tạo hóa đơn cọc/thanh toán trước
             INSERT INTO HoaDon (NgayXuat, TongTienSan, TongTienDichVu, TongTienGiamGia, TongThanhToan, TrangThaiThanhToan, MaNhanVien, MaPhieuDat)
             VALUES (GETDATE(), @TongTienSan, @TongTienDichVu, @TongTienGiamGia, @TongThanhToan, N'Chưa thanh toán', @MaNhanVien, @MaPhieuDat);
-            
-            -- Cập nhật trạng thái phiếu để chờ thu ngân
-            UPDATE PhieuDatSan SET TrangThaiPhieu = N'Chờ thanh toán' WHERE MaPhieuDat = @MaPhieuDat;
-            
-            PRINT N'Đã tạo hóa đơn đặt sân (Giai đoạn 1).';
         END
 
         -- =========================================================================
@@ -417,8 +412,6 @@ BEGIN
 
                 -- Chuyển sang chờ thanh toán để thu ngân thu tiền
                 UPDATE PhieuDatSan SET TrangThaiPhieu = N'Chờ thanh toán' WHERE MaPhieuDat = @MaPhieuDat;
-                
-                PRINT N'Có chi phí phát sinh. Đã tạo hóa đơn quyết toán.';
             END
             ELSE
             BEGIN
@@ -436,8 +429,6 @@ BEGIN
                 
                 -- 3. Cập nhật trạng thái Sân về Trống
                 UPDATE San SET TinhTrang = N'Trống' WHERE MaSan = @MaSan;
-
-                PRINT N'Không có chi phí phát sinh. Đã hoàn thành phiếu đặt sân.';
             END
         END
 

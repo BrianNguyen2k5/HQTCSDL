@@ -634,7 +634,7 @@ namespace HQTCSDL.Controllers
             decimal giamGia = latestHoaDon?.TongTienGiamGia ?? 0;
 
             // Map trạng thái từ database sang format của view
-            string status = MapDatabaseStatusToViewStatus(phieu.TrangThaiPhieu);
+            string status = phieu.TrangThaiPhieu;
             
             // Xác định trạng thái thanh toán
             string paymentStatus = "unpaid";
@@ -702,23 +702,7 @@ namespace HQTCSDL.Controllers
             };
         }
 
-        /// <summary>
-        /// Map trạng thái từ database (tiếng Việt) sang format của view (English)
-        /// </summary>
-        private static string MapDatabaseStatusToViewStatus(string dbStatus)
-        {
-            return dbStatus switch
-            {
-                "Chờ xác nhận" => "booked",
-                "Đã xác nhận" => "booked",
-                "Chờ thanh toán" => "booked",
-                "Đang sử dụng" => "active",
-                "Hoàn thành" => "completed",
-                "Đã hủy" => "cancelled",
-                "Vắng mặt" => "cancelled",
-                _ => "booked"
-            };
-        }
+
 
         /// <summary>
         /// Map tên loại sân sang court type code
