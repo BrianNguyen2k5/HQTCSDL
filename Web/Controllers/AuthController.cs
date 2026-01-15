@@ -163,7 +163,7 @@ public class AuthController : Controller
     private string GenerateJwtToken(string username, string role, string userId)
     {
         var jwtSettings = _configuration.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "VerifyKey123123123");
 
         var claims = new List<Claim>
         {

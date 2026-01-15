@@ -75,3 +75,4 @@ wwwroot/lib/
 *~
 *.bak
 *.swp
+node_modules

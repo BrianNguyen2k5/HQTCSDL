@@ -175,38 +175,38 @@ function switchCustomerTab(tab) {
         // Update tab styles
         const searchTab = document.getElementById('searchCustomerTab');
         const newTab = document.getElementById('newCustomerTab');
-        
+
         searchTab.classList.add('btn-primary', 'active');
         searchTab.classList.remove('btn-outline');
         searchTab.style.borderBottom = '3px solid #007BFF';
         searchTab.style.background = 'transparent';
         searchTab.style.color = '#007BFF';
-        
+
         newTab.classList.remove('btn-primary', 'active');
         newTab.classList.add('btn-outline');
         newTab.style.borderBottom = '3px solid transparent';
         newTab.style.background = 'transparent';
         newTab.style.color = 'var(--color-gray-600)';
-        
+
         document.getElementById('searchCustomerContent').style.display = 'block';
         document.getElementById('newCustomerContent').style.display = 'none';
     } else {
         // Update tab styles
         const searchTab = document.getElementById('searchCustomerTab');
         const newTab = document.getElementById('newCustomerTab');
-        
+
         newTab.classList.add('btn-primary', 'active');
         newTab.classList.remove('btn-outline');
         newTab.style.borderBottom = '3px solid #007BFF';
         newTab.style.background = 'transparent';
         newTab.style.color = '#007BFF';
-        
+
         searchTab.classList.remove('btn-primary', 'active');
         searchTab.classList.add('btn-outline');
         searchTab.style.borderBottom = '3px solid transparent';
         searchTab.style.background = 'transparent';
         searchTab.style.color = 'var(--color-gray-600)';
-        
+
         document.getElementById('searchCustomerContent').style.display = 'none';
         document.getElementById('newCustomerContent').style.display = 'block';
     }
@@ -245,19 +245,19 @@ function createNewCustomer() {
 
     // Select the new customer
     selectCustomer(newCustomer);
-    
+
     // Show success message
     alert('Tạo khách hàng mới thành công!');
-    
+
     // Switch back to search tab
     switchCustomerTab('search');
 }
 
 function searchCustomers() {
     const searchTerm = document.getElementById('customerSearchInput').value.trim();
-    
+
     if (searchTerm.length < 3) {
-        document.getElementById('customerSearchResults').innerHTML = 
+        document.getElementById('customerSearchResults').innerHTML =
             `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
                 <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
                 <p>Nhập ít nhất 3 ký tự để tìm kiếm</p>
@@ -273,13 +273,13 @@ function searchCustomers() {
         { id: '4', name: 'Phạm Hoàng Anh', phone: '0934567890', memberType: 'general' }
     ];
 
-    const filtered = mockCustomers.filter(c => 
-        c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const filtered = mockCustomers.filter(c =>
+        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.phone.includes(searchTerm)
     );
 
     if (filtered.length === 0) {
-        document.getElementById('customerSearchResults').innerHTML = 
+        document.getElementById('customerSearchResults').innerHTML =
             `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
                 <i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
                 <p>Không tìm thấy khách hàng</p>
@@ -321,7 +321,7 @@ function searchCustomers() {
 function selectCustomer(customer) {
     selectedCustomerData = customer;
     bookingFormData.customer = customer;
-    
+
     document.getElementById('selectedCustomerName').textContent = customer.name;
     document.getElementById('selectedCustomerPhone').textContent = customer.phone;
     document.getElementById('selectedCustomerInfo').style.display = 'block';
@@ -345,7 +345,7 @@ function updateCourtInfo() {
     }
 
     const [courtId, courtType, courtPrice] = court.split('|');
-    
+
     const durations = {
         'mini-football': 90,
         'badminton': 60,
@@ -354,7 +354,7 @@ function updateCourtInfo() {
 
     const duration = durations[courtType];
     document.getElementById('durationText').textContent = duration + ' phút/buổi';
-    
+
     updateEndTime();
 }
 
@@ -380,10 +380,10 @@ function updateEndTime() {
     const totalMins = hours * 60 + mins + duration;
     const endHours = Math.floor(totalMins / 60);
     const endMins = totalMins % 60;
-    
+
     const endTime = `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
     bookingFormData.endTime = endTime;
-    
+
     document.getElementById('endTimeText').textContent = endTime;
 }
 
@@ -397,21 +397,21 @@ function updateAddon(type, change) {
 function updatePaymentMethod() {
     const method = document.querySelector('input[name="paymentMethod"]:checked').value;
     bookingFormData.paymentMethod = method;
-    
+
     document.getElementById('counterPaymentWarning').style.display = method === 'counter' ? 'block' : 'none';
 }
 
 function calculateSummary() {
     const courtFee = bookingFormData.courtPrice * bookingFormData.sessions;
-    const addonsFee = 
+    const addonsFee =
         bookingFormData.addons.coach * 50 +
         bookingFormData.addons.uniform * 10 +
         bookingFormData.addons.drink * 3 +
         bookingFormData.addons.locker * 5;
-    
+
     const subtotal = courtFee + addonsFee;
     const tax = Math.round(subtotal * 0.1);
-    
+
     // Member discount
     const discountRates = {
         'platinum': 0.20,
@@ -420,10 +420,10 @@ function calculateSummary() {
         'student': 0.10,
         'general': 0
     };
-    
+
     const discountRate = discountRates[bookingFormData.customer?.memberType || 'general'];
     const discount = Math.round(subtotal * discountRate);
-    
+
     const total = subtotal + tax - discount;
 
     document.getElementById('summaryCourtFee').textContent = courtFee.toLocaleString() + ' VNĐ';
@@ -450,24 +450,24 @@ function submitBooking() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Đặt sân thành công!');
-            closeNewBookingDialog();
-            location.reload();
-        } else {
-            alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra. Vui lòng thử lại.');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đặt sân thành công!');
+                closeNewBookingDialog();
+                location.reload();
+            } else {
+                alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        });
 }
 
 // Set default date to today
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const today = new Date().toISOString().split('T')[0];
     if (document.getElementById('bookingDate')) {
         document.getElementById('bookingDate').value = today;
