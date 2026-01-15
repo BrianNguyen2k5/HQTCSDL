@@ -43,7 +43,8 @@ INSERT INTO UuDai (MaUuDai, LoaiUuDai, PhanTramGiamGia) VALUES
 ('UD01', N'Silver', 5),
 ('UD02', N'Gold', 10),
 ('UD03', N'Platinum', 20),
-('UD04', N'HSSV', 10);
+('UD04', N'HSSV', 10),
+('UD05', N'Người Cao Tuổi', 10)
 
 --GoiDichVu
 INSERT INTO GoiDichVu (MaGoi, TenGoi, LoaiTaiSan, DonGia, ThoiGianSuDung) VALUES
