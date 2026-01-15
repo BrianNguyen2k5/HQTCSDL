@@ -650,6 +650,18 @@ namespace HQTCSDL.Controllers
                     return Json(new { success = false, message = message });
                 }
 
+                // Add services if any
+                if (model.Services != null && model.Services.Count > 0)
+                {
+                    foreach (var service in model.Services)
+                    {
+                        if (service.Value > 0)
+                        {
+                            _leTanDAL.ThemDichVu(maPhieuDat, service.Key, service.Value, maNhanVien);
+                        }
+                    }
+                }
+
                 // Create invoice
                 var (invoiceSuccess, invoiceMessage, maHoaDon) = _leTanDAL.TaoHoaDon(
                     maPhieuDat,
@@ -960,7 +972,7 @@ namespace HQTCSDL.Controllers
         public string Date { get; set; } = string.Empty;
         public string StartTime { get; set; } = string.Empty;
         public string EndTime { get; set; } = string.Empty;
-        public Dictionary<string, int>? Addons { get; set; }
+        public Dictionary<string, int>? Services { get; set; }
     }
 
     public class CreateCustomerRequest

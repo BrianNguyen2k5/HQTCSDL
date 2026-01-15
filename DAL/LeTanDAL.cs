@@ -244,16 +244,14 @@ namespace DAL
                     danhSach.Add(new DichVuPhieuDat
                     {
                         MaChiTietPDS = reader["MaChiTietPDS"].ToString() ?? string.Empty,
-                        ThoiDiemTao = reader.IsDBNull(reader.GetOrdinal("ThoiDiemTao"))
-                            ? null
-                            : reader.GetDateTime(reader.GetOrdinal("ThoiDiemTao")),
-                        SoLuong = reader.GetInt32(reader.GetOrdinal("SoLuong")),
-                        ThanhTien = reader.GetInt32(reader.GetOrdinal("ThanhTien")),
-                        TrangThaiThanhToan = reader.GetInt32(reader.GetOrdinal("TrangThaiThanhToan")),
+                        ThoiDiemTao = reader["ThoiDiemTao"] == DBNull.Value ? null : Convert.ToDateTime(reader["ThoiDiemTao"]),
+                        SoLuong = reader["SoLuong"] == DBNull.Value ? 0 : Convert.ToInt32(reader["SoLuong"]),
+                        ThanhTien = reader["ThanhTien"] == DBNull.Value ? 0 : Convert.ToInt32(reader["ThanhTien"]),
+                        TrangThaiThanhToan = reader["TrangThaiThanhToan"] == DBNull.Value ? 0 : Convert.ToInt32(reader["TrangThaiThanhToan"]),
                         MaDichVu = reader["MaDichVu"].ToString() ?? string.Empty,
                         TenDichVu = reader["TenDichVu"].ToString() ?? string.Empty,
                         LoaiDichVu = reader["LoaiDichVu"].ToString() ?? string.Empty,
-                        DonGia = reader.GetInt32(reader.GetOrdinal("DonGia")),
+                        DonGia = reader["DonGia"] == DBNull.Value ? 0 : Convert.ToInt32(reader["DonGia"]),
                         DonViTinh = reader["DonViTinh"].ToString() ?? string.Empty
                     });
                 }
@@ -390,15 +388,15 @@ namespace DAL
                     danhSach.Add(new PhieuDatSanChiTiet
                     {
                         MaPhieuDat = reader["MaPhieuDat"].ToString() ?? string.Empty,
-                        NgayDat = reader.GetDateTime(reader.GetOrdinal("NgayDat")),
-                        NgayNhanSan = reader.GetDateTime(reader.GetOrdinal("NgayNhanSan")),
-                        GioBatDau = reader.GetTimeSpan(reader.GetOrdinal("GioBatDau")),
-                        GioKetThuc = reader.GetTimeSpan(reader.GetOrdinal("GioKetThuc")),
+                        NgayDat = Convert.ToDateTime(reader["NgayDat"]),
+                        NgayNhanSan = Convert.ToDateTime(reader["NgayNhanSan"]),
+                        GioBatDau = reader["GioBatDau"] is DateTime dtbd ? dtbd.TimeOfDay : (TimeSpan)reader["GioBatDau"],
+                        GioKetThuc = reader["GioKetThuc"] is DateTime dtkt ? dtkt.TimeOfDay : (TimeSpan)reader["GioKetThuc"],
                         HinhThucDat = reader["HinhThucDat"].ToString() ?? string.Empty,
                         TrangThaiPhieu = reader["TrangThaiPhieu"].ToString() ?? string.Empty,
-                        ThoiGianCheckin = reader.IsDBNull(reader.GetOrdinal("ThoiGianCheckin"))
-                            ? null
-                            : reader.GetTimeSpan(reader.GetOrdinal("ThoiGianCheckin")),
+                        ThoiGianCheckin = reader["ThoiGianCheckin"] == DBNull.Value 
+                            ? null 
+                            : (reader["ThoiGianCheckin"] is DateTime dtCk ? dtCk.TimeOfDay : (TimeSpan)reader["ThoiGianCheckin"]),
                         MaKhachHang = reader["MaKhachHang"].ToString() ?? string.Empty,
                         TenKhachHang = reader["TenKhachHang"].ToString() ?? string.Empty,
                         SoDienThoai = reader["SoDienThoai"].ToString() ?? string.Empty,

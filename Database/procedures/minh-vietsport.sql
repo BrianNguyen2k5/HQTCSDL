@@ -462,7 +462,7 @@ BEGIN
                @TongTienGiamGia = TongTienGiamGia
         FROM HoaDon
         WHERE MaPhieuDat = @MaPhieuDat 
-          AND TrangThaiThanhToan = N'Chờ thanh toán'
+          AND TrangThaiThanhToan = N'Chưa thanh toán'
         ORDER BY MaHoaDon DESC;
 
         IF @MaHoaDon IS NULL
