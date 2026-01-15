@@ -599,7 +599,7 @@ function submitBooking() {
         startTime: bookingFormData.startTime,
         endTime: bookingFormData.endTime,
         sessions: bookingFormData.sessions,
-        addons: bookingFormData.services // Backend expects 'addons' field
+        services: bookingFormData.services
     };
 
     fetch('/Receptionist/CreateBooking', {

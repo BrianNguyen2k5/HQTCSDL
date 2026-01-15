@@ -546,29 +546,6 @@ namespace HQTCSDL.Controllers
                     return Json(new { success = false, message = message });
                 }
 
-                // Add services if any were selected
-                if (model.Addons != null && model.Addons.Count > 0)
-                {
-                    foreach (var addon in model.Addons)
-                    {
-                        if (addon.Value > 0) // Only add services with quantity > 0
-                        {
-                            var (serviceSuccess, serviceMessage) = _leTanDAL.ThemDichVu(
-                                maPhieuDat,
-                                addon.Key,
-                                addon.Value,
-                                maNhanVien
-                            );
-
-                            if (!serviceSuccess)
-                            {
-                                // Log the error but continue - don't fail the entire booking
-                                Console.WriteLine($"Warning: Failed to add service {addon.Key}: {serviceMessage}");
-                            }
-                        }
-                    }
-                }
-
                 // Create invoice
                 var (invoiceSuccess, invoiceMessage, maHoaDon) = _leTanDAL.TaoHoaDon(
                     maPhieuDat,
@@ -631,6 +608,7 @@ namespace HQTCSDL.Controllers
             // Tính tổng tiền từ hóa đơn
             decimal tongTien = latestHoaDon?.TongThanhToan ?? 0;
             decimal tienSan = latestHoaDon?.TongTienSan ?? 0;
+            decimal tienDichVu = latestHoaDon?.TongTienDichVu ?? 0;
             decimal giamGia = latestHoaDon?.TongTienGiamGia ?? 0;
 
             // Map trạng thái từ database sang format của view
@@ -665,8 +643,8 @@ namespace HQTCSDL.Controllers
                 PaymentStatus = paymentStatus,
                 CreatedAt = phieu.NgayDat,
                 CourtFee = tienSan,
-                Discount = giamGia,
-                Tax = 0 // Thuế đã tính trong TongThanhToan
+                ServiceFee = tienDichVu,
+                Discount = giamGia
             };
         }
 
@@ -745,8 +723,7 @@ namespace HQTCSDL.Controllers
                     PaymentStatus = "paid-online",
                     CreatedAt = DateTime.Now.AddMinutes(-5),
                     CourtFee = 100,
-                    Discount = 0,
-                    Tax = 10
+                    Discount = 0
                 },
                 new BookingViewModel
                 {
@@ -764,8 +741,7 @@ namespace HQTCSDL.Controllers
                     PaymentStatus = "pay-at-counter",
                     CreatedAt = DateTime.Now.AddMinutes(-25),
                     CourtFee = 60,
-                    Discount = 10,
-                    Tax = 5
+                    Discount = 10
                 },
                 new BookingViewModel
                 {
@@ -783,8 +759,7 @@ namespace HQTCSDL.Controllers
                     PaymentStatus = "paid-online",
                     CreatedAt = DateTime.Now.AddMinutes(-15),
                     CourtFee = 80,
-                    Discount = 15,
-                    Tax = 7
+                    Discount = 15
                 }
             };
         }
@@ -848,8 +823,8 @@ namespace HQTCSDL.Controllers
         public string PaymentStatus { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public decimal CourtFee { get; set; }
+        public decimal ServiceFee { get; set; }
         public decimal Discount { get; set; }
-        public decimal Tax { get; set; }
         public Dictionary<string, int> Addons { get; set; } = new Dictionary<string, int>();
     }
 

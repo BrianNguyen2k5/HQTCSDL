@@ -29,6 +29,7 @@
                 <option value="Hoàn thành">Hoàn thành</option>
                 <option value="Đã hủy">Đã hủy</option>
                 <option value="Vắng mặt">Vắng mặt</option>
+                <option value="Chờ thanh toán">Chờ thanh toán</option>
             </select>
 
             <button class="btn btn-outline">
@@ -63,7 +64,7 @@
                 <tbody id="bookingsTableBody">
                     @foreach (var booking in Model)
                     {
-                        var totalAmount = booking.CourtFee + booking.Tax - booking.Discount;
+                        var totalAmount = booking.CourtFee + booking.ServiceFee - booking.Discount;
                         var statusBadge = booking.Status switch
                         {
                             "Đang sử dụng" => "badge-primary",
@@ -110,7 +111,7 @@
                             </td>
                             <td>
                                 <div style="display: flex; gap: 0.5rem;">
-                                    @if (booking.Status == "Chờ xác nhận" || booking.Status == "Chờ thanh toán")
+                                    @if (booking.Status == "Đã xác nhận")
                                     {
                                         <button class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
                                                 onclick="checkIn('@booking.Id')">

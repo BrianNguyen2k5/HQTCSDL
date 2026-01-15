@@ -89,7 +89,7 @@
                     <div>
                         <p style="font-size: 0.875rem; opacity: 0.9; margin: 0;">Doanh thu hôm nay</p>
                         <p style="font-size: 1.5rem; font-weight: bold; margin: 0.25rem 0 0 0;">
-                            @Model.Sum(b => b.CourtFee + b.Tax - b.Discount).ToString("N0") VNĐ
+                            @Model.Sum(b => b.CourtFee + b.ServiceFee - b.Discount).ToString("N0") VNĐ
                         </p>
                     </div>
                     <div>
