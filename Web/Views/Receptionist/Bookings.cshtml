@@ -222,17 +222,21 @@
             return map[payment] || '';
         }
 
-        function checkIn(bookingId) {
-            if (confirm('Xác nhận check-in cho đặt sân #' + bookingId + '?')) {
+        function checkIn(maPhieuDat) {
+            if (confirm('Xác nhận check-in cho đặt sân ' + maPhieuDat + '?')) {
                 fetch('/Receptionist/CheckIn', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ bookingId })
+                    body: JSON.stringify({ maPhieuDat: maPhieuDat })
                 })
                 .then(response => response.json())
                 .then(data => {
                     alert(data.message);
                     if (data.success) location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi check-in');
                 });
             }
         }
@@ -252,9 +256,25 @@
             }
         }
 
-        function viewBookingDetail(bookingId) {
-            // TODO: Open modal or navigate to detail page
-            alert('Chi tiết đặt sân #' + bookingId);
+        function viewBookingDetail(maPhieuDat) {
+            // Gọi API lấy thông tin chi tiết
+            fetch('/Receptionist/LayThongTinPhieuDat?maPhieuDat=' + maPhieuDat)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // TODO: Hiển thị modal với thông tin chi tiết
+                        console.log('Booking details:', data);
+                        alert('Chi tiết đặt sân ' + maPhieuDat + '\n' + 
+                              'Khách hàng: ' + data.phieuDat.tenKhachHang + '\n' +
+                              'Trạng thái: ' + data.phieuDat.trangThaiPhieu);
+                    } else {
+                        alert('Không tìm thấy thông tin đặt sân');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi lấy thông tin');
+                });
         }
 
         function openNewBookingDialog() {

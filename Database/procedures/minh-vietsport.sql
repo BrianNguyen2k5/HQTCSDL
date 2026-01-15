@@ -154,7 +154,7 @@ BEGIN
         )
         VALUES (
             @MaPhieuDat, GETDATE(), @NgayNhanSan, @GioBatDau, @GioKetThuc,
-            N'Tại quầy', N'Chờ thanh toán', @MaKhachHang, @MaNhanVien, @MaSan
+            N'Tại quầy', N'Chờ xác nhận', @MaKhachHang, @MaNhanVien, @MaSan
         );
 
         COMMIT TRANSACTION;
