@@ -546,6 +546,29 @@ namespace HQTCSDL.Controllers
                     return Json(new { success = false, message = message });
                 }
 
+                // Add services if any were selected
+                if (model.Addons != null && model.Addons.Count > 0)
+                {
+                    foreach (var addon in model.Addons)
+                    {
+                        if (addon.Value > 0) // Only add services with quantity > 0
+                        {
+                            var (serviceSuccess, serviceMessage) = _leTanDAL.ThemDichVu(
+                                maPhieuDat,
+                                addon.Key,
+                                addon.Value,
+                                maNhanVien
+                            );
+
+                            if (!serviceSuccess)
+                            {
+                                // Log the error but continue - don't fail the entire booking
+                                Console.WriteLine($"Warning: Failed to add service {addon.Key}: {serviceMessage}");
+                            }
+                        }
+                    }
+                }
+
                 // Create invoice
                 var (invoiceSuccess, invoiceMessage, maHoaDon) = _leTanDAL.TaoHoaDon(
                     maPhieuDat,

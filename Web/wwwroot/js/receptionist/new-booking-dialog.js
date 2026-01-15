@@ -220,7 +220,7 @@ function renderServices() {
             </div>`;
         return;
     }
-    
+
     console.log('Rendering', availableServices.length, 'services');
 
     // Service icons mapping
@@ -276,7 +276,7 @@ function renderServices() {
 function updateServiceQuantity(maDichVu, change) {
     maDichVu = maDichVu.trim(); // Trim whitespace
     const input = document.getElementById('service_' + maDichVu);
-    const service = availableServices.find(s => 
+    const service = availableServices.find(s =>
         ((s.maDichVu || s.MaDichVu) + '').trim() === maDichVu
     );
 
@@ -560,7 +560,7 @@ function calculateSummary() {
     // Calculate services fee dynamically
     let servicesFee = 0;
     for (const [maDichVu, quantity] of Object.entries(bookingFormData.services)) {
-        const service = availableServices.find(s => 
+        const service = availableServices.find(s =>
             ((s.maDichVu || s.MaDichVu) + '').trim() === maDichVu.trim()
         );
         if (service && quantity > 0) {
@@ -599,7 +599,7 @@ function submitBooking() {
         startTime: bookingFormData.startTime,
         endTime: bookingFormData.endTime,
         sessions: bookingFormData.sessions,
-        services: bookingFormData.services
+        addons: bookingFormData.services // Backend expects 'addons' field
     };
 
     fetch('/Receptionist/CreateBooking', {
