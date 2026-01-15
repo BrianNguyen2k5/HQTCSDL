@@ -297,7 +297,7 @@ CREATE TABLE HoaDon (
     TongThanhToan INT NOT NULL,
     HinhThucThanhToan NVARCHAR (50), -- HinhThucThanhToan = 'Ví điện tử', 'Tiền mặt'
     TrangThaiThanhToan NVARCHAR (50), -- TrangThaiThanhToan = 'Chưa thanh toán', 'Đã thanh toán'
-    MaNhanVien CHAR(10) NOT NULL,
+    MaNhanVien CHAR(10),
     MaPhieuDat CHAR(10),
     MaPhieuThue CHAR(10)
 );
