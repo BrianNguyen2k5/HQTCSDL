@@ -44,11 +44,11 @@ go
 -- Dirty read (Tranh chấp No8)
 --T2: NVQL xem doanh thu để lập báo cáo doanh thu hiện tại
 create or alter proc sp_QL_DoanhThuNam
+	@nam int,
 	@output int output
 as
 begin
 	set transaction isolation level read committed --Chuyển qua read committed
-	declare @nam int = year(getdate())
 	begin tran
 	
 		-- Lấy thống kê
@@ -58,7 +58,7 @@ begin
 		where year(hd.NgayXuat) = @nam
 
 	commit tran
-	set @output = @doanhthu
+	set @output = isnull(@doanhthu, 0)
 end
 go
 declare @doanhthu int

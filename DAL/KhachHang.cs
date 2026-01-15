@@ -18,8 +18,7 @@ namespace DAL
             string NgaySinh = "",
             string SoCCCD = "",
             string SoDienThoai = "",
-            string Email = ""
-        )
+            string Email = "")
         {
             // VD: KH003 => KH + 003 (int) => Khách hàng tiếp theo KH004
             string getIDQuery = "SELECT MAX(MaKhachHang) FROM KhachHang";

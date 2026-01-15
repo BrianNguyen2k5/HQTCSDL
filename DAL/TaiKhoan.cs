@@ -21,10 +21,10 @@ namespace DAL
             // 1. Tìm user theo TenDangNhap trươc
             string query =
                 @"
-				SELECT tk.*
-				FROM TaiKhoan tk
-				WHERE tk.TenDangNhap = @TenDangNhap 
-				AND tk.TrangThai = 1";
+                SELECT tk.*
+                FROM TaiKhoan tk
+                WHERE tk.TenDangNhap = @TenDangNhap 
+                AND tk.TrangThai = 1";
 
             SqlParameter[] parameters = new SqlParameter[]
             {
@@ -39,25 +39,16 @@ namespace DAL
                 string storedHash = row["MatKhauMaHoa"].ToString().Trim();
 
                 // 2. Dùng BCrypt để kiểm tra mật khẩu
-                // Lưu ý: Nếu DB của bạn đang lưu pass thường (chưa hash), lệnh Verify này sẽ false.
-                // Tạm thời để test với pass thường, bạn có thể dùng: if (storedHash == matKhau)
-                // Nhưng đúng chuẩn BCrypt phải là:
                 bool isPasswordValid = false;
 
-                // CHECK TẠM THỜI: Hỗ trợ cả pass thường (cho dữ liệu cũ) và pass đã hash
-                if (storedHash == matKhau)
+                try
                 {
-                    isPasswordValid = true;
+                    isPasswordValid = BCrypt.Net.BCrypt.Verify(matKhau, storedHash);
                 }
-                else
+                catch
                 {
-                    try
-                    {
-                        isPasswordValid = BCrypt.Net.BCrypt.Verify(matKhau, storedHash);
-                    }
-                    catch
-                    { /* Không phải hash BCrypt hợp lệ */
-                    }
+                    // Không phải hash BCrypt hợp lệ
+                    isPasswordValid = false;
                 }
 
                 if (isPasswordValid)
@@ -68,8 +59,12 @@ namespace DAL
                         TenDangNhap = row["TenDangNhap"].ToString() ?? "",
                         MatKhauMaHoa = storedHash ?? "",
                         Email = row["Email"].ToString() ?? "",
-                        TrangThai = row["TrangThai"] != DBNull.Value && Convert.ToBoolean(row["TrangThai"]),
-                        NgayTao = row["NgayTao"] != DBNull.Value ? Convert.ToDateTime(row["NgayTao"]) : null,
+                        TrangThai =
+                            row["TrangThai"] != DBNull.Value && Convert.ToBoolean(row["TrangThai"]),
+                        NgayTao =
+                            row["NgayTao"] != DBNull.Value
+                                ? Convert.ToDateTime(row["NgayTao"])
+                                : null,
                         MaKhachHang =
                             row["MaKhachHang"] != DBNull.Value
                                 ? row["MaKhachHang"].ToString()
@@ -125,7 +120,12 @@ namespace DAL
             if (string.IsNullOrEmpty(maNhanVien))
                 return "KhachHang";
 
-            string query = "SELECT nv.MaChucVu FROM NhanVien nv WHERE nv.MaNhanVien = @MaNV";
+            string query =
+                @"
+                SELECT cv.TenChucVu 
+                FROM NhanVien nv 
+                JOIN ChucVu cv ON nv.MaChucVu = cv.MaChucVu 
+                WHERE nv.MaNhanVien = @MaNV";
             SqlParameter[] parameters = { new SqlParameter("@MaNV", maNhanVien) };
 
             object? result = _dbConnection.ExecuteScalar(query, parameters);

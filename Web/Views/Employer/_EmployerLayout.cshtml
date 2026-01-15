@@ -1,0 +1,80 @@
+@{
+	Layout = "_Layout";
+	var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+}
+
+@section Styles {
+	@RenderSection("Styles", required: false)
+}
+
+<div class="employer-dsb bg-background font-sans">
+	<div class="content-container">
+		<div class="navigate-bar fixed">
+			<div class="navigate-bar bg-white border-r p-4">
+				<div class="navigate-items space-y-2">
+					<a href="@Url.Action("Dashboard", "Employer")">
+						<button id="btn-dashboard"
+							class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 @(currentAction == "Dashboard" ? "tab-active" : "tab-inactive")">
+							<div class="flex items-center gap-2">
+								<i class="bi bi-grid-fill"></i> Dashboard
+							</div>
+						</button>
+					</a>
+
+					<a href="@Url.Action("Employees", "Employer")">
+						<button id="btn-employees"
+							class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 @(currentAction == "Employees" ? "tab-active" : "tab-inactive")">
+							<div class="flex items-center gap-2">
+								<i class="bi bi-people-fill"></i> Quản lý nhân viên
+							</div>
+						</button>
+					</a>
+
+					<a href="@Url.Action("Arrangement", "Employer")">
+						<button id="btn-arrangement"
+							class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 @(currentAction == "Arrangement" ? "tab-active" : "tab-inactive")">
+							<div class="flex items-center gap-2">
+								<i class="bi bi-calendar-check"></i> Phân công ca trực
+							</div>
+						</button>
+					</a>
+					
+					<a href="@Url.Action("Modification", "Employer")">
+						<button id="btn-modification"
+							class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 @(currentAction == "Modification" ? "tab-active" : "tab-inactive")">
+							<div class="flex items-center gap-2">
+								<i class="bi bi-calendar3"></i> Cài đặt chi nhánh
+							</div>
+						</button>
+					</a>
+
+					<a href="@Url.Action("Report", "Employer")">
+						<button id="btn-report"
+							class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 @(currentAction == "Report" ? "tab-active" : "tab-inactive")">
+							<div class="flex items-center gap-2">
+								<i class="bi bi-bar-chart-line"></i> Báo cáo kinh doanh
+							</div>
+						</button>
+					</a>
+				</div>
+
+				<a href="@Url.Action("Profile", "Employer")">
+					<button id="btn-profile"
+						class="w-full text-left py-4 px-2 font-medium transition-colors @(currentAction == "Profile" ? "tab-active" : "tab-inactive")">
+						<div class="flex items-center gap-2">
+							<i class="bi bi-person-circle"></i> Thông tin cá nhân
+						</div>
+					</button>
+				</a>
+			</div>
+		</div>
+
+    <main class="w-full p-4 ml-[300px]">
+      @RenderBody()
+    </main>
+	</div>
+</div>
+
+@section Scripts {
+	@RenderSection("Scripts", required: false)
+}

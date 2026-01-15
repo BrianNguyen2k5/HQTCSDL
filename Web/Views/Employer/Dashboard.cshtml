@@ -1,197 +1,100 @@
-@model IEnumerable<DTO.LoaiSan>
 @{
-	ViewData["Title"] = "Employer Dashboard";
-	ViewBag.Title = "Cài đặt chi nhánh nhân viên";
+    ViewData["Title"] = "Employer Dashboard";
+    Layout = "_EmployerLayout";
+
+    var stats = new[] {
+        new { label = "Doanh thu tháng này", value = "45.2M", icon = "dollar", trend = "+12%" },
+        new { label = "Nhân viên hoạt động", value = "24", icon = "users", trend = "+2" },
+        new { label = "Ca trực tuần này", value = "168", icon = "calendar", trend = "100%" },
+        new { label = "Tỷ lệ sử dụng sân", value = "78%", icon = "trending", trend = "+5%" },
+    };
+
+    var bookings = new[] {
+        new { id = 1, court = "Sân bóng đá mini 1", time = "14:00-15:30", customer = "Nguyễn Minh Đức", status = "Đang sử dụng" },
+        new { id = 2, court = "Sân cầu lông 2", time = "15:00-16:00", customer = "Trần Thị Hương", status = "Đã thanh toán" },
+        new { id = 3, court = "Sân tennis 1", time = "16:00-18:00", customer = "Phạm Hoàng", status = "Chờ thanh toán" },
+        new { id = 4, court = "Sân futsal 3", time = "18:00-19:30", customer = "Đội bóng ABA", status = "Đã thanh toán" },
+    };
 }
 
 @section Styles {
-	<link rel="stylesheet" href="~/css/Employer/Dashboard.css" />
+    <link rel="stylesheet" href="~/css/Employer/Dashboard.css" />
 }
 
-<div class="employer-dsb bg-background font-sans">
-	<div class="content-container">
-		<div class="navigate-bar">
+<div class="p-8">
+    <h1 class="text-3xl font-bold text-foreground mb-8">Dashboard</h1>
 
-			<div class="navigate-bar bg-white border-r p-4">
-				<div class="navigate-items space-y-2">
-					<button onclick="switchTab('dashboard')" id="btn-dashboard"
-						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-active">
-						<div class="flex items-center gap-2">
-							<i class="bi bi-grid-fill"></i> Dashboard
-						</div>
-					</button>
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        @foreach (var stat in stats)
+        {
+            <div class="bg-card border border-border rounded-lg p-6 bg-white shadow-sm">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <p class="text-muted-foreground mb-1 text-gray-500">@stat.label</p>
+                        <p class="text-2xl font-bold text-foreground text-gray-900">@stat.value</p>
+                    </div>
+                    @if (stat.icon == "dollar")
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary text-blue-600"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    }
+                    else if (stat.icon == "users")
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary text-blue-600"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    }
+                    else if (stat.icon == "calendar")
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary text-blue-600"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                    }
+                    else if (stat.icon == "trending")
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary text-blue-600"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                    }
+                </div>
+                <p class="text-primary text-blue-600">@stat.trend</p>
+            </div>
+        }
+    </div>
 
-					<button onclick="switchTab('employees')" id="btn-employees"
-						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
-						<div class="flex items-center gap-2">
-							<i class="bi bi-people-fill"></i> Quản lý nhân viên
-						</div>
-					</button>
-
-					<button onclick="switchTab('arrangement')" id="btn-arrangement"
-						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
-						<div class="flex items-center gap-2">
-							<i class="bi bi-calendar-check"></i> Phân công ca trực
-						</div>
-					</button>
-
-					<button onclick="switchTab('skipform')" id="btn-skipform"
-						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
-						<div class="flex items-center gap-2">
-							<i class="bi bi-file-earmark-text"></i> Đơn nghỉ phép
-						</div>
-					</button>
-
-					<button onclick="switchTab('modification')" id="btn-modification"
-						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
-						<div class="flex items-center gap-2">
-							<i class="bi bi-calendar3"></i> Cài đặt chi nhánh
-						</div>
-					</button>
-
-					<button onclick="switchTab('report')" id="btn-report"
-						class="w-full text-left py-4 px-2 font-medium transition-colors border-b-2 tab-inactive">
-						<div class="flex items-center gap-2">
-							<i class="bi bi-bar-chart-line"></i> Báo cáo kinh doanh
-						</div>
-					</button>
-				</div>
-
-				<button onclick="switchTab('profile')" id="btn-profile"
-					class="w-full text-left py-4 px-2 font-medium transition-colors tab-inactive">
-					<div class="flex items-center gap-2">
-						<i class="bi bi-person-circle"></i> Thông tin cá nhân
-					</div>
-				</button>
-			</div>
-		</div>
-
-		<main class="main-content">
-
-			<div id="tab-content-dashboard" class="space-y-4">
-				<p class="title">Trang quản lý</p>
-			</div>
-
-			<div id="tab-content-employees" class="space-y-4">
-				<p class="title">Quản lý thông tin nhân viên</p>
-			</div>
-
-			<div id="tab-content-arrangement" class="space-y-4">
-				<p class="title">Quản lý nhân viên và phân công trực</p>
-			</div>
-
-			<div id="tab-content-skipform" class="space-y-4">
-				<p class="title">Quản lý nhân viên và phân công trực</p>
-			</div>
-
-			<div id="tab-content-modification" class="space-y-4">
-				<p class="title">Cài đặt chi nhánh <span class="branches_name"></span></p>
-				<div class="price-modify">
-					<p class="title">Điều chỉnh giá sân</p>
-					<div class="fields-list">
-						@foreach (DTO.LoaiSan field in Model) {
-							@await Html.PartialAsync(partialViewName: "_GetFieldList", field)
-						}
-					</div>
-					<p class="title">Điều chỉnh giá dịch vụ</p>
-					<p class="title">Điều chỉnh giá tài sản</p>
-				</div>
-			</div>
-
-			<div id="tab-content-report" class="space-y-4">
-				<p class="title">Báo cáo doanh thu</p>
-				<div class="revenue-report">
-					<div class="date-picker-group">
-						<select id="dp_year" name="NamSinh" class="dp-select">
-							<option value="">Năm</option>
-						</select>
-
-						<select id="dp_month" name="ThangSinh" class="dp-select" disabled>
-							<option value="">Tháng</option>
-						</select>
-
-						<select id="dp_day" name="NgaySinh" class="dp-select" disabled>
-							<option value="">Ngày</option>
-						</select>
-
-						<button type="button" onclick="loadRevenue()" class="btn btn-primary ml-2">Xem Doanh Thu</button>
-					</div>
-					<div class="mt-4">
-						<h3>Tổng doanh thu: <span id="lblDoanhThu" class="text-success font-bold">0 VNĐ</span></h3>
-					</div>
-				</div>
-				
-				<div class="statistics-report">
-					<p class="title">Báo cáo thống kê dịch vụ</p>
-					<div class="statistics-list">
-						<p>Tổng số lượt đặt sân: <span id="San_total"></span></p> 
-						<p>Tổng số lượt đặt dịch vụ: <span id="DichVu_total"></span></p> 
-						<p>Tổng số lượt đặt tài sản: <span id="TaiSan_total"></span></p>
-						<p>Tổng số lần sân bị hủy: <span id="San_cancel"></span></p>
-						<p>Tổng số lần dịch vụ bị hủy: <span id="DichVu_cancel"></span></p>
-					</div>
-				</div>
-				
-			</div>
-
-			<div id="tab-content-profile" class="space-y-4 hidden">
-				<h2>Thông tin cá nhân</h2>
-
-				<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-					<h3 class="font-semibold text-slate-900 mb-4">Thông tin cơ bản</h3>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<div>
-							<p class="text-sm text-slate-500 mb-2">Họ và tên</p>
-							<p class="font-medium text-slate-900">Trần Thị B</p>
-						</div>
-						<div>
-							<p class="text-sm text-slate-500 mb-2">Ngày sinh</p>
-							<p class="font-medium text-slate-900">15/05/1995</p>
-						</div>
-						<div>
-							<p class="text-sm text-slate-500 mb-2">Giới tính</p>
-							<p class="font-medium text-slate-900">Nữ</p>
-						</div>
-						<div>
-							<p class="text-sm text-slate-500 mb-2">Số CMND/CCCD</p>
-							<p class="font-medium text-slate-900">012345678901</p>
-						</div>
-						<div class="md:col-span-2">
-							<p class="text-sm text-slate-500 mb-2">Địa chỉ</p>
-							<p class="font-medium text-slate-900">123 Đường Trần Hưng Đạo, Hà Nội</p>
-						</div>
-						<div>
-							<p class="text-sm text-slate-500 mb-2">Số điện thoại</p>
-							<p class="font-medium text-slate-900">0912345678</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-					<h3 class="font-semibold text-slate-900 mb-4">Thông tin công việc</h3>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<div>
-							<p class="text-sm text-slate-500 mb-2">Chức vụ</p>
-							<p class="font-medium text-slate-900">Nhân viên quản lý</p>
-						</div>
-						<div>
-							<p class="text-sm text-slate-500 mb-2">Chi nhánh</p>
-							<p class="font-medium text-slate-900">Hà Nội</p>
-						</div>
-						<div>
-							<p class="text-sm text-slate-500 mb-2">Mã nhân viên</p>
-							<p class="font-medium text-slate-900">EMP001</p>
-						</div>
-						<div>
-							<p class="text-sm text-slate-500 mb-2">Lương cơ bản</p>
-							<p class="font-medium text-slate-900">5.000.000 VND</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</main>
-	</div>
+    <!-- Bookings Table -->
+    <div class="bg-card border border-border rounded-lg p-6 bg-white shadow-sm">
+        <h2 class="text-lg font-semibold text-foreground mb-4 text-gray-900">Đơn đặt sân hôm nay</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-border border-gray-200">
+                        <th class="text-left py-3 px-4 text-muted-foreground font-medium text-gray-500">Sân</th>
+                        <th class="text-left py-3 px-4 text-muted-foreground font-medium text-gray-500">Giờ</th>
+                        <th class="text-left py-3 px-4 text-muted-foreground font-medium text-gray-500">Khách hàng</th>
+                        <th class="text-left py-3 px-4 text-muted-foreground font-medium text-gray-500">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var booking in bookings)
+                    {
+                        <tr class="border-b border-border border-gray-200 hover:bg-gray-50">
+                            <td class="py-3 px-4 text-foreground text-gray-900">@booking.court</td>
+                            <td class="py-3 px-4 text-foreground text-gray-900">@booking.time</td>
+                            <td class="py-3 px-4 text-foreground text-gray-900">@booking.customer</td>
+                            <td class="py-3 px-4">
+                                @{
+                                    var statusClass = "";
+                                    if (booking.status == "Đang sử dụng") statusClass = "bg-blue-500 text-white";
+                                    else if (booking.status == "Đã thanh toán") statusClass = "bg-green-500 text-white";
+                                    else statusClass = "bg-yellow-500 text-gray-900";
+                                }
+                                <span class="inline-block px-3 py-1 rounded font-medium @statusClass">
+                                    @booking.status
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
-	<script src="~/js/Employer/Dashboard.js" asp-append-version="true"></script>
+    <script src="~/js/Employer/Dashboard.js" asp-append-version="true"></script>
 }

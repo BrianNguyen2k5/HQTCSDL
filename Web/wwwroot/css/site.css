@@ -12,6 +12,40 @@ body {
 	font-size: 16px;
 }
 
+.blue-button-decor {
+  background-color: #00ADEF;
+  color: white;
+  border: 1px solid var(--main-color);
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.blue-button-decor:hover {
+	background-color: white;
+	color: #777;
+	border: 1px solid #eee;
+	transition: all 0.3s ease;
+}
+
+.white-button-decor {
+  background-color: white;
+  color: #777;
+  border: 1px solid #bbb;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.white-button-decor:hover {
+	background-color: var(--main-color);
+	color: white;
+	border-color: var(--main-color);
+	transition: all 0.3s ease;
+}
+
 /* ...existing code... */
 
 .btn:focus,

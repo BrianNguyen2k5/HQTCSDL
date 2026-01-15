@@ -40,16 +40,6 @@ begin
 end
 go
 
-declare @masan char(10) = 'CS01LS0101'
---update San set TinhTrang = N'Trống' where MaSan = @masan
-exec sp_KT_BaoTriSan @masan
-
--- Kết quả xuất ra "bảo trì" 
---=> Khách hàng mất thông tin đặt sân
-select * from san
-go
-
-
 
 -- Dirty read (Tranh chấp No8)
 --T1: NVTN thanh toán và xuất hóa đơn cùng ngày lập báo cáo nhưng lỗi không xuất được
@@ -110,17 +100,3 @@ begin
 	commit tran
 end
 go
-
-declare @tiensan int = 15000,
-	@tiendv int = 0,
-	@giamgia int = 5000,
-	@hinhthuc nvarchar(50) = N'Tiền mặt',
-	@trangthai nvarchar(50) = N'Đã thanh toán',
-	@manv char(10) = 'NV003',
-	@maphieudat char(10) = 'PDS01',
-	@maphieuthue char(10) = null
-exec sp_TN_LapHoaDon @tiensan, @tiendv, @giamgia, @hinhthuc, @trangthai, @manv, @maphieudat, @maphieuthue
-
-select * from nhanvien join ChucVu on nhanvien.MaChucVu = chucvu.MaChucVu
-select * from phieudatsan join san on PhieuDatSan.MaSan = san.masan
-select * from HoaDon

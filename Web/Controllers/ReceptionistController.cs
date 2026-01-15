@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using HQTCSDL.Models;
 using DAL;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HQTCSDL.Controllers
 {
+    [Authorize(Roles = "Lễ tân")]
     public class ReceptionistController : Controller
     {
         private readonly IConfiguration _configuration;

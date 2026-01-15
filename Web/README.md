@@ -1,72 +1,8 @@
-Các bước kết nối database vào ASP.NET
-Chạy từng câu lệnh sau:
+Các tài khoản có thể dùng để đăng nhập với role Nhân viên:
+--CV01	Quản lý => NV001 - Username: nv_NV001, pass: 123456
+--CV02	Lễ tân => NV006 - Username: nv_NV006, pass: 123456
+--CV03  Kỹ thuật => NV002 - Username: nv_NV002, pass: 123456
+--CV04  Thu ngân => NV003 -Username: nv_NV003, pass: 123456
+--CV05  Huấn luyện viên => NV009 - Username: nv_NV009, pass: 123456
 
-// Chọn đúng folder của project: cd ...
-1. dotnet add package Microsoft.EntityFrameworkCore
-2. dotnet add package Microsoft.EntityFrameworkCore.SqlServer
-3. dotnet add package Microsoft.EntityFrameworkCore.Tools
-4. dotnet tool install --global dotnet-ef
-// Đảm bảo đã có database chạy trên SSMS
-5. dotnet ef dbcontext scaffold "Server=localhost;Database=VietSport;Trusted_Connection=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -o Models -c VietSportContext
-
-Lệnh (5) này tạo:
-VietSportContext (DbContext)
-Các class entity tương ứng bảng trong thư mục Models
-
-6. Thêm connection string vào appsettings.json:
-"""
-"ConnectionStrings": {
-	"VietSport": "Server=localhost;Database=VietSport;Trusted_Connection=True;TrustServerCertificate=True;"
-}
-"""
-
-7. Đăng ký DbContext trong Program.cs:
-"""
-using Microsoft.EntityFrameworkCore;
-using newHQTCSDL.Models;
-
-// ...existing code...
-
-builder.Services.AddDbContext<VietSportContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("VietSport")));
-//nhớ đặt hàm này sau "var builder = ..."
-
-// ...existing code...
-"""
-
-8. Xóa connection string hard‑code trong VietSportContext
-"""
-// ...existing code...
-protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-{
-    if (!optionsBuilder.IsConfigured)
-    {
-        optionsBuilder.UseSqlServer("Server=localhost;Database=VietSport;Trusted_Connection=True;TrustServerCertificate=True;");
-    }
-}
-// ...existing code...
-"""
-
-
-Sử dụng DbContext trong controller
-"""
-// Ví dụ lấy danh sách nhân viên:
-using Microsoft.AspNetCore.Mvc;
-using newHQTCSDL.Models;
-
-public class NhanVienController : Controller
-{
-    private readonly VietSportContext _context;
-
-    public NhanVienController(VietSportContext context)
-    {
-        _context = context;
-    }
-
-    public IActionResult Index()
-    {
-        var list = _context.NhanViens.ToList();
-        return View(list);
-    }
-}
-"""
+Khách hàng thì chỉ cần đăng ký với tài khoản random và pass là được
