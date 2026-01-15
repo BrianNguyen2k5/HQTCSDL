@@ -22,6 +22,31 @@ function openNewBookingDialog() {
     // Services will be loaded when user reaches step 3
 }
 
+function openBookingWithDetails(dateStr, timeStr, courtId) {
+    openNewBookingDialog();
+
+    // Pre-fill data for Step 2
+    const dateInput = document.getElementById('bookingDate');
+    const timeInput = document.getElementById('bookingStartTime');
+
+    // Format date string to YYYY-MM-DD if needed (assuming input is YYYY-MM-DD)
+    if (dateInput) dateInput.value = dateStr;
+    if (timeInput) timeInput.value = timeStr;
+
+    // Select the court based on ID (matching the start of the value string "id|type|price")
+    const courtSelect = document.getElementById('bookingCourt');
+    if (courtSelect) {
+        for (let i = 0; i < courtSelect.options.length; i++) {
+            if (courtSelect.options[i].value.startsWith(courtId + '|')) {
+                courtSelect.selectedIndex = i;
+                // Trigger update to set duration and end time
+                updateCourtInfo();
+                break;
+            }
+        }
+    }
+}
+
 function closeNewBookingDialog() {
     document.getElementById('newBookingModal').style.display = 'none';
     resetBookingForm();

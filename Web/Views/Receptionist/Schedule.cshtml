@@ -8,9 +8,7 @@
     
     // Get courts from database via ViewBag
     var courts = ViewBag.Courts as List<HQTCSDL.Controllers.CourtViewModel> ?? new List<HQTCSDL.Controllers.CourtViewModel>();
-    
-    // Get selected date (defaults to today if not set)
-    DateTime selectedDate = ViewBag.SelectedDate ?? DateTime.Today;
+    var selectedDate = ViewBag.SelectedDate as DateTime? ?? DateTime.Today;
 }
 
 <div style="display: flex; flex-direction: column; gap: 1.5rem; height: 100%;">
@@ -128,7 +126,7 @@
                             {
                                 <div style="min-height: 48px; padding: 0.5rem; border-left: 1px solid var(--border-color); background-color: var(--background); cursor: pointer; transition: background-color 0.2s; box-sizing: border-box;"
                                      data-court-type="@court.CourtType"
-                                     onclick="quickBook('@court.TenSan', '@timeSlot')"
+                                     onclick="quickBook('@selectedDate.ToString("yyyy-MM-dd")', '@timeSlot', '@court.MaSan', '@court.TenSan')"
                                      onmouseover="this.style.backgroundColor='var(--color-gray-50)'"
                                      onmouseout="this.style.backgroundColor='var(--background)'">
                                     <div style="font-size: 0.75rem; color: var(--color-gray-400); text-align: center;">Trống</div>
@@ -163,13 +161,19 @@
         // Initialize with the date from the server
         let selectedDate = new Date('@selectedDate.ToString("yyyy-MM-dd")');
 
+        function formatDateForUrl(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         function changeDate(days) {
             selectedDate.setDate(selectedDate.getDate() + days);
-            const formattedDate = selectedDate.toLocaleDateString('vi-VN');
-            document.getElementById('currentDate').textContent = formattedDate;
+            document.getElementById('currentDate').textContent = selectedDate.toLocaleDateString('vi-VN');
             
             // Reload schedule for the new date
-            const dateStr = selectedDate.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            const dateStr = formatDateForUrl(selectedDate); // Format: YYYY-MM-DD
             window.location.href = `/Receptionist/Schedule?date=${dateStr}`;
         }
 
@@ -200,10 +204,17 @@
             });
         }
 
-        function quickBook(courtName, timeSlot) {
-            if (confirm(`Đặt sân ${courtName} lúc ${timeSlot}?`)) {
-                // TODO: Open booking dialog with pre-filled data
-                alert('Chức năng đang phát triển');
+        function quickBook(dateStr, timeSlot, courtId, courtName) {
+            // Chuyển định dạng ngày hiển thị cho đẹp
+            const dateParts = dateStr.split('-');
+            const displayDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+            
+            if (confirm(`Đặt sân ${courtName}\nThời gian: ${timeSlot} - Ngày: ${displayDate}?`)) {
+                if (typeof openBookingWithDetails === 'function') {
+                    openBookingWithDetails(dateStr, timeSlot, courtId);
+                } else {
+                    alert('Đang tải dữ liệu, vui lòng thử lại...');
+                }
             }
         }
 
