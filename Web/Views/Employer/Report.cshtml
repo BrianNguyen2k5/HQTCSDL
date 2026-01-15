@@ -80,6 +80,29 @@
 		<p>Tổng số lượt đặt tài sản: <span id="TaiSan_total"></span></p>
 		<p>Tổng số lần sân bị hủy: <span id="San_cancel"></span></p>
 		<p>Tổng số lần dịch vụ bị hủy: <span id="DichVu_cancel"></span></p>
+		<button 
+			class="blue-button-decor w-fit"
+			onclick="handleServiceCancelModal()"
+			>Xem chi tiết hủy
+		</button>
+	</div>
+
+	<div id="service-cancel-modal" class="modal hidden">
+		<div class="modal-content">
+			<p 
+				class="close-button text-right font-bold text-2xl" 
+				onclick="closeServiceCancelModal()"
+			>
+				&times;
+			</p>
+			<p class="text-xl font-bold mb-4 text-center">Chi tiết doanh thu</p>
+			<div class="modal-header mt-8">
+				<p>Số lượng phiếu đặt sân bị hủy: <span id="totalBillCount"></span></p>
+			</div>
+			<div id="cancel-field-list" class="mt-2">
+				
+			</div>
+		</div>
 	</div>
 </div>
 
