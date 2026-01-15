@@ -76,6 +76,20 @@ public class AuthController : Controller
                 new Claim("UserId", userId),
             };
 
+            // Add MaCoSo and MaNhanVien for employees
+            if (!string.IsNullOrEmpty(user.MaNhanVien))
+            {
+                // Add MaNhanVien claim
+                claims.Add(new Claim("MaNhanVien", user.MaNhanVien));
+                
+                // Add MaCoSo claim
+                string? maCoSo = _taiKhoanDAL.LayMaCoSo(user.MaNhanVien);
+                if (!string.IsNullOrEmpty(maCoSo))
+                {
+                    claims.Add(new Claim("MaCoSo", maCoSo));
+                }
+            }
+
             var identity = new ClaimsIdentity(claims, "MyCookieAuth");
             var principal = new ClaimsPrincipal(identity);
 
@@ -99,14 +113,14 @@ public class AuthController : Controller
             }
             else if (role == "Thu ngân")
             {
-                return RedirectToAction("", "Cashier");
+                return RedirectToAction("Bill", "Cashier");
             }
             else if (role == "Huấn luyện viên")
             {
                 return RedirectToAction("", "Gymnast");
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("", "Home");
         }
 
         ViewBag.Error = "Sai tài khoản hoặc mật khẩu";

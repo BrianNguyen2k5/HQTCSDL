@@ -131,5 +131,21 @@ namespace DAL
             object? result = _dbConnection.ExecuteScalar(query, parameters);
             return result != null ? result.ToString() : "NhanVien";
         }
+
+        public string? LayMaCoSo(string maNhanVien)
+        {
+            if (string.IsNullOrEmpty(maNhanVien))
+                return null;
+
+            string query =
+                @"
+                SELECT MaCoSo 
+                FROM NhanVien 
+                WHERE MaNhanVien = @MaNV";
+            
+            SqlParameter[] parameters = { new SqlParameter("@MaNV", maNhanVien) };
+            object? result = _dbConnection.ExecuteScalar(query, parameters);
+            return result?.ToString();
+        }
     }
 }
