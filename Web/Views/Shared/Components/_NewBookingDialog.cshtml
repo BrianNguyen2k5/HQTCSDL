@@ -232,39 +232,12 @@
                     <span id="summaryAddonsFee">0 VNĐ</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span>Thuế (10%):</span>
-                    <span id="summaryTax">0 VNĐ</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                     <span>Giảm giá (thành viên):</span>
                     <span style="color: var(--color-success);" id="summaryDiscount">0 VNĐ</span>
                 </div>
                 <div style="padding-top: 1rem; margin-top: 1rem; border-top: 2px solid var(--border-color); display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: bold;">
                     <span>Tổng cộng:</span>
                     <span style="color: var(--color-primary);" id="summaryTotal">0 VNĐ</span>
-                </div>
-            </div>
-
-            <div>
-                <label class="label">Phương thức thanh toán</label>
-                <div style="display: flex; gap: 1rem;">
-                    <label style="flex: 1; cursor: pointer;">
-                        <input type="radio" name="paymentMethod" value="online" checked onchange="updatePaymentMethod()" />
-                        <span style="margin-left: 0.5rem;">Thanh toán online</span>
-                    </label>
-                    <label style="flex: 1; cursor: pointer;">
-                        <input type="radio" name="paymentMethod" value="counter" onchange="updatePaymentMethod()" />
-                        <span style="margin-left: 0.5rem;">Thanh toán tại quầy</span>
-                    </label>
-                </div>
-                
-                <div id="counterPaymentWarning" style="display: none; margin-top: 1rem; padding: 1rem; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: var(--radius-md);">
-                    <div style="display: flex; gap: 0.75rem;">
-                        <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
-                        <div style="font-size: 0.875rem;">
-                            <strong>Lưu ý:</strong> Khách hàng phải thanh toán trong vòng 30 phút kể từ khi đặt sân.
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

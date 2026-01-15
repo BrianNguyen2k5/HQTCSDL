@@ -38,7 +38,7 @@ namespace HQTCSDL.Controllers
             if (string.IsNullOrEmpty(maNhanVien))
             {
                 // Fallback for testing
-                return "NV0000001";
+                return "NV006";
             }
             return maNhanVien;
         }
@@ -306,12 +306,263 @@ namespace HQTCSDL.Controllers
 
         #endregion
 
+        /// <summary>
+        /// API tìm kiếm khách hàng theo số điện thoại hoặc tên
+        /// </summary>
+        [HttpGet]
+        public IActionResult SearchCustomers(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm) || searchTerm.Length < 3)
+            {
+                return Json(new { success = false, message = "Vui lòng nhập ít nhất 3 ký tự" });
+            }
+
+            try
+            {
+                var allCustomers = _khachHangQueryDAL.LayDanhSachKhachHang();
+                
+                // Filter by phone or name
+                var filtered = allCustomers.Where(c => 
+                    c.SoDienThoai.Contains(searchTerm) || 
+                    c.HoTen.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+
+                var results = filtered.Select(c => {
+                    var chiTiet = _khachHangQueryDAL.LayKhachHangChiTiet(c.MaKhachHang);
+                    string memberType = "general";
+                    
+                    if (chiTiet?.LoaiUuDai != null)
+                    {
+                        memberType = chiTiet.LoaiUuDai.ToLower() switch
+                        {
+                            "platinum" => "platinum",
+                            "gold" => "gold",
+                            "hssv" => "student",
+                            _ => "general"
+                        };
+                    }
+
+                    return new {
+                        id = c.MaKhachHang,
+                        name = c.HoTen,
+                        phone = c.SoDienThoai,
+                        email = c.Email,
+                        memberType = memberType
+                    };
+                }).ToList();
+
+                return Json(new { success = true, customers = results });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// API lấy danh sách sân có sẵn
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetAvailableCourts()
+        {
+            try
+            {
+                string maCoSo = GetMaCoSo();
+                
+                using var connection = new Microsoft.Data.SqlClient.SqlConnection(_configuration.GetConnectionString("VietSport"));
+                connection.Open();
+
+                string query = @"
+                    SELECT 
+                        s.MaSan,
+                        s.TenSan,
+                        s.TinhTrang,
+                        ls.MaLoaiSan,
+                        ls.TenLoaiSan,
+                        ls.GiaGoc,
+                        ls.DonViTinhTheoPhut
+                    FROM San s
+                    JOIN LoaiSan ls ON s.MaLoaiSan = ls.MaLoaiSan
+                    WHERE s.MaCoSo = @MaCoSo 
+                      AND s.TinhTrang NOT IN (N'Bảo trì')
+                    ORDER BY ls.TenLoaiSan, s.TenSan";
+
+                using var cmd = new Microsoft.Data.SqlClient.SqlCommand(query, connection);
+                cmd.Parameters.AddWithValue("@MaCoSo", maCoSo);
+
+                var courts = new List<object>();
+                using var reader = cmd.ExecuteReader();
+                
+                while (reader.Read())
+                {
+                    string courtType = reader["TenLoaiSan"].ToString() switch
+                    {
+                        "Bóng đá mini" => "mini-football",
+                        "Futsal" => "mini-football",
+                        "Cầu lông" => "badminton",
+                        "Tennis" => "tennis",
+                        "Bóng rổ" => "basketball",
+                        _ => "mini-football"
+                    };
+
+                    courts.Add(new {
+                        id = reader["MaSan"].ToString(),
+                        name = reader["TenSan"].ToString(),
+                        type = courtType,
+                        typeName = reader["TenLoaiSan"].ToString(),
+                        price = Convert.ToInt32(reader["GiaGoc"]),
+                        status = reader["TinhTrang"].ToString(),
+                        duration = Convert.ToInt32(reader["DonViTinhTheoPhut"])
+                    });
+                }
+
+                return Json(new { success = true, courts = courts });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// API tạo khách hàng mới
+        /// </summary>
+        [HttpPost]
+        public IActionResult CreateNewCustomer([FromBody] CreateCustomerRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Name) || 
+                string.IsNullOrWhiteSpace(request.Phone) || string.IsNullOrWhiteSpace(request.CCCD))
+            {
+                return Json(new { success = false, message = "Vui lòng điền đầy đủ thông tin bắt buộc" });
+            }
+
+            try
+            {
+                using var connection = new Microsoft.Data.SqlClient.SqlConnection(_configuration.GetConnectionString("VietSport"));
+                connection.Open();
+
+                // Generate new customer ID
+                string query = "SELECT MAX(MaKhachHang) FROM KhachHang WHERE MaKhachHang LIKE 'KH%'";
+                using var cmd = new Microsoft.Data.SqlClient.SqlCommand(query, connection);
+                var result = cmd.ExecuteScalar();
+                
+                string newId = "KH0000001";
+                if (result != null && result != DBNull.Value)
+                {
+                    string maxId = result.ToString() ?? "";
+                    if (maxId.Length > 2)
+                    {
+                        string numberPart = maxId.Substring(2);
+                        if (int.TryParse(numberPart, out int num))
+                        {
+                            num++;
+                            newId = "KH" + num.ToString("D7");
+                        }
+                    }
+                }
+
+                // Insert new customer
+                string insertQuery = @"
+                    INSERT INTO KhachHang (MaKhachHang, HoTen, NgaySinh, SoCCCD, SoDienThoai, Email)
+                    VALUES (@MaKhachHang, @HoTen, @NgaySinh, @SoCCCD, @SoDienThoai, @Email)";
+
+                using var insertCmd = new Microsoft.Data.SqlClient.SqlCommand(insertQuery, connection);
+                insertCmd.Parameters.AddWithValue("@MaKhachHang", newId);
+                insertCmd.Parameters.AddWithValue("@HoTen", request.Name);
+                insertCmd.Parameters.AddWithValue("@NgaySinh", request.DateOfBirth);
+                insertCmd.Parameters.AddWithValue("@SoCCCD", request.CCCD);
+                insertCmd.Parameters.AddWithValue("@SoDienThoai", request.Phone);
+                insertCmd.Parameters.AddWithValue("@Email", (object?)request.Email ?? DBNull.Value);
+
+                insertCmd.ExecuteNonQuery();
+
+                return Json(new { 
+                    success = true, 
+                    message = "Tạo khách hàng mới thành công",
+                    customer = new {
+                        id = newId,
+                        name = request.Name,
+                        phone = request.Phone,
+                        email = request.Email,
+                        memberType = "general"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
+        }
+
         // POST: /Receptionist/CreateBooking (Deprecated - Use DatSanTrucTiep instead)
         [HttpPost]
         public IActionResult CreateBooking([FromBody] BookingCreateModel model)
         {
-            // TODO: Xử lý tạo booking mới
-            return Json(new { success = true, message = "Đặt sân thành công" });
+            if (model == null || string.IsNullOrEmpty(model.CourtId) || 
+                string.IsNullOrEmpty(model.CustomerPhone))
+            {
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+            }
+
+            try
+            {
+                // Find customer by phone
+                var customer = _khachHangQueryDAL.LayKhachHang(soDienThoai: model.CustomerPhone);
+                if (customer == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy khách hàng" });
+                }
+
+                // Parse date and times
+                if (!DateTime.TryParse(model.Date, out DateTime ngayNhanSan))
+                {
+                    return Json(new { success = false, message = "Ngày không hợp lệ" });
+                }
+
+                if (!TimeSpan.TryParse(model.StartTime, out TimeSpan gioBatDau))
+                {
+                    return Json(new { success = false, message = "Giờ bắt đầu không hợp lệ" });
+                }
+
+                if (!TimeSpan.TryParse(model.EndTime, out TimeSpan gioKetThuc))
+                {
+                    return Json(new { success = false, message = "Giờ kết thúc không hợp lệ" });
+                }
+
+                string maNhanVien = GetMaNhanVien();
+
+                // Call the stored procedure to create booking
+                var (success, message, maPhieuDat) = _leTanDAL.DatSanTrucTiep(
+                    customer.MaKhachHang,
+                    maNhanVien,
+                    model.CourtId,
+                    ngayNhanSan,
+                    gioBatDau,
+                    gioKetThuc
+                );
+
+                if (!success || maPhieuDat == null)
+                {
+                    return Json(new { success = false, message = message });
+                }
+
+                // Create invoice
+                var (invoiceSuccess, invoiceMessage, maHoaDon) = _leTanDAL.TaoHoaDon(
+                    maPhieuDat,
+                    maNhanVien
+                );
+
+                return Json(new { 
+                    success = true, 
+                    message = "Đặt sân thành công! Vui lòng thanh toán.",
+                    maPhieuDat = maPhieuDat,
+                    maHoaDon = maHoaDon
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
+            }
         }
 
         // POST: /Receptionist/CancelBooking
@@ -610,9 +861,19 @@ namespace HQTCSDL.Controllers
     {
         public string CourtId { get; set; } = string.Empty;
         public string CustomerPhone { get; set; } = string.Empty;
+        public string Date { get; set; } = string.Empty;
         public string StartTime { get; set; } = string.Empty;
         public string EndTime { get; set; } = string.Empty;
         public Dictionary<string, int>? Addons { get; set; }
+    }
+
+    public class CreateCustomerRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public string CCCD { get; set; } = string.Empty;
     }
 
     public class PaymentModel

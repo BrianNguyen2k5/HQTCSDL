@@ -16,8 +16,7 @@ let bookingFormData = {
         uniform: 0,
         drink: 0,
         locker: 0
-    },
-    paymentMethod: 'online'
+    }
 };
 
 function openNewBookingDialog() {
@@ -48,8 +47,7 @@ function resetBookingForm() {
             uniform: 0,
             drink: 0,
             locker: 0
-        },
-        paymentMethod: 'online'
+        }
     };
 
     // Reset form inputs
@@ -175,38 +173,38 @@ function switchCustomerTab(tab) {
         // Update tab styles
         const searchTab = document.getElementById('searchCustomerTab');
         const newTab = document.getElementById('newCustomerTab');
-        
+
         searchTab.classList.add('btn-primary', 'active');
         searchTab.classList.remove('btn-outline');
         searchTab.style.borderBottom = '3px solid #007BFF';
         searchTab.style.background = 'transparent';
         searchTab.style.color = '#007BFF';
-        
+
         newTab.classList.remove('btn-primary', 'active');
         newTab.classList.add('btn-outline');
         newTab.style.borderBottom = '3px solid transparent';
         newTab.style.background = 'transparent';
         newTab.style.color = 'var(--color-gray-600)';
-        
+
         document.getElementById('searchCustomerContent').style.display = 'block';
         document.getElementById('newCustomerContent').style.display = 'none';
     } else {
         // Update tab styles
         const searchTab = document.getElementById('searchCustomerTab');
         const newTab = document.getElementById('newCustomerTab');
-        
+
         newTab.classList.add('btn-primary', 'active');
         newTab.classList.remove('btn-outline');
         newTab.style.borderBottom = '3px solid #007BFF';
         newTab.style.background = 'transparent';
         newTab.style.color = '#007BFF';
-        
+
         searchTab.classList.remove('btn-primary', 'active');
         searchTab.classList.add('btn-outline');
         searchTab.style.borderBottom = '3px solid transparent';
         searchTab.style.background = 'transparent';
         searchTab.style.color = 'var(--color-gray-600)';
-        
+
         document.getElementById('searchCustomerContent').style.display = 'none';
         document.getElementById('newCustomerContent').style.display = 'block';
     }
@@ -218,7 +216,6 @@ function createNewCustomer() {
     const email = document.getElementById('newCustomerEmail').value.trim();
     const dob = document.getElementById('newCustomerDob').value;
     const cccd = document.getElementById('newCustomerCccd').value.trim();
-    const memberType = document.getElementById('newCustomerMemberType').value;
 
     // Validation
     if (!name || !phone || !dob || !cccd) {
@@ -232,32 +229,50 @@ function createNewCustomer() {
         return;
     }
 
-    // Create customer object
-    const newCustomer = {
-        id: 'NEW_' + Date.now(),
-        name: name,
-        phone: phone,
-        email: email,
-        dob: dob,
-        cccd: cccd,
-        memberType: memberType
-    };
+    // CCCD validation
+    if (!/^[0-9]{12}$/.test(cccd)) {
+        alert('Số CCCD không hợp lệ. Vui lòng nhập 12 chữ số.');
+        return;
+    }
 
-    // Select the new customer
-    selectCustomer(newCustomer);
-    
-    // Show success message
-    alert('Tạo khách hàng mới thành công!');
-    
-    // Switch back to search tab
-    switchCustomerTab('search');
+    // Call API to create customer
+    fetch('/Receptionist/CreateNewCustomer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            name: name,
+            phone: phone,
+            email: email || null,
+            dateOfBirth: dob,
+            cccd: cccd
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Select the new customer
+                selectCustomer(data.customer);
+
+                // Show success message
+                alert(data.message || 'Tạo khách hàng mới thành công!');
+
+                // Switch back to search tab
+                switchCustomerTab('search');
+            } else {
+                alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        });
 }
 
 function searchCustomers() {
     const searchTerm = document.getElementById('customerSearchInput').value.trim();
-    
+
     if (searchTerm.length < 3) {
-        document.getElementById('customerSearchResults').innerHTML = 
+        document.getElementById('customerSearchResults').innerHTML =
             `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
                 <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
                 <p>Nhập ít nhất 3 ký tự để tìm kiếm</p>
@@ -265,63 +280,81 @@ function searchCustomers() {
         return;
     }
 
-    // Mock search - replace with actual API call
-    const mockCustomers = [
-        { id: '1', name: 'Nguyễn Văn An', phone: '0901234567', memberType: 'gold' },
-        { id: '2', name: 'Trần Thị Bình', phone: '0912345678', memberType: 'student' },
-        { id: '3', name: 'Lê Minh Châu', phone: '0923456789', memberType: 'platinum' },
-        { id: '4', name: 'Phạm Hoàng Anh', phone: '0934567890', memberType: 'general' }
-    ];
+    // Show loading
+    document.getElementById('customerSearchResults').innerHTML =
+        `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+            <p>Đang tìm kiếm...</p>
+        </div>`;
 
-    const filtered = mockCustomers.filter(c => 
-        c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        c.phone.includes(searchTerm)
-    );
+    // Call API to search customers
+    fetch(`/Receptionist/SearchCustomers?searchTerm=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                document.getElementById('customerSearchResults').innerHTML =
+                    `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                        <p>${data.message}</p>
+                    </div>`;
+                return;
+            }
 
-    if (filtered.length === 0) {
-        document.getElementById('customerSearchResults').innerHTML = 
-            `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
-                <i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
-                <p>Không tìm thấy khách hàng</p>
-                <p style="font-size: 0.875rem;">Thử tìm với từ khóa khác hoặc tạo khách hàng mới</p>
-            </div>`;
-        return;
-    }
+            const customers = data.customers || [];
 
-    const getMemberBadge = (memberType) => {
-        const badges = {
-            'platinum': { icon: '💎', text: 'Platinum', class: 'badge-primary' },
-            'gold': { icon: '🥇', text: 'Gold', class: 'badge-warning' },
-            'silver': { icon: '🥈', text: 'Silver', class: 'badge-outline' },
-            'student': { icon: '🎓', text: 'Sinh viên', class: 'badge-outline' },
-            'general': { icon: '👤', text: 'Thường', class: 'badge-outline' }
-        };
-        const badge = badges[memberType] || badges['general'];
-        return `<span class="badge ${badge.class}">${badge.icon} ${badge.text}</span>`;
-    };
+            if (customers.length === 0) {
+                document.getElementById('customerSearchResults').innerHTML =
+                    `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                        <i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                        <p>Không tìm thấy khách hàng</p>
+                        <p style="font-size: 0.875rem;">Thử tìm với từ khóa khác hoặc tạo khách hàng mới</p>
+                    </div>`;
+                return;
+            }
 
-    document.getElementById('customerSearchResults').innerHTML = filtered.map(customer => `
-        <div class="card" style="margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; border: 2px solid transparent;" 
-             onclick='selectCustomer(${JSON.stringify(customer)})'
-             onmouseover="this.style.borderColor='#007BFF'; this.style.backgroundColor='#f0f9ff';"
-             onmouseout="this.style.borderColor='transparent'; this.style.backgroundColor='white';">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; font-size: 1rem; color: var(--color-gray-900); margin-bottom: 0.25rem;">${customer.name}</div>
-                    <div style="font-size: 0.875rem; color: var(--color-gray-600);">
-                        <i class="fas fa-phone" style="margin-right: 0.25rem;"></i>${customer.phone}
+            const getMemberBadge = (memberType) => {
+                const badges = {
+                    'platinum': { icon: '💎', text: 'Platinum', class: 'badge-primary' },
+                    'gold': { icon: '🥇', text: 'Gold', class: 'badge-warning' },
+                    'silver': { icon: '🥈', text: 'Silver', class: 'badge-outline' },
+                    'student': { icon: '🎓', text: 'Sinh viên', class: 'badge-outline' },
+                    'general': { icon: '👤', text: 'Thường', class: 'badge-outline' }
+                };
+                const badge = badges[memberType] || badges['general'];
+                return `<span class="badge ${badge.class}">${badge.icon} ${badge.text}</span>`;
+            };
+
+            document.getElementById('customerSearchResults').innerHTML = customers.map(customer => `
+                <div class="card" style="margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; border: 2px solid transparent;" 
+                     onclick='selectCustomer(${JSON.stringify(customer)})'
+                     onmouseover="this.style.borderColor='#007BFF'; this.style.backgroundColor='#f0f9ff';"
+                     onmouseout="this.style.borderColor='transparent'; this.style.backgroundColor='white';">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 1rem; color: var(--color-gray-900); margin-bottom: 0.25rem;">${customer.name}</div>
+                            <div style="font-size: 0.875rem; color: var(--color-gray-600);">
+                                <i class="fas fa-phone" style="margin-right: 0.25rem;"></i>${customer.phone}
+                            </div>
+                        </div>
+                        ${getMemberBadge(customer.memberType)}
                     </div>
                 </div>
-                ${getMemberBadge(customer.memberType)}
-            </div>
-        </div>
-    `).join('');
+            `).join('');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('customerSearchResults').innerHTML =
+                `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                    <p>Có lỗi xảy ra. Vui lòng thử lại.</p>
+                </div>`;
+        });
 }
 
 function selectCustomer(customer) {
     selectedCustomerData = customer;
     bookingFormData.customer = customer;
-    
+
     document.getElementById('selectedCustomerName').textContent = customer.name;
     document.getElementById('selectedCustomerPhone').textContent = customer.phone;
     document.getElementById('selectedCustomerInfo').style.display = 'block';
@@ -345,16 +378,18 @@ function updateCourtInfo() {
     }
 
     const [courtId, courtType, courtPrice] = court.split('|');
-    
+
     const durations = {
         'mini-football': 90,
         'badminton': 60,
-        'tennis': 120
+        'tennis': 120,
+        'basketball': 60,
+        'futsal': 60
     };
 
     const duration = durations[courtType];
     document.getElementById('durationText').textContent = duration + ' phút/buổi';
-    
+
     updateEndTime();
 }
 
@@ -372,7 +407,9 @@ function updateEndTime() {
     const durations = {
         'mini-football': 90,
         'badminton': 60,
-        'tennis': 120
+        'tennis': 120,
+        'basketball': 90,
+        'futsal': 90
     };
 
     const duration = durations[courtType] * sessions;
@@ -380,10 +417,10 @@ function updateEndTime() {
     const totalMins = hours * 60 + mins + duration;
     const endHours = Math.floor(totalMins / 60);
     const endMins = totalMins % 60;
-    
+
     const endTime = `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
     bookingFormData.endTime = endTime;
-    
+
     document.getElementById('endTimeText').textContent = endTime;
 }
 
@@ -394,24 +431,16 @@ function updateAddon(type, change) {
     input.value = newValue;
 }
 
-function updatePaymentMethod() {
-    const method = document.querySelector('input[name="paymentMethod"]:checked').value;
-    bookingFormData.paymentMethod = method;
-    
-    document.getElementById('counterPaymentWarning').style.display = method === 'counter' ? 'block' : 'none';
-}
-
 function calculateSummary() {
     const courtFee = bookingFormData.courtPrice * bookingFormData.sessions;
-    const addonsFee = 
+    const addonsFee =
         bookingFormData.addons.coach * 50 +
         bookingFormData.addons.uniform * 10 +
         bookingFormData.addons.drink * 3 +
         bookingFormData.addons.locker * 5;
-    
+
     const subtotal = courtFee + addonsFee;
-    const tax = Math.round(subtotal * 0.1);
-    
+
     // Member discount
     const discountRates = {
         'platinum': 0.20,
@@ -420,15 +449,14 @@ function calculateSummary() {
         'student': 0.10,
         'general': 0
     };
-    
+
     const discountRate = discountRates[bookingFormData.customer?.memberType || 'general'];
     const discount = Math.round(subtotal * discountRate);
-    
-    const total = subtotal + tax - discount;
+
+    const total = subtotal - discount;
 
     document.getElementById('summaryCourtFee').textContent = courtFee.toLocaleString() + ' VNĐ';
     document.getElementById('summaryAddonsFee').textContent = addonsFee.toLocaleString() + ' VNĐ';
-    document.getElementById('summaryTax').textContent = tax.toLocaleString() + ' VNĐ';
     document.getElementById('summaryDiscount').textContent = '-' + discount.toLocaleString() + ' VNĐ';
     document.getElementById('summaryTotal').textContent = total.toLocaleString() + ' VNĐ';
 }
@@ -441,8 +469,7 @@ function submitBooking() {
         startTime: bookingFormData.startTime,
         endTime: bookingFormData.endTime,
         sessions: bookingFormData.sessions,
-        addons: bookingFormData.addons,
-        paymentMethod: bookingFormData.paymentMethod
+        addons: bookingFormData.addons
     };
 
     fetch('/Receptionist/CreateBooking', {
@@ -450,26 +477,56 @@ function submitBooking() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Đặt sân thành công!');
-            closeNewBookingDialog();
-            location.reload();
-        } else {
-            alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra. Vui lòng thử lại.');
-    });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đặt sân thành công! Vui lòng thanh toán.');
+                closeNewBookingDialog();
+                location.reload();
+            } else {
+                alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        });
 }
 
-// Set default date to today
-document.addEventListener('DOMContentLoaded', function() {
+// Load courts from API
+function loadCourts() {
+    fetch('/Receptionist/GetAvailableCourts')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.courts) {
+                const courtSelect = document.getElementById('bookingCourt');
+                if (courtSelect) {
+                    // Clear existing options except the first placeholder
+                    courtSelect.innerHTML = '<option value="">-- Chọn sân --</option>';
+
+                    // Add courts
+                    data.courts.forEach(court => {
+                        const option = document.createElement('option');
+                        // Store court info in the value as: maSan|courtType|price
+                        option.value = `${court.id}|${court.type}|${court.price}`;
+                        option.textContent = `${court.name} - ${court.typeName} (${court.price.toLocaleString()} VNĐ/${court.duration} phút)`;
+                        courtSelect.appendChild(option);
+                    });
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading courts:', error);
+        });
+}
+
+// Set default date to today and load courts
+document.addEventListener('DOMContentLoaded', function () {
     const today = new Date().toISOString().split('T')[0];
     if (document.getElementById('bookingDate')) {
         document.getElementById('bookingDate').value = today;
     }
+
+    // Load courts when page loads
+    loadCourts();
 });
