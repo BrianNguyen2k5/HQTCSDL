@@ -150,6 +150,9 @@
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <div style="width: 16px; height: 16px; background-color: #dbeafe; border: 2px solid #3b82f6; border-radius: 2px;"></div>
+
+<!-- Include Modal -->
+<partial name="_BookingDetailModal" />
                 <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đang diễn ra</span>
             </div>
         </div>
@@ -157,6 +160,8 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/receptionist/new-booking-dialog.js"></script>
+    <script src="~/js/receptionist/booking-detail.js"></script>
     <script>
         // Initialize with the date from the server
         let selectedDate = new Date('@selectedDate.ToString("yyyy-MM-dd")');
@@ -218,10 +223,7 @@
             }
         }
 
-        function viewBookingDetail(bookingId) {
-            // TODO: Open booking detail modal
-            alert('Chi tiết đặt sân #' + bookingId);
-        }
+        // viewBookingDetail is handled in booking-detail.js
 
         function openNewBookingDialog() {
             document.getElementById('newBookingModal').style.display = 'flex';

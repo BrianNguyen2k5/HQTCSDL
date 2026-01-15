@@ -139,7 +139,12 @@
     </div>
 </div>
 
+<!-- Include Modal -->
+<partial name="_BookingDetailModal" />
+
 @section Scripts {
+    <script src="~/js/receptionist/new-booking-dialog.js"></script>
+    <script src="~/js/receptionist/booking-detail.js"></script>
     <script>
         // Search functionality
         document.getElementById('searchInput').addEventListener('input', function(e) {
@@ -216,26 +221,7 @@
             }
         }
 
-        function viewBookingDetail(maPhieuDat) {
-            // Gọi API lấy thông tin chi tiết
-            fetch('/Receptionist/LayThongTinPhieuDat?maPhieuDat=' + maPhieuDat)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // TODO: Hiển thị modal với thông tin chi tiết
-                        console.log('Booking details:', data);
-                        alert('Chi tiết đặt sân ' + maPhieuDat + '\n' + 
-                              'Khách hàng: ' + data.phieuDat.tenKhachHang + '\n' +
-                              'Trạng thái: ' + data.phieuDat.trangThaiPhieu);
-                    } else {
-                        alert('Không tìm thấy thông tin đặt sân');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Có lỗi xảy ra khi lấy thông tin');
-                });
-        }
+        // viewBookingDetail is now handled in booking-detail.js
 
         function openNewBookingDialog() {
             document.getElementById('newBookingModal').style.display = 'flex';

@@ -1,0 +1,158 @@
+
+<!-- Booking Detail Modal -->
+<div id="bookingDetailModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: white; border-radius: 12px; width: 900px; max-width: 95%; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);">
+        
+        <!-- Header -->
+        <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <h3 style="margin: 0; font-size: 1.5rem; font-weight: bold;">Chi tiết đặt sân</h3>
+                <span id="detailBookingCode" style="font-family: monospace; font-size: 1.125rem; color: var(--color-gray-500); background: var(--color-gray-100); padding: 0.25rem 0.75rem; border-radius: 6px;">
+                    #LOADING
+                </span>
+                <span id="detailStatusBadge" class="badge badge-outline">Loading...</span>
+            </div>
+            <button onclick="closeBookingDetailModal()" class="btn btn-ghost" style="font-size: 1.25rem; color: var(--color-gray-500);">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Scrollable Body -->
+        <div class="scroll-area" style="padding: 1.5rem; overflow-y: auto; flex: 1;">
+            
+            <!-- Info Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <!-- Customer & Booking Info -->
+                <div class="card" style="padding: 1.5rem;">
+                    <h4 style="margin: 0 0 1rem 0; font-size: 1.125rem; font-weight: 600; color: var(--color-gray-800); display: flex; align-items: center;">
+                        <i class="fas fa-user-clock" style="margin-right: 0.75rem; color: var(--color-primary);"></i>
+                        Thông tin Chung
+                    </h4>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--color-gray-500);">Khách hàng:</span>
+                            <span style="font-weight: 500;" id="detailCustomerName">--</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--color-gray-500);">Số điện thoại:</span>
+                            <span style="font-weight: 500;" id="detailPhone">--</span>
+                        </div>
+                         <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--color-gray-500);">Sân:</span>
+                            <span style="font-weight: 500;" id="detailCourtName">--</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--color-gray-500);">Loại sân:</span>
+                            <span style="font-weight: 500;" id="detailCourtType">--</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--color-gray-500);">Ngày:</span>
+                            <span style="font-weight: 500;" id="detailDate">--</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--color-gray-500);">Thời gian:</span>
+                            <span style="font-weight: 500;">
+                                <span id="detailTime">--</span> 
+                                <span style="font-size: 0.875rem; color: var(--color-gray-500); font-weight: normal;">(<span id="detailDuration">--</span> phút)</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Summary -->
+                <div class="card" style="padding: 1.5rem;">
+                    <h4 style="margin: 0 0 1rem 0; font-size: 1.125rem; font-weight: 600; color: var(--color-gray-800); display: flex; align-items: center;">
+                        <i class="fas fa-file-invoice-dollar" style="margin-right: 0.75rem; color: var(--color-success);"></i>
+                        Chi phí (Tạm tính)
+                    </h4>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--color-gray-500);">Tiền sân:</span>
+                            <span style="font-weight: 500;" id="detailCourtFee">0 VNĐ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--color-gray-500);">Dịch vụ:</span>
+                            <span style="font-weight: 500;" id="detailServiceFee">0 VNĐ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: var(--color-success);">
+                            <span>Giảm giá:</span>
+                            <span style="font-weight: 500;" id="detailDiscount">-0 VNĐ</span>
+                        </div>
+                        <div style="height: 1px; background: var(--border-color); margin: 0.5rem 0;"></div>
+                        <div style="display: flex; justify-content: space-between; font-size: 1.125rem; font-weight: 700; color: var(--color-primary);">
+                            <span>Tổng cộng:</span>
+                            <span id="detailTotalAmount">0 VNĐ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Section -->
+            <div style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h4 style="margin: 0; font-size: 1.125rem; font-weight: 600;">Dịch vụ sử dụng</h4>
+                    <!-- Only show add service button if status is "In Use" -->
+                    <button id="btnAddService" class="btn btn-outline" style="font-size: 0.875rem; display: none;" onclick="openAddServiceDialog()">
+                        <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>Thêm dịch vụ
+                    </button>
+                </div>
+                
+                <table class="table" style="font-size: 0.95rem;">
+                    <thead style="background: var(--color-gray-50);">
+                        <tr>
+                            <th>Tên dịch vụ</th>
+                            <th style="text-align: center;">SL</th>
+                            <th style="text-align: right;">Đơn giá</th>
+                            <th style="text-align: right;">Thành tiền</th>
+                            <th style="text-align: center;">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailServicesBody">
+                        <!-- Services will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Invoices History Section -->
+            <div>
+                <h4 style="margin: 0 0 1rem 0; font-size: 1.125rem; font-weight: 600;">Lịch sử hóa đơn</h4>
+                <table class="table" style="font-size: 0.95rem;">
+                    <thead style="background: var(--color-gray-50);">
+                        <tr>
+                            <th>Mã HĐ</th>
+                            <th>Ngày xuất</th>
+                            <th>Nội dung</th>
+                            <th style="text-align: right;">Số tiền</th>
+                            <th style="text-align: center;">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailInvoicesBody">
+                        <!-- Invoices will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- Footer Actions -->
+        <div style="padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 1rem; background: var(--color-gray-50); border-radius: 0 0 12px 12px;">
+            <button class="btn btn-outline" onclick="closeBookingDetailModal()">Đóng</button>
+            
+            <!-- Actions based on status -->
+            <button id="btnCancelBooking" class="btn btn-ghost" style="color: var(--color-danger); display: none;" onclick="processCancelBooking()">
+                Hủy đặt sân
+            </button>
+            <button id="btnCheckIn" class="btn btn-primary" style="display: none;" onclick="processCheckIn()">
+                <i class="fas fa-check" style="margin-right: 0.5rem;"></i>Check-in
+            </button>
+            <button id="btnPayment" class="btn btn-warning" style="display: none;" onclick="processPayment()">
+                <i class="fas fa-money-bill-wave" style="margin-right: 0.5rem;"></i>Thanh toán cọc
+            </button>
+            <button id="btnCheckOut" class="btn btn-success" style="display: none;" onclick="processCheckOut()">
+                <i class="fas fa-sign-out-alt" style="margin-right: 0.5rem;"></i>Thanh toán & Trả sân
+            </button>
+        </div>
+    </div>
+</div>
