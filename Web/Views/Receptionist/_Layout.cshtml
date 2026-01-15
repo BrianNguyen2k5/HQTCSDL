@@ -28,7 +28,7 @@
                 </div>
             </div>
 
-            <nav class="nav" style="flex: 1; padding: 1rem;">
+            <nav class="nav" style="flex: 1; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
                 <a href="@Url.Action("Dashboard", "Receptionist")" class="nav-item @(currentPage == "dashboard" ? "active" : "")">
                     <i class="fas fa-chart-line"></i>
                     <span>Tổng quan</span>
@@ -43,11 +43,15 @@
                 </a>
                 <a href="@Url.Action("POS", "Receptionist")" class="nav-item @(currentPage == "pos" ? "active" : "")">
                     <i class="fas fa-shopping-cart"></i>
-                    <span>Thanh toán</span>
+                    <span>Dịch vụ</span>
                 </a>
                 <a href="@Url.Action("Customers", "Receptionist")" class="nav-item @(currentPage == "customers" ? "active" : "")">
                     <i class="fas fa-users"></i>
                     <span>Khách hàng</span>
+                </a>
+                <a href="@Url.Action("Logout", "Auth")" class="nav-item" style="margin-top: auto; color: #dc3545;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Đăng xuất</span>
                 </a>
             </nav>
 

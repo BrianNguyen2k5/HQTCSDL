@@ -8,7 +8,12 @@
 }
 
 <div style="display: flex; flex-direction: column; gap: 1rem; height: 100%;">
-    <h2 style="font-size: 1.5rem; font-weight: bold; color: var(--color-gray-900);">POS/Dịch vụ</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.5rem; font-weight: bold; color: var(--color-gray-900);">POS/Dịch vụ</h2>
+        
+        <!-- Mode Switcher Removed -->
+
+    </div>
 
     <div style="display: grid; grid-template-columns: 3fr 1fr; gap: 1rem; flex: 1; min-height: 0;">
         <!-- Products Area -->
@@ -57,14 +62,25 @@
                 </h3>
             </div>
 
-            <!-- Customer Selection -->
+            <!-- Customer/Booking Selection -->
             <div style="padding: 1rem 0; border-bottom: 1px solid var(--border-color);">
-                <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Khách hàng</label>
-                <select class="input" id="customerSelect">
-                    <option value="retail">Khách lẻ</option>
-                    <option value="1">Nguyễn Văn An (Gold)</option>
-                    <option value="2">Trần Thị Bình (Sinh viên)</option>
-                </select>
+                <!-- Booking Mode: Active Booking Selection -->
+                <div id="bookingSelectionArea">
+                    <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">
+                        <i class="fas fa-futbol" style="margin-right: 0.25rem;"></i>
+                        Chọn phiếu đặt đang sử dụng
+                    </label>
+                    <select class="input" id="activeBookingSelect">
+                        <option value="">-- Chọn phiếu đặt --</option>
+                    </select>
+                    <div id="bookingInfo" style="margin-top: 0.75rem; padding: 0.75rem; background: var(--color-gray-50); border-radius: var(--radius-md); display: none;">
+                        <div style="font-size: 0.875rem; color: var(--color-gray-700);">
+                            <div style="margin-bottom: 0.25rem;"><strong>Khách:</strong> <span id="bookingCustomer"></span></div>
+                            <div style="margin-bottom: 0.25rem;"><strong>Sân:</strong> <span id="bookingCourt"></span></div>
+                            <div><strong>Check-in:</strong> <span id="bookingCheckin"></span></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Cart Items -->
@@ -89,9 +105,10 @@
                     <span style="color: var(--color-primary);" id="total">0₫</span>
                 </div>
 
-                <button class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.75rem;" onclick="processPayment()">
-                    <i class="fas fa-credit-card" style="margin-right: 0.5rem;"></i>
-                    Thanh toán
+                <!-- Booking Mode Button -->
+                <button id="bookingAddBtn" class="btn btn-success" style="width: 100%; margin-top: 1rem; padding: 0.75rem;" onclick="addServicesToBooking()">
+                    <i class="fas fa-plus-circle" style="margin-right: 0.5rem;"></i>
+                    Thêm vào phiếu
                 </button>
             </div>
         </div>
@@ -101,6 +118,108 @@
 @section Scripts {
     <script>
         let cart = [];
+        let activeBookings = [];
+
+        // Initialize - load active bookings
+        document.addEventListener('DOMContentLoaded', function() {
+            loadActiveBookings();
+        });
+
+        // Load Active Bookings
+        function loadActiveBookings() {
+            console.log('Loading active bookings...');
+            fetch('/Receptionist/LayDanhSachPhieuDat?trangThai=' + encodeURIComponent('Đang sử dụng'))
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API response:', data);
+                    if (data.success) {
+                        activeBookings = data.danhSach || [];
+                        console.log('Active bookings loaded:', activeBookings.length);
+                        renderActiveBookingsDropdown();
+                    } else {
+                        console.error('API returned error:', data.message);
+                        activeBookings = [];
+                        renderActiveBookingsDropdown();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading active bookings:', error);
+                    activeBookings = [];
+                    renderActiveBookingsDropdown();
+                });
+        }
+
+        // Render Active Bookings Dropdown
+        function renderActiveBookingsDropdown() {
+            const select = document.getElementById('activeBookingSelect');
+            select.innerHTML = '<option value="">-- Chọn phiếu đặt --</option>';
+            
+            if (activeBookings.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Không có phiếu đặt nào đang sử dụng';
+                option.disabled = true;
+                select.appendChild(option);
+                return;
+            }
+            
+            activeBookings.forEach(booking => {
+                const option = document.createElement('option');
+                option.value = booking.maPhieuDat;
+                const checkinTime = formatTimeSpan(booking.thoiGianCheckin);
+                option.textContent = `[${booking.tenSan}] - ${booking.tenKhachHang} - ${checkinTime}`;
+                select.appendChild(option);
+            });
+            
+            // Add change event listener (only once)
+            select.removeEventListener('change', handleBookingChange);
+            select.addEventListener('change', handleBookingChange);
+        }
+
+        // Handle booking selection change
+        function handleBookingChange(event) {
+            updateBookingInfo(event.target.value);
+        }
+
+        // Update Booking Info Display
+        function updateBookingInfo(maPhieuDat) {
+            const bookingInfo = document.getElementById('bookingInfo');
+            
+            if (!maPhieuDat) {
+                bookingInfo.style.display = 'none';
+                return;
+            }
+            
+            const booking = activeBookings.find(b => b.maPhieuDat === maPhieuDat);
+            if (booking) {
+                document.getElementById('bookingCustomer').textContent = booking.tenKhachHang || '--';
+                document.getElementById('bookingCourt').textContent = booking.tenSan || '--';
+                document.getElementById('bookingCheckin').textContent = formatTimeSpan(booking.thoiGianCheckin);
+                bookingInfo.style.display = 'block';
+            }
+        }
+
+        // Format TimeSpan from C# - can be "HH:mm:ss" or object format
+        function formatTimeSpan(timeSpan) {
+            if (!timeSpan) return '--';
+            
+            // If it's a string (HH:mm:ss format)
+            if (typeof timeSpan === 'string') {
+                return timeSpan.substring(0, 5); // Return HH:mm
+            }
+            
+            // If it's an object with hours/minutes
+            if (typeof timeSpan === 'object') {
+                const hours = timeSpan.hours || 0;
+                const minutes = timeSpan.minutes || 0;
+                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            }
+            
+            return '--';
+        }
 
         function addToCart(id, name, price) {
             const existingItem = cart.find(item => item.id === id);
@@ -173,34 +292,70 @@
             document.getElementById('total').textContent = total.toLocaleString() + '₫';
         }
 
-        function processPayment() {
+
+
+        // Add Services to Booking
+        async function addServicesToBooking() {
             if (cart.length === 0) {
                 alert('Giỏ hàng trống!');
                 return;
             }
-            
-            const customer = document.getElementById('customerSelect').value;
+
+            const maPhieuDat = document.getElementById('activeBookingSelect').value;
+            if (!maPhieuDat) {
+                alert('Vui lòng chọn phiếu đặt!');
+                return;
+            }
+
+            const booking = activeBookings.find(b => b.maPhieuDat === maPhieuDat);
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            
-            if (confirm(`Xác nhận thanh toán ${total.toLocaleString()}₫?`)) {
-                // TODO: Send to backend
-                fetch('/Receptionist/Payment', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customerId: customer,
-                        items: cart,
-                        amount: total
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
+
+            if (!confirm(`Thêm ${cart.length} dịch vụ (${total.toLocaleString()}₫) vào phiếu của ${booking.tenKhachHang}?`)) {
+                return;
+            }
+
+            try {
+                let successCount = 0;
+                let errorMessages = [];
+
+                // Add each service to the booking
+                for (const item of cart) {
+                    const response = await fetch('/Receptionist/ThemDichVu', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            MaPhieuDat: maPhieuDat,
+                            MaDichVu: item.id,
+                            SoLuong: item.quantity
+                        })
+                    });
+
+                    const data = await response.json();
                     if (data.success) {
-                        cart = [];
-                        updateCart();
+                        successCount++;
+                    } else {
+                        errorMessages.push(`${item.name}: ${data.message}`);
                     }
-                });
+                }
+
+                // Show results
+                if (successCount === cart.length) {
+                    alert(`✓ Đã thêm ${successCount} dịch vụ vào phiếu thành công!`);
+                    cart = [];
+                    updateCart();
+                } else if (successCount > 0) {
+                    alert(`Đã thêm ${successCount}/${cart.length} dịch vụ.\n\nLỗi:\n${errorMessages.join('\n')}`);
+                    // Remove successful items from cart
+                    cart = cart.filter(item => 
+                        errorMessages.some(msg => msg.startsWith(item.name))
+                    );
+                    updateCart();
+                } else {
+                    alert(`Không thể thêm dịch vụ:\n${errorMessages.join('\n')}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi thêm dịch vụ!');
             }
         }
     </script>

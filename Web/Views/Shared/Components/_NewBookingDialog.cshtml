@@ -165,53 +165,11 @@
         <div id="bookingStep3" class="booking-step-content" style="display: none; min-height: 400px;">
             <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--color-gray-900);">Bước 3: Thêm dịch vụ</h3>
             
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span>🏃 Huấn luyện viên</span>
-                        <span>50.000 VNĐ/buổi</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('coach', -1)">-</button>
-                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonCoach" value="0" readonly />
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('coach', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span>👕 Áo đồng phục</span>
-                        <span>10.000 VNĐ/bộ</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('uniform', -1)">-</button>
-                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonUniform" value="0" readonly />
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('uniform', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span>🥤 Nước uống</span>
-                        <span>3.000 VNĐ/chai</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('drink', -1)">-</button>
-                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonDrink" value="0" readonly />
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('drink', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span>🔐 Tủ đồ</span>
-                        <span>5.000 VNĐ/tủ</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('locker', -1)">-</button>
-                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonLocker" value="0" readonly />
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('locker', 1)">+</button>
-                    </div>
+            <div id="servicesContainer" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                <!-- Services will be loaded dynamically -->
+                <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--color-gray-500);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <p>Đang tải dịch vụ...</p>
                 </div>
             </div>
         </div>
@@ -232,39 +190,12 @@
                     <span id="summaryAddonsFee">0 VNĐ</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span>Thuế (10%):</span>
-                    <span id="summaryTax">0 VNĐ</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                     <span>Giảm giá (thành viên):</span>
                     <span style="color: var(--color-success);" id="summaryDiscount">0 VNĐ</span>
                 </div>
                 <div style="padding-top: 1rem; margin-top: 1rem; border-top: 2px solid var(--border-color); display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: bold;">
                     <span>Tổng cộng:</span>
                     <span style="color: var(--color-primary);" id="summaryTotal">0 VNĐ</span>
-                </div>
-            </div>
-
-            <div>
-                <label class="label">Phương thức thanh toán</label>
-                <div style="display: flex; gap: 1rem;">
-                    <label style="flex: 1; cursor: pointer;">
-                        <input type="radio" name="paymentMethod" value="online" checked onchange="updatePaymentMethod()" />
-                        <span style="margin-left: 0.5rem;">Thanh toán online</span>
-                    </label>
-                    <label style="flex: 1; cursor: pointer;">
-                        <input type="radio" name="paymentMethod" value="counter" onchange="updatePaymentMethod()" />
-                        <span style="margin-left: 0.5rem;">Thanh toán tại quầy</span>
-                    </label>
-                </div>
-                
-                <div id="counterPaymentWarning" style="display: none; margin-top: 1rem; padding: 1rem; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: var(--radius-md);">
-                    <div style="display: flex; gap: 0.75rem;">
-                        <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
-                        <div style="font-size: 0.875rem;">
-                            <strong>Lưu ý:</strong> Khách hàng phải thanh toán trong vòng 30 phút kể từ khi đặt sân.
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
