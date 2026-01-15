@@ -208,6 +208,7 @@ begin
 		select @doanhthu = sum(hd.TongThanhToan)
 		from HoaDon hd
 		where year(hd.NgayXuat) = @nam
+			and hd.TrangThaiThanhToan = N'Đã thanh toán'
 	commit tran
 	set @output = isnull(@doanhthu, 0)
 end
@@ -224,6 +225,7 @@ begin
 	from HoaDon hd
 	where year(hd.NgayXuat) = @nam
 		and month(hd.NgayXuat) = @thang
+		and hd.TrangThaiThanhToan = N'Đã thanh toán'
 	set @output = isnull(@doanhthu, 0)
 end
 go
@@ -241,7 +243,35 @@ begin
 	where year(hd.NgayXuat) = @nam
 		and month(hd.NgayXuat) = @thang
 		and day(hd.NgayXuat) = @ngay
+		and hd.TrangThaiThanhToan = N'Đã thanh toán'
 	set @output = isnull(@doanhthu, 0)
+end
+go
+
+-- My (Xem chi tiết hóa đơn giai đoạn 1 và 2 của quản lý
+create or alter proc sp_ChiTietThongKeDoanhThu
+	@macoso char(10),
+	@nam int
+as
+begin
+	set transaction isolation level repeatable read
+	begin tran
+		SELECT COUNT(MaHoaDon) as SoHoaDon,  SUM (TongThanhToan) as TongDoanhThu
+		FROM HoaDon hd
+		JOIN NhanVien nv on nv.MaNhanVien = hd.MaNhanVien
+		WHERE MaCoSo = 'CS01' 
+			and hd.TrangThaiThanhToan = N'Đã thanh toán'
+			and year(hd.NgayXuat) = @nam
+
+		WAITFOR DELAY '00:00:05'
+
+		SELECT hd.MaHoaDon, hd.TongThanhToan, hd.HinhThucThanhToan
+		FROM HoaDon hd
+		JOIN NhanVien nv on nv.MaNhanVien = hd.MaNhanVien
+		WHERE MaCoSo = 'CS01' 
+			and hd.TrangThaiThanhToan = N'Đã thanh toán'
+			and year(hd.NgayXuat) = @nam
+	commit tran
 end
 go
 

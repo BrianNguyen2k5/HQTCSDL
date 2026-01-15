@@ -59,6 +59,7 @@ namespace DAL
             }
 
             using SqlCommand cmd = new SqlCommand(spName, conn);
+            cmd.CommandTimeout = 120; // Chờ tối đa 2 phút để test transaction blocking
             cmd.CommandType = CommandType.StoredProcedure; // Phải là StoredProcedure vì spName là tên SP
 
             // 2. TRUYỀN THAM SỐ (Parameters)

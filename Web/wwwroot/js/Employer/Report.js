@@ -98,10 +98,15 @@ function closeRevenueDetailModal() {
     }
 }
 
-// Đóng modal khi click ra ngoài vùng content
-window.onclick = function(event) {
-    const modal = document.getElementById('revenue-detail-modal');
-    if (event.target == modal) {
-        modal.classList.add('hidden');
-    }
+
+function handleServiceCancelModal() {
+	const serviceModal = document.getElementById("service-cancel-modal");
+	if(serviceModal) serviceModal.classList.remove("hidden");
+	else alert("Không tìm thấy biểu mẫu kết quả")
+}
+
+function closeServiceCancelModal() {
+	const serviceModal = document.getElementById("service-cancel-modal")
+	if(serviceModal) serviceModal.classList.add("hidden");
+	else alert("Không tìm thấy biểu mẫu kết quả")
 }

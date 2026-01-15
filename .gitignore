@@ -75,3 +75,7 @@ wwwroot/lib/
 *~
 *.bak
 *.swp
+
+#appsettings
+appsettings.json
+appsettings.Development.json
