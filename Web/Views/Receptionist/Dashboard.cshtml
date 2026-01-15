@@ -4,9 +4,10 @@
     ViewData["PageTitle"] = "Tổng quan";
     ViewData["CurrentPage"] = "dashboard";
     
-    var activeBookings = Model.Count(b => b.Status == "active");
+    // FIX: Use Vietnamese status values from database
+    var activeBookings = Model.Count(b => b.Status == "Đang sử dụng");
     var totalBookings = Model.Count;
-    var pendingCheckIns = Model.Count(b => b.Status == "booked");
+    var pendingCheckIns = Model.Count(b => b.Status == "Đã xác nhận");
 }
 
 <div style="display: flex; flex-direction: column; height: 100%; gap: 1.5rem;">
