@@ -19,8 +19,7 @@ END
 GO
 
 CREATE PROCEDURE sp_LeTan_CheckIn
-    @MaPhieuDat CHAR(10),
-    @MaNhanVien CHAR(10) -- Nhân viên lễ tân thực hiện check-in
+    @MaPhieuDat CHAR(10)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -35,7 +34,7 @@ BEGIN
             RETURN;
         END
 
-        -- 2. Kiểm tra trạng thái phiếu (Chỉ cho phép check-in nếu đã xác nhận hoặc chờ xác nhận)
+        -- 2. Kiểm tra trạng thái phiếu
         DECLARE @TrangThaiHienTai NVARCHAR(20);
         DECLARE @MaSan CHAR(10);
         DECLARE @NgayNhanSan DATE;
@@ -46,9 +45,9 @@ BEGIN
         FROM PhieuDatSan 
         WHERE MaPhieuDat = @MaPhieuDat;
 
-        IF @TrangThaiHienTai NOT IN (N'Đã xác nhận', N'Chờ xác nhận')
+        IF @TrangThaiHienTai NOT IN (N'Đã xác nhận')
         BEGIN
-            RAISERROR(N'Trạng thái phiếu không hợp lệ để Check-in (Phải là Đã xác nhận hoặc Chờ xác nhận).', 16, 1);
+            RAISERROR(N'Trạng thái phiếu không hợp lệ để Check-in (Phải là Đã xác nhận).', 16, 1);
             ROLLBACK TRANSACTION;
             RETURN;
         END
@@ -64,17 +63,10 @@ BEGIN
         -- 4. Cập nhật thông tin phiếu đặt
         UPDATE PhieuDatSan
         SET ThoiGianCheckin = CAST(GETDATE() AS TIME),
-            TrangThaiPhieu = N'Đang sử dụng',
-            MaNhanVien = @MaNhanVien -- Cập nhật nhân viên thực hiện checkin
+            TrangThaiPhieu = N'Đang sử dụng'
         WHERE MaPhieuDat = @MaPhieuDat;
 
-        -- 5. Cập nhật trạng thái sân
-        UPDATE San
-        SET TinhTrang = N'Đang sử dụng'
-        WHERE MaSan = @MaSan;
-
         COMMIT TRANSACTION;
-        PRINT N'Check-in thành công!';
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
