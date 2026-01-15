@@ -73,6 +73,9 @@ function initializeEventListeners() {
         });
     });
 
+    // Logout button
+    document.getElementById('logoutButton').addEventListener('click', handleLogout);
+
     // Modal overlay click
     document.querySelector('.modal-overlay')?.addEventListener('click', () => {
         hidePaymentModal();
@@ -469,6 +472,34 @@ function showSuccess(message) {
 
 function showError(message) {
     alert('Lỗi: ' + message); // TODO: Replace with better notification
+}
+
+// ====================================================
+// LOGOUT
+// ====================================================
+
+async function handleLogout() {
+    if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            window.location.href = '/login';
+        } else {
+            showError('Không thể đăng xuất. Vui lòng thử lại.');
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        showError('Có lỗi xảy ra khi đăng xuất.');
+    }
 }
 
 // Make viewInvoiceDetail available globally
