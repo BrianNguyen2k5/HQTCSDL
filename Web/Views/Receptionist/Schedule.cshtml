@@ -104,21 +104,62 @@
                             if (booking != null)
                             {
                                 var span = booking.DurationMinutes / 30;
-                                var bgColor = booking.Status == "active" ? "#dbeafe" : 
-                                             booking.Status == "booked" ? "#fee2e2" : "#dcfce7";
-                                var borderColor = booking.Status == "active" ? "#3b82f6" : 
-                                                booking.Status == "booked" ? "#ef4444" : "#10b981";
-                                var textColor = booking.Status == "active" ? "#1e40af" : 
-                                              booking.Status == "booked" ? "#991b1b" : "#166534";
-                                
-                                <div style="grid-column: span @span; min-height: 48px; padding: 0.5rem; border-left: 2px solid @borderColor; background-color: @bgColor; color: @textColor; cursor: pointer; transition: opacity 0.2s; box-sizing: border-box;"
+                                var bgColor = "#f3f4f6";
+                                var borderColor = "#d1d5db";
+                                var textColor = "#374151";
+
+                                if (booking.Status == "Đang sử dụng")
+                                {
+                                    bgColor = "#dbeafe"; // Blue-100
+                                    borderColor = "#3b82f6"; // Blue-500
+                                    textColor = "#1e40af"; // Blue-800
+                                }
+                                else if (booking.Status == "Đã xác nhận")
+                                {
+                                    bgColor = "#dcfce7"; // Green-100
+                                    borderColor = "#10b981"; // Emerald-500
+                                    textColor = "#166534"; // Green-800
+                                }
+                                else if (booking.Status == "Chờ xác nhận")
+                                {
+                                    bgColor = "#fee2e2"; // Red-100
+                                    borderColor = "#ef4444"; // Red-500
+                                    textColor = "#991b1b"; // Red-800
+                                }
+                                else if (booking.Status == "Hoàn thành" || booking.Status == "Chờ thanh toán")
+                                {
+                                    bgColor = "#fef9c3"; // Yellow-100
+                                    borderColor = "#eab308"; // Yellow-500
+                                    textColor = "#854d0e"; // Yellow-800
+                                }
+
+                                <div style="grid-column: span @span; min-height: 48px; padding: 0.5rem; border-left: 4px solid @borderColor; background-color: @bgColor; color: @textColor; cursor: pointer; transition: opacity 0.2s; box-sizing: border-box; overflow: hidden;"
                                      data-court-type="@court.CourtType"
                                      onclick="viewBookingDetail('@booking.Id')"
                                      onmouseover="this.style.opacity='0.8'"
                                      onmouseout="this.style.opacity='1'">
-                                    <div style="font-size: 0.875rem; font-weight: 600;">@booking.CustomerName</div>
-                                    <div style="font-size: 0.75rem; margin-top: 0.25rem;">
-                                        @(booking.PaymentStatus == "paid-online" ? "✓ Đã thanh toán" : "⏳ Chưa thanh toán")
+                                    <div style="font-size: 0.875rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@booking.CustomerName</div>
+                                    <div style="font-size: 0.75rem; margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem;">
+                                        @if (booking.Status == "Đang sử dụng")
+                                        {
+                                            <i class="fas fa-play-circle" style="color: @textColor"></i> <span>Đang sử dụng</span>
+                                        }
+                                        else if (booking.Status == "Đã xác nhận")
+                                        {
+                                            <i class="fas fa-check-circle" style="color: @textColor"></i> <span>Đã xác nhận</span>
+                                        }
+                                        else if (booking.Status == "Chờ xác nhận")
+                                        {
+                                            <i class="fas fa-clock" style="color: @textColor"></i> <span>Chờ xác nhận</span>
+                                        }
+                                        else if (booking.Status == "Hoàn thành" || booking.Status == "Chờ thanh toán")
+                                        {
+                                            <i class="fas fa-money-bill-wave" style="color: @textColor"></i> <span>Chờ thanh toán</span>
+                                        }
+                                        else 
+                                        {
+                                            <span>@booking.Status</span>
+                                        }
                                     </div>
                                 </div>
                             }
@@ -146,14 +187,23 @@
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <div style="width: 16px; height: 16px; background-color: #fee2e2; border: 2px solid #ef4444; border-radius: 2px;"></div>
-                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đã đặt</span>
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Chờ xác nhận</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 16px; height: 16px; background-color: #dcfce7; border: 2px solid #10b981; border-radius: 2px;"></div>
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đã xác nhận</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <div style="width: 16px; height: 16px; background-color: #dbeafe; border: 2px solid #3b82f6; border-radius: 2px;"></div>
 
 <!-- Include Modal -->
+<!-- Include Modal -->
 <partial name="_BookingDetailModal" />
-                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đang diễn ra</span>
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đang sử dụng</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 16px; height: 16px; background-color: #fef9c3; border: 2px solid #eab308; border-radius: 2px;"></div>
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Chờ thanh toán</span>
             </div>
         </div>
     </div>
