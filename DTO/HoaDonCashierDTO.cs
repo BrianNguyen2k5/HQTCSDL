@@ -96,8 +96,8 @@ namespace DTO
         public string MaChiTietPDS { get; set; } = string.Empty;
         public int SoLuong { get; set; }
         public int ThanhTien { get; set; }
-        public string LoaiYeuCau { get; set; } = string.Empty;
         public DateTime? ThoiDiemTao { get; set; }
+        public bool TrangThaiThanhToan { get; set; }
         
         // Thông tin dịch vụ
         public string? MaDichVu { get; set; }

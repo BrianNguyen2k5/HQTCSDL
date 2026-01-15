@@ -13,6 +13,14 @@ namespace BLL
             _hoaDonDAL = new HoaDonDAL(configuration);
         }
 
+        /// <summary>
+        /// Lấy tên cơ sở theo mã cơ sở
+        /// </summary>
+        public string GetTenCoSo(string maCoSo)
+        {
+            return _hoaDonDAL.GetTenCoSo(maCoSo);
+        }
+
         // Lấy danh sách hóa đơn với validation
         public List<HoaDonListDTO> GetAllInvoices(string? maCoSo = null, string? trangThai = null)
         {

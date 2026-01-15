@@ -130,8 +130,8 @@ BEGIN
         ct.MaChiTietPDS,
         ct.SoLuong,
         ct.ThanhTien,
-        ct.LoaiYeuCau,
         ct.ThoiDiemTao,
+        ct.TrangThaiThanhToan,
         dv.MaDichVu,
         dv.TenDichVu,
         dv.LoaiDichVu,
@@ -199,6 +199,17 @@ BEGIN
             RETURN;
         END
         
+        -- Lấy thông tin phiếu đặt sân (nếu có)
+        DECLARE @MaPhieuDat CHAR(10);
+        DECLARE @MaPhieuThue CHAR(10);
+        DECLARE @TrangThaiPhieuHienTai NVARCHAR(20);
+        
+        SELECT 
+            @MaPhieuDat = MaPhieuDat,
+            @MaPhieuThue = MaPhieuThue
+        FROM HoaDon 
+        WHERE MaHoaDon = @MaHoaDon;
+        
         -- Cập nhật trạng thái hóa đơn
         UPDATE HoaDon
         SET TrangThaiThanhToan = N'Đã thanh toán',
@@ -206,19 +217,49 @@ BEGIN
             MaNhanVien = @MaNhanVien
         WHERE MaHoaDon = @MaHoaDon;
         
-        -- Cập nhật trạng thái phiếu đặt sân (nếu có)
-        UPDATE PhieuDatSan
-        SET TrangThaiPhieu = N'Hoàn thành'
-        WHERE MaPhieuDat IN (
-            SELECT MaPhieuDat FROM HoaDon WHERE MaHoaDon = @MaHoaDon AND MaPhieuDat IS NOT NULL
-        );
+        -- Xử lý phiếu đặt sân (nếu có)
+        IF @MaPhieuDat IS NOT NULL
+        BEGIN
+            -- Lấy trạng thái hiện tại của phiếu đặt sân
+            SELECT @TrangThaiPhieuHienTai = TrangThaiPhieu
+            FROM PhieuDatSan
+            WHERE MaPhieuDat = @MaPhieuDat;
+            
+            -- Trường hợp 1: Thanh toán ban đầu (Chờ xác nhận -> Đã xác nhận)
+            -- Trường hợp 2: Thanh toán khi có dịch vụ phát sinh (Chờ thanh toán -> Hoàn thành)
+            IF @TrangThaiPhieuHienTai = N'Chờ xác nhận'
+            BEGIN
+                -- Thanh toán ban đầu
+                UPDATE PhieuDatSan
+                SET TrangThaiPhieu = N'Đã xác nhận'
+                WHERE MaPhieuDat = @MaPhieuDat;
+                
+                -- Cập nhật tất cả chi tiết phiếu đặt sân thành đã thanh toán
+                UPDATE ChiTietPhieuDatSan
+                SET TrangThaiThanhToan = 1
+                WHERE MaPhieuDat = @MaPhieuDat;
+            END
+            ELSE IF @TrangThaiPhieuHienTai = N'Chờ thanh toán'
+            BEGIN
+                -- Thanh toán khi có dịch vụ phát sinh
+                UPDATE PhieuDatSan
+                SET TrangThaiPhieu = N'Hoàn thành'
+                WHERE MaPhieuDat = @MaPhieuDat;
+                
+                -- Cập nhật chi tiết phiếu đặt sân thành đã thanh toán
+                UPDATE ChiTietPhieuDatSan
+                SET TrangThaiThanhToan = 1
+                WHERE MaPhieuDat = @MaPhieuDat;
+            END
+        END
         
         -- Cập nhật trạng thái phiếu thuê tài sản (nếu có)
-        UPDATE PhieuThueTaiSan
-        SET TrangThai = N'Hoàn thành'
-        WHERE MaPhieuThue IN (
-            SELECT MaPhieuThue FROM HoaDon WHERE MaHoaDon = @MaHoaDon AND MaPhieuThue IS NOT NULL
-        );
+        IF @MaPhieuThue IS NOT NULL
+        BEGIN
+            UPDATE PhieuThueTaiSan
+            SET TrangThai = N'Hoàn thành'
+            WHERE MaPhieuThue = @MaPhieuThue;
+        END
         
         COMMIT TRANSACTION;
         
@@ -240,5 +281,5 @@ BEGIN
 END
 GO
 
-PRINT N'Đã tạo thành công các stored procedures cho module thu ngân!'
+PRINT N'Đã tạo thành công các stored procedures cho module thu ngân!';
 GO

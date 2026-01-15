@@ -11,6 +11,22 @@ namespace DAL
         {
         }
 
+        /// <summary>
+        /// Lấy tên cơ sở theo mã cơ sở
+        /// </summary>
+        public string GetTenCoSo(string maCoSo)
+        {
+            var parameter = new SqlParameter("@MaCoSo", maCoSo);
+            var dt = ExecuteQuery("SELECT TenCoSo FROM CoSo WHERE MaCoSo = @MaCoSo", new[] { parameter });
+            
+            if (dt.Rows.Count > 0)
+            {
+                return dt.Rows[0]["TenCoSo"].ToString() ?? "Cơ sở";
+            }
+            
+            return "Cơ sở";
+        }
+
         // Lấy danh sách hóa đơn
         public List<HoaDonListDTO> GetAllInvoices(string? maCoSo = null, string? trangThai = null)
         {
@@ -132,8 +148,8 @@ namespace DAL
                                     MaChiTietPDS = reader["MaChiTietPDS"].ToString() ?? string.Empty,
                                     SoLuong = Convert.ToInt32(reader["SoLuong"]),
                                     ThanhTien = Convert.ToInt32(reader["ThanhTien"]),
-                                    LoaiYeuCau = reader["LoaiYeuCau"].ToString() ?? string.Empty,
                                     ThoiDiemTao = reader["ThoiDiemTao"] != DBNull.Value ? Convert.ToDateTime(reader["ThoiDiemTao"]) : null,
+                                    TrangThaiThanhToan = reader["TrangThaiThanhToan"] != DBNull.Value && Convert.ToBoolean(reader["TrangThaiThanhToan"]),
                                     MaDichVu = reader["MaDichVu"] as string,
                                     TenDichVu = reader["TenDichVu"]?.ToString() ?? string.Empty,
                                     LoaiDichVu = reader["LoaiDichVu"] as string,

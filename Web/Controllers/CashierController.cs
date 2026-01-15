@@ -27,10 +27,30 @@ namespace HQTCSDL.Controllers
             return maCoSo;
         }
 
+        // Helper method to get MaNhanVien from claims
+        private string GetMaNhanVien()
+        {
+            var maNhanVien = User.FindFirst("MaNhanVien")?.Value;
+            if (string.IsNullOrEmpty(maNhanVien))
+            {
+                // This should not happen for authenticated users
+                throw new UnauthorizedAccessException("Không tìm thấy thông tin nhân viên");
+            }
+            return maNhanVien;
+        }
+
         // GET: /Cashier
         // GET: /Cashier/Index
-        public IActionResult Index()
+        public IActionResult Bill()
         {
+            // Get branch name for display
+            var maCoSo = GetMaCoSo();
+            Console.WriteLine($"DEBUG - MaCoSo: {maCoSo}");
+            
+            var tenCoSo = _hoaDonBLL.GetTenCoSo(maCoSo);
+            Console.WriteLine($"DEBUG - TenCoSo: {tenCoSo}");
+            
+            ViewBag.TenCoSo = tenCoSo;
             return View();
         }
 
@@ -152,6 +172,9 @@ namespace HQTCSDL.Controllers
                         message = "Mã hóa đơn không khớp"
                     });
                 }
+
+                // Lấy mã nhân viên từ user đang đăng nhập
+                request.MaNhanVien = GetMaNhanVien();
 
                 var result = _hoaDonBLL.ProcessPayment(request);
 

@@ -277,28 +277,11 @@ function renderInvoiceDetail() {
         fieldInfo.innerHTML = '<div class="field-info-item">Không có thông tin đặt sân</div>';
     }
 
-    // Service Table
+    // Service Table - ONLY show actual services, NOT court rental
     const serviceTable = document.getElementById('serviceTable');
     let serviceRows = '';
 
-    // Add field rental row
-    if (selectedInvoice.tenSan && selectedInvoice.gioBatDau && selectedInvoice.gioKetThuc) {
-        const duration = calculateDuration(selectedInvoice.gioBatDau, selectedInvoice.gioKetThuc);
-        const pricePerHour = selectedInvoice.giaGocSan || 0;
-        const fieldTotal = selectedInvoice.tongTienSan || 0;
-
-        serviceRows += `
-            <tr>
-                <td>Thuê sân (${selectedInvoice.tenLoaiSan || 'Sân'})</td>
-                <td>Giờ</td>
-                <td>${duration}</td>
-                <td>${formatCurrency(pricePerHour)}</td>
-                <td>${formatCurrency(fieldTotal)}</td>
-            </tr>
-        `;
-    }
-
-    // Add service rows
+    // Add service rows (NO court rental here)
     if (selectedInvoice.dichVu && selectedInvoice.dichVu.length > 0) {
         selectedInvoice.dichVu.forEach(service => {
             serviceRows += `
@@ -328,23 +311,24 @@ function renderInvoiceDetail() {
         </tbody>
     `;
 
-    // Payment Summary
+    // Payment Summary - Show detailed breakdown
     const paymentSummary = document.getElementById('paymentSummary');
-    const subtotal = selectedInvoice.tongTienSan + selectedInvoice.tongTienDichVu;
 
     paymentSummary.innerHTML = `
         <div class="payment-row">
-            <span class="payment-label">Tạm tính</span>
-            <span class="payment-value">${formatCurrency(subtotal)}</span>
+            <span class="payment-label">Tổng tiền sân</span>
+            <span class="payment-value">${formatCurrency(selectedInvoice.tongTienSan)}</span>
         </div>
-        ${selectedInvoice.tongTienGiamGia > 0 ? `
-            <div class="payment-row discount">
-                <span class="payment-label">Giảm giá ${selectedInvoice.loaiUuDai ? `(${selectedInvoice.loaiUuDai})` : ''}</span>
-                <span class="payment-value">- ${formatCurrency(selectedInvoice.tongTienGiamGia)}</span>
-            </div>
-        ` : ''}
+        <div class="payment-row">
+            <span class="payment-label">Tổng tiền dịch vụ</span>
+            <span class="payment-value">${formatCurrency(selectedInvoice.tongTienDichVu)}</span>
+        </div>
+        <div class="payment-row discount">
+            <span class="payment-label">Tổng giảm giá${selectedInvoice.loaiUuDai ? ` (${selectedInvoice.loaiUuDai})` : ''}</span>
+            <span class="payment-value">-${formatCurrency(selectedInvoice.tongTienGiamGia)}</span>
+        </div>
         <div class="payment-row total">
-            <span class="payment-label">Tổng cộng</span>
+            <span class="payment-label">Thành tiền</span>
             <span class="payment-value">${formatCurrency(selectedInvoice.tongThanhToan)}</span>
         </div>
     `;
@@ -403,8 +387,8 @@ async function processPayment() {
 
     const paymentData = {
         maHoaDon: selectedInvoice.maHoaDon,
-        hinhThucThanhToan: selectedPaymentMethod,
-        maNhanVien: 'NV001' // TODO: Get from logged-in user
+        hinhThucThanhToan: selectedPaymentMethod
+        // maNhanVien will be set by backend from logged-in user
     };
 
     try {
