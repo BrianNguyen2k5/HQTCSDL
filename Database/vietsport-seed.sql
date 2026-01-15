@@ -1,5 +1,5 @@
---use VietSport
---go
+use VietSport
+go
 
 --Chuc Vu
 INSERT INTO ChucVu (MaChucVu, TenChucVu) VALUES
@@ -91,14 +91,13 @@ INSERT INTO BangGiaTangCuoiTuan VALUES
 
 --Dịch Vụ
 INSERT INTO DichVu VALUES
-('DV01',N'Nước suối',N'Khác',10000,N'Chai'),
-('DV02',N'Nước tăng lực',N'Khác',20000,N'Lon'),
-('DV03',N'Khăn lạnh',N'Khác',5000,N'Cái'),
-('DV04',N'Bóng đá',N'Dụng cụ thể thao',300000,N'Quả'),
-('DV05',N'Bóng tennis',N'Dụng cụ thể thao',80000,N'Quả'),
-('DV06',N'Vợt cầu lông',N'Dụng cụ thể thao',400000,N'Cái'),
-('DV07',N'Áo thể thao',N'Khác',150000,N'Cái'),
-('DV08',N'Găng tay thủ môn',N'Dụng cụ thể thao',250000,N'Đôi');
+('DV01',N'Áo bib',N'Dụng cụ thể thao',100000,N'Cái'),
+('DV02',N'Vợt Cầu Lông VIP',N'Dụng cụ thể thao',100000,N'Cái'),
+('DV03',N'Bóng Động Lực',N'Dụng cụ thể thao',50000,N'Quả'),
+('DV04',N'Lưới',N'Dụng cụ thể thao',50000,N'Cái'),
+('DV05',N'Nước uống',N'Khác',10000,N'Chai'),
+('DV06',N'Áo đấu đồng phục',N'Khác',100000,N'Cái'),
+('DV07',N'Thuê trọng tài',N'Khác',200000,N'Người')
 
 
 --Khanh hang
@@ -317,83 +316,6 @@ INSERT INTO HuanLuyenVien VALUES
 ('NV092',N'Bóng rổ',280000,N'5 năm kinh nghiệm');
 
 
---Tài Khoản Khách Hàng
-DECLARE @MaKhachHang CHAR(10);
-DECLARE @Email VARCHAR(100);
-
-DECLARE curKhachHang CURSOR FOR
-SELECT MaKhachHang, Email
-FROM KhachHang
-WHERE MaKhachHang NOT IN (
-    SELECT MaKhachHang FROM TaiKhoan WHERE MaKhachHang IS NOT NULL
-);
-
-OPEN curKhachHang;
-FETCH NEXT FROM curKhachHang INTO @MaKhachHang, @Email;
-
-WHILE @@FETCH_STATUS = 0
-BEGIN
-    INSERT INTO TaiKhoan (
-        TenDangNhap,
-        MatKhauMaHoa,
-        Email,
-        TrangThai,
-        NgayTao,
-        MaKhachHang,
-        MaNhanVien
-    )
-    VALUES (
-        'kh_' + @MaKhachHang,                 -- tên đăng nhập
-        'E10ADC3949BA59ABBE56E057F20F883E',    -- hash demo
-        @Email,                               -- dùng email khách
-        1,                                    -- còn hoạt động
-        GETDATE(),
-        @MaKhachHang,
-        NULL
-    );
-
-    FETCH NEXT FROM curKhachHang INTO @MaKhachHang, @Email;
-END;
-
-CLOSE curKhachHang;
-DEALLOCATE curKhachHang;
-
---Tai Khoan Nhan Vien
-DECLARE @MaNhanVien CHAR(10);
-
-DECLARE curNhanVien CURSOR FOR
-SELECT MaNhanVien
-FROM NhanVien;
-
-OPEN curNhanVien;
-FETCH NEXT FROM curNhanVien INTO @MaNhanVien;
-
-WHILE @@FETCH_STATUS = 0
-BEGIN
-    INSERT INTO TaiKhoan (
-        TenDangNhap,
-        MatKhauMaHoa,
-        Email,
-        TrangThai,
-        NgayTao,
-        MaKhachHang,
-        MaNhanVien
-    )
-    VALUES (
-        'nv_' + RTRIM(@MaNhanVien),
-        'E10ADC3949BA59ABBE56E057F20F883E',
-        RTRIM(@MaNhanVien) + '@vietsport.vn',
-        1,
-        GETDATE(),
-        NULL,
-        @MaNhanVien
-    );
-
-    FETCH NEXT FROM curNhanVien INTO @MaNhanVien;
-END;
-
-CLOSE curNhanVien;
-DEALLOCATE curNhanVien;
 
 --Lich Làm Việc
 --CS1
@@ -835,141 +757,141 @@ INSERT INTO TonKho VALUES
 --Phiếu Đặt Sân
 INSERT INTO PhieuDatSan VALUES
 -- CS01
-('PDS06','2025-01-10 08:00','2025-01-22','08:00','10:00',
+('PDS0000006','2025-01-10 08:00','2025-01-22','08:00','10:00',
  N'Online',N'Hoàn thành','08:02','KH006',NULL,'CS01LS0201'),
 
-('PDS07','2025-01-10 15:30','2025-01-22','16:00','18:00',
+('PDS0000007','2025-01-10 15:30','2025-01-22','16:00','18:00',
  N'Tại quầy',N'Hoàn thành','16:01','KH007','NV006','CS01LS0301'),
 
 -- CS02
-('PDS08','2025-01-11 09:00','2025-01-23','09:00','11:00',
+('PDS0000008','2025-01-11 09:00','2025-01-23','09:00','11:00',
  N'Online',N'Chờ thanh toán',NULL,'KH008',NULL,'CS02LS0101'),
 
-('PDS09','2025-01-11 18:00','2025-01-24','18:00','20:00',
+('PDS0000009','2025-01-11 18:00','2025-01-24','18:00','20:00',
  N'Tại quầy',N'Hoàn thành','18:00','KH009','NV023','CS02LS0401'),
 
 -- CS03
-('PDS10','2025-01-12 07:00','2025-01-25','07:00','09:00',
+('PDS0000010','2025-01-12 07:00','2025-01-25','07:00','09:00',
  N'Online',N'Hoàn thành','07:05','KH010',NULL,'CS03LS0501'),
 
-('PDS11','2025-01-12 16:30','2025-01-25','16:00','18:00',
+('PDS0000011','2025-01-12 16:30','2025-01-25','16:00','18:00',
  N'Tại quầy',N'Hoàn thành','16:02','KH011','NV026','CS03LS0201'),
 
 -- CS04
-('PDS12','2025-01-13 10:00','2025-01-26','10:00','12:00',
+('PDS0000012','2025-01-13 10:00','2025-01-26','10:00','12:00',
  N'Online',N'Hoàn thành','10:01','KH012',NULL,'CS04LS0101'),
 
-('PDS13','2025-01-13 18:30','2025-01-26','18:00','20:00',
+('PDS0000013','2025-01-13 18:30','2025-01-26','18:00','20:00',
  N'Tại quầy',N'Hoàn thành','18:03','KH013','NV041','CS04LS0301'),
 
 -- CS05
-('PDS14','2025-01-14 08:30','2025-01-27','08:00','10:00',
+('PDS0000014','2025-01-14 08:30','2025-01-27','08:00','10:00',
  N'Online',N'Vắng mặt',NULL,'KH014',NULL,'CS05LS0201'),
 
-('PDS15','2025-01-14 17:00','2025-01-27','18:00','20:00',
+('PDS0000015','2025-01-14 17:00','2025-01-27','18:00','20:00',
  N'Tại quầy',N'Hoàn thành','18:01','KH015','NV049','CS05LS0401');
 
  INSERT INTO PhieuDatSan VALUES
-('PDS01','2025-01-05 08:00','2025-01-05','08:00','10:00',N'Online',N'Hoàn thành','08:00','KH001',NULL,'CS01LS0101'),
-('PDS02','2025-01-06 08:00','2025-01-06','08:00','10:00',N'Tại quầy',N'Hoàn thành','08:00','KH002','NV001','CS01LS0102'),
-('PDS03','2025-01-07 08:00','2025-01-07','08:00','10:00',N'Online',N'Hoàn thành','08:00','KH003',NULL,'CS01LS0201'),
-('PDS04','2025-01-08 08:00','2025-01-08','08:00','10:00',N'Tại quầy',N'Hoàn thành','08:00','KH004','NV001','CS01LS0202'),
-('PDS05','2025-01-09 08:00','2025-01-09','08:00','10:00',N'Online',N'Hoàn thành','08:00','KH005',NULL,'CS01LS0301');
+('PDS0000001','2025-01-05 08:00','2025-01-05','08:00','10:00',N'Online',N'Hoàn thành','08:00','KH001',NULL,'CS01LS0101'),
+('PDS0000002','2025-01-06 08:00','2025-01-06','08:00','10:00',N'Tại quầy',N'Hoàn thành','08:00','KH002','NV001','CS01LS0102'),
+('PDS0000003','2025-01-07 08:00','2025-01-07','08:00','10:00',N'Online',N'Hoàn thành','08:00','KH003',NULL,'CS01LS0201'),
+('PDS0000004','2025-01-08 08:00','2025-01-08','08:00','10:00',N'Tại quầy',N'Hoàn thành','08:00','KH004','NV001','CS01LS0202'),
+('PDS0000005','2025-01-09 08:00','2025-01-09','08:00','10:00',N'Online',N'Hoàn thành','08:00','KH005',NULL,'CS01LS0301');
 
 --Chi tiết phiếu đặt sân
-INSERT INTO ChiTietPhieuDatSan (MaChiTietPDS, ThoiDiemTao, SoLuong, ThanhTien, LoaiYeuCau, MaPhieuDat, MaNhanVien, MaDichVu, MaHLV) VALUES
+INSERT INTO ChiTietPhieuDatSan (MaChiTietPDS, ThoiDiemTao, SoLuong, ThanhTien, MaPhieuDat, MaNhanVien, MaDichVu, MaHLV, TrangThaiThanhToan) VALUES
 -- ===== PDS06 (CS01) =====
-('CTPDS16','2025-01-10 08:00',1,10000,N'Nước suối','PDS06',NULL,'DV01',NULL),
-('CTPDS17','2025-01-10 08:00',1,20000,N'Nước tăng lực','PDS06',NULL,'DV02',NULL),
+('CTPDS00016','2025-01-10 08:00',1,10000,'PDS0000006',NULL,'DV01',NULL,1),
+('CTPDS00017','2025-01-10 08:00',1,20000,'PDS0000006',NULL,'DV02',NULL,1),
 
 -- ===== PDS07 (CS01) =====
-('CTPDS18','2025-01-10 15:30',2,160000,N'Bóng tennis','PDS07','NV006','DV05',NULL),
-('CTPDS19','2025-01-10 15:30',1,5000,N'Khăn lạnh','PDS07','NV006','DV03',NULL),
+('CTPDS00018','2025-01-10 15:30',2,160000,'PDS0000007','NV006','DV05',NULL,1),
+('CTPDS00019','2025-01-10 15:30',1,5000,'PDS0000007','NV006','DV03',NULL,1),
 
 -- ===== PDS08 (CS02) =====
-('CTPDS20','2025-01-11 09:00',2,20000,N'Nước suối','PDS08',NULL,'DV01',NULL),
+('CTPDS00020','2025-01-11 09:00',2,20000,'PDS0000008',NULL,'DV01',NULL,0),
 
 -- ===== PDS09 (CS02) =====
-('CTPDS21','2025-01-11 18:00',1,300000,N'Thuê bóng đá','PDS09','NV023','DV04',NULL),
-('CTPDS22','2025-01-11 18:00',2,10000,N'Khăn lạnh','PDS09','NV023','DV03',NULL),
+('CTPDS00021','2025-01-11 18:00',1,300000,'PDS0000009','NV023','DV04',NULL,1),
+('CTPDS00022','2025-01-11 18:00',2,10000,'PDS0000009','NV023','DV03',NULL,1),
 
 -- ===== PDS10 (CS03) =====
-('CTPDS23','2025-01-12 07:00',1,20000,N'Nước tăng lực','PDS10',NULL,'DV02',NULL),
+('CTPDS00023','2025-01-12 07:00',1,20000,'PDS0000010',NULL,'DV02',NULL,1),
 
 -- ===== PDS11 (CS03) =====
-('CTPDS24','2025-01-12 16:30',1,400000,N'Thuê vợt cầu lông','PDS11','NV026','DV06',NULL),
-('CTPDS25','2025-01-12 16:30',1,150000,N'Áo thể thao','PDS11','NV026','DV07',NULL),
+('CTPDS00024','2025-01-12 16:30',1,400000,'PDS0000011','NV026','DV06',NULL,1),
+('CTPDS00025','2025-01-12 16:30',1,150000,'PDS0000011','NV026','DV07',NULL,1),
 
 -- ===== PDS12 (CS04) =====
-('CTPDS26','2025-01-13 10:00',2,20000,N'Nước suối','PDS12',NULL,'DV01',NULL),
+('CTPDS00026','2025-01-13 10:00',2,20000,'PDS0000012',NULL,'DV01',NULL,1),
 
 -- ===== PDS13 (CS04) – THUÊ HLV =====
-('CTPDS27','2025-01-13 18:30',1,500000,N'Thuê HLV nâng cao','PDS13','NV041','DV04','NV050'),
+('CTPDS00027','2025-01-13 18:30',1,500000,'PDS0000013','NV041','DV04','NV050',1),
 
 -- ===== PDS14 (CS05) =====
-('CTPDS28','2025-01-14 08:30',1,80000,N'Bóng tennis','PDS14',NULL,'DV05',NULL),
+('CTPDS00028','2025-01-14 08:30',1,80000,'PDS0000014',NULL,'DV05',NULL,1),
 
 -- ===== PDS15 (CS05) =====
-('CTPDS29','2025-01-14 17:00',2,40000,N'Nước tăng lực','PDS15','NV049','DV02',NULL),
-('CTPDS30','2025-01-14 17:00',1,10000,N'Khăn lạnh','PDS15','NV049','DV03',NULL),
+('CTPDS00029','2025-01-14 17:00',2,40000,'PDS0000015','NV049','DV02',NULL,1),
+('CTPDS00030','2025-01-14 17:00',1,10000,'PDS0000015','NV049','DV03',NULL,1),
 
-('CTPDS01','2025-01-05 08:00',1,300000,N'Thuê HLV','PDS01','NV049','DV04','NV049'),
-('CTPDS02','2025-01-05 08:00',1,300000,N'Thuê HLV','PDS01','NV049','DV04','NV049'),
-('CTPDS03','2025-01-06 08:00',1,150000,N'Dịch vụ hủy','PDS02',NULL,'DV01',NULL), -- Được tham chiếu bởi LichSuHuyDichVu
-('CTPDS04','2025-01-06 08:00',1,300000,N'Thuê HLV','PDS02','NV050','DV04','NV050'),
-('CTPDS05','2025-01-07 08:00',1,20000,N'Nước uống','PDS03',NULL,'DV01',NULL),
-('CTPDS06','2025-01-07 08:00',1,300000,N'Thuê HLV','PDS03','NV049','DV04','NV049'),
-('CTPDS07','2025-01-07 08:00',1,80000,N'Dịch vụ hủy','PDS03',NULL,'DV05',NULL), -- Được tham chiếu bởi LichSuHuyDichVu
-('CTPDS08','2025-01-08 08:00',1,300000,N'Thuê HLV','PDS04','NV050','DV04','NV050'),
-('CTPDS09','2025-01-08 08:00',1,300000,N'Thuê HLV','PDS04','NV050','DV04','NV050'),
-('CTPDS10','2025-01-09 08:00',1,20000,N'Dịch vụ hủy','PDS05',NULL,'DV02',NULL), -- Được tham chiếu bởi LichSuHuyDichVu
-('CTPDS11','2025-01-09 08:00',1,300000,N'Thuê HLV','PDS05','NV049','DV04','NV049'),
-('CTPDS12','2025-01-09 08:00',1,300000,N'Thuê HLV','PDS05','NV050','DV04','NV050'),
-('CTPDS13','2025-01-09 08:00',1,150000,N'Dịch vụ hủy','PDS05',NULL,'DV07',NULL), -- Được tham chiếu bởi LichSuHuyDichVu
-('CTPDS14','2025-01-09 08:00',1,20000,N'Nước suối','PDS05',NULL,'DV01',NULL),
-('CTPDS15','2025-01-09 08:00',1,300000,N'Thuê HLV','PDS05','NV049','DV04','NV049');
+('CTPDS00001','2025-01-05 08:00',1,300000,'PDS0000001','NV049','DV04','NV049',1),
+('CTPDS00002','2025-01-05 08:00',1,300000,'PDS0000001','NV049','DV04','NV049',1),
+('CTPDS00003','2025-01-06 08:00',1,150000,'PDS0000002',NULL,'DV01',NULL,1), -- Được tham chiếu bởi LichSuHuyDichVu
+('CTPDS00004','2025-01-06 08:00',1,300000,'PDS0000002','NV050','DV04','NV050',1),
+('CTPDS00005','2025-01-07 08:00',1,20000,'PDS0000003',NULL,'DV01',NULL,1),
+('CTPDS00006','2025-01-07 08:00',1,300000,'PDS0000003','NV049','DV04','NV049',1),
+('CTPDS00007','2025-01-07 08:00',1,80000,'PDS0000003',NULL,'DV05',NULL,1), -- Được tham chiếu bởi LichSuHuyDichVu
+('CTPDS00008','2025-01-08 08:00',1,300000,'PDS0000004','NV050','DV04','NV050',1),
+('CTPDS00009','2025-01-08 08:00',1,300000,'PDS0000004','NV050','DV04','NV050',1),
+('CTPDS00010','2025-01-09 08:00',1,20000,'PDS0000005',NULL,'DV02',NULL,1), -- Được tham chiếu bởi LichSuHuyDichVu
+('CTPDS00011','2025-01-09 08:00',1,300000,'PDS0000005','NV049','DV04','NV049',1),
+('CTPDS00012','2025-01-09 08:00',1,300000,'PDS0000005','NV050','DV04','NV050',1),
+('CTPDS00013','2025-01-09 08:00',1,150000,'PDS0000005',NULL,'DV07',NULL,1), -- Được tham chiếu bởi LichSuHuyDichVu
+('CTPDS00014','2025-01-09 08:00',1,20000,'PDS0000005',NULL,'DV01',NULL,1),
+('CTPDS00015','2025-01-09 08:00',1,300000,'PDS0000005','NV049','DV04','NV049',1);
 
 --Lich Sử Thay Đổi
 INSERT INTO LichSuThayDoi VALUES
-('PDS06','2025-01-10 09:00',N'Đổi hình thức thanh toán',0,
+('PDS0000006','2025-01-10 09:00',N'Đổi hình thức thanh toán',0,
  N'Khách chuyển từ online sang tiền mặt',0),
 
-('PDS07','2025-01-10 16:00',N'Đổi dịch vụ kèm theo',0,
+('PDS0000007','2025-01-10 16:00',N'Đổi dịch vụ kèm theo',0,
  N'Khách thêm dịch vụ trong quá trình sử dụng',0),
 
-('PDS08','2025-01-11 10:30',N'Hủy sát giờ',200000,
+('PDS0000008','2025-01-11 10:30',N'Hủy sát giờ',200000,
  N'Khách hủy trong vòng 2 giờ trước khi nhận sân',0),
 
-('PDS09','2025-01-11 18:30',N'Đổi giờ đặt sân',0,
+('PDS0000009','2025-01-11 18:30',N'Đổi giờ đặt sân',0,
  N'Dời sang khung giờ buổi tối',0),
 
-('PDS10','2025-01-12 07:30',N'Gia hạn thời gian',50000,
+('PDS0000010','2025-01-12 07:30',N'Gia hạn thời gian',50000,
  N'Khách chơi thêm 30 phút',0),
 
-('PDS11','2025-01-12 17:00',N'Đổi sân',0,
+('PDS0000011','2025-01-12 17:00',N'Đổi sân',0,
  N'Sân ban đầu bảo trì đột xuất',0),
 
-('PDS12','2025-01-13 10:30',N'Đổi giờ đặt sân',0,
+('PDS0000012','2025-01-13 10:30',N'Đổi giờ đặt sân',0,
  N'Khách yêu cầu đổi khung giờ',0),
 
-('PDS13','2025-01-13 19:00',N'Thuê thêm HLV',0,
+('PDS0000013','2025-01-13 19:00',N'Thuê thêm HLV',0,
  N'Khách yêu cầu HLV trình độ cao hơn',0),
 
-('PDS14','2025-01-14 08:30',N'Vắng mặt',100000,
+('PDS0000014','2025-01-14 08:30',N'Vắng mặt',100000,
  N'Khách không đến đúng giờ nhận sân',0),
 
-('PDS15','2025-01-14 18:30',N'Đổi dịch vụ kèm theo',0,
+('PDS0000015','2025-01-14 18:30',N'Đổi dịch vụ kèm theo',0,
  N'Khách hủy một phần dịch vụ đã đặt',0);
 
 
 --LichSuHuyDichVu
 INSERT INTO LichSuHuyDichVu VALUES
-('CTPDS03','2025-01-07 11:30',N'Khách không sử dụng dịch vụ',150000),
-('CTPDS07','2025-01-10 16:10',N'Hết hàng tại quầy',80000),
-('CTPDS10','2025-01-12 07:30',N'Khách đổi ý',20000),
-('CTPDS13','2025-01-13 10:20',N'Sai loại dịch vụ',150000),
-('CTPDS18','2025-01-23 08:30',N'Hủy thuê dụng cụ',160000),
-('CTPDS21','2025-01-24 18:20',N'Dịch vụ không còn nhu cầu',300000);
+('CTPDS00003','2025-01-07 11:30',N'Khách không sử dụng dịch vụ',150000),
+('CTPDS00007','2025-01-10 16:10',N'Hết hàng tại quầy',80000),
+('CTPDS00010','2025-01-12 07:30',N'Khách đổi ý',20000),
+('CTPDS00013','2025-01-13 10:20',N'Sai loại dịch vụ',150000),
+('CTPDS00018','2025-01-23 08:30',N'Hủy thuê dụng cụ',160000),
+('CTPDS00021','2025-01-24 18:20',N'Dịch vụ không còn nhu cầu',300000);
 
 
 --Tài Sản Cho Thuê
@@ -999,41 +921,41 @@ INSERT INTO TaiSanChoThue VALUES
 
 --Phiếu Thuê Tài Sản
 INSERT INTO PhieuThueTaiSan (MaPhieuThue, ThoiDiemTao, MaKhachHang, MaNhanVien, TrangThai) VALUES
-('PTS01','2025-01-01 09:00','KH001','NV006',N'Hoàn thành'),
-('PTS02','2025-01-05 13:00','KH002','NV003',N'Hoàn thành'),
-('PTS03','2025-01-10 09:30','KH003','NV006',N'Chờ thanh toán'),
-('PTS04','2025-01-12 08:30','KH004','NV023',N'Hoàn thành'),
-('PTS05','2025-01-12 10:00','KH005','NV041',N'Đã hủy'),
-('PTS06','2025-01-15 07:45','KH006','NV026',N'Hoàn thành'),
-('PTS07','2025-01-18 17:30','KH007','NV049',N'Hoàn thành');
+('PT00000001','2025-01-01 09:00','KH001','NV006',N'Hoàn thành'),
+('PT00000002','2025-01-05 13:00','KH002','NV003',N'Hoàn thành'),
+('PT00000003','2025-01-10 09:30','KH003','NV006',N'Chờ thanh toán'),
+('PT00000004','2025-01-12 08:30','KH004','NV023',N'Hoàn thành'),
+('PT00000005','2025-01-12 10:00','KH005','NV041',N'Đã hủy'),
+('PT00000006','2025-01-15 07:45','KH006','NV026',N'Hoàn thành'),
+('PT00000007','2025-01-18 17:30','KH007','NV049',N'Hoàn thành');
 
 --Chi Tiết Phiếu Thuê Tài Sản
 INSERT INTO ChiTietPhieuThueTaiSan VALUES
-('CTPTTS01','PTS01','TS01','GD01','2025-01-01','2025-06-30'),
-('CTPTTS02','PTS01','TS03','GD03','2025-01-01','2025-06-30'),
+('CTPT000001','PT00000001','TS01','GD01','2025-01-01','2025-06-30'),
+('CTPT000002','PT00000001','TS03','GD03','2025-01-01','2025-06-30'),
 
-('CTPTTS03','PTS02','TS02','GD02','2025-01-05','2026-01-04'),
+('CTPT000003','PT00000002','TS02','GD02','2025-01-05','2026-01-04'),
 
-('CTPTTS04','PTS03','TS05','GD01','2025-01-10','2025-07-08'),
+('CTPT000004','PT00000003','TS05','GD01','2025-01-10','2025-07-08'),
 
-('CTPTTS05','PTS04','TS08','GD02','2025-01-12','2026-01-11'),
-('CTPTTS06','PTS04','TS09','GD04','2025-01-12','2026-01-11'),
+('CTPT000005','PT00000004','TS08','GD02','2025-01-12','2026-01-11'),
+('CTPT000006','PT00000004','TS09','GD04','2025-01-12','2026-01-11'),
 
-('CTPTTS07','PTS06','TS10','GD01','2025-01-15','2025-07-13'),
-('CTPTTS08','PTS07','TS12','GD03','2025-01-18','2025-07-16');
+('CTPT000007','PT00000006','TS10','GD01','2025-01-15','2025-07-13'),
+('CTPT000008','PT00000007','TS12','GD03','2025-01-18','2025-07-16');
 
 --Đặt Lịch HLV
 INSERT INTO DatLichHLV VALUES
-('CTPDS01','NV049','2025-01-10 08:00','2025-01-10 10:00'),
-('CTPDS02','NV049','2025-01-10 10:00','2025-01-10 12:00'),
-('CTPDS04','NV050','2025-01-12 18:00','2025-01-12 20:00'),
-('CTPDS06','NV049','2025-01-22 08:00','2025-01-22 10:00'),
-('CTPDS08','NV050','2025-01-23 09:00','2025-01-23 11:00'),
-('CTPDS09','NV050','2025-01-24 18:00','2025-01-24 20:00'),
-('CTPDS11','NV049','2025-01-25 16:00','2025-01-25 18:00'),
-('CTPDS12','NV050','2025-01-26 10:00','2025-01-26 12:00'),
-('CTPDS15','NV049','2025-01-27 18:00','2025-01-27 20:00'),
-('CTPDS27','NV050','2025-01-13 18:30','2025-01-13 20:30');
+('CTPDS00001','NV049','2025-01-10 08:00','2025-01-10 10:00'),
+('CTPDS00002','NV049','2025-01-10 10:00','2025-01-10 12:00'),
+('CTPDS00004','NV050','2025-01-12 18:00','2025-01-12 20:00'),
+('CTPDS00006','NV049','2025-01-22 08:00','2025-01-22 10:00'),
+('CTPDS00008','NV050','2025-01-23 09:00','2025-01-23 11:00'),
+('CTPDS00009','NV050','2025-01-24 18:00','2025-01-24 20:00'),
+('CTPDS00011','NV049','2025-01-25 16:00','2025-01-25 18:00'),
+('CTPDS00012','NV050','2025-01-26 10:00','2025-01-26 12:00'),
+('CTPDS00015','NV049','2025-01-27 18:00','2025-01-27 20:00'),
+('CTPDS00027','NV050','2025-01-13 18:30','2025-01-13 20:30');
 
 
 -- Tham SỐ hệ thống
@@ -1050,24 +972,24 @@ INSERT INTO ThamSoHeThong VALUES
 INSERT INTO HoaDon (NgayXuat, TongTienSan, TongTienDichVu, TongTienGiamGia, TongThanhToan,
                     HinhThucThanhToan, TrangThaiThanhToan, MaNhanVien, MaPhieuDat, MaPhieuThue) VALUES
 -- ===== Hóa đơn cho Phiếu Đặt Sân =====
-('2025-01-10 10:00',200000,30000,0,230000,N'Tiền mặt',N'Đã thanh toán','NV006','PDS06',NULL),
-('2025-01-10 18:00',300000,165000,0,465000,N'Tiền mặt',N'Đã thanh toán','NV006','PDS07',NULL),
-('2025-01-11 11:00',200000,20000,0,220000,N'Ví điện tử',N'Chưa thanh toán','NV023','PDS08',NULL),
-('2025-01-11 20:00',400000,310000,0,710000,N'Tiền mặt',N'Đã thanh toán','NV023','PDS09',NULL),
-('2025-01-12 09:30',300000,20000,0,320000,N'Ví điện tử',N'Đã thanh toán','NV026','PDS10',NULL),
-('2025-01-12 18:00',300000,550000,0,850000,N'Tiền mặt',N'Đã thanh toán','NV026','PDS11',NULL),
-('2025-01-13 12:30',250000,20000,0,270000,N'Ví điện tử',N'Đã thanh toán','NV041','PDS12',NULL),
-('2025-01-13 20:30',350000,500000,0,850000,N'Tiền mặt',N'Đã thanh toán','NV041','PDS13',NULL),
-('2025-01-14 10:00',200000,0,0,200000,N'Ví điện tử',N'Đã thanh toán','NV049','PDS14',NULL),
-('2025-01-14 20:00',300000,40000,0,340000,N'Tiền mặt',N'Đã thanh toán','NV049','PDS15',NULL),
+('2025-01-10 10:00',200000,30000,0,230000,N'Tiền mặt',N'Đã thanh toán','NV006','PDS0000006',NULL),
+('2025-01-10 18:00',300000,165000,0,465000,N'Tiền mặt',N'Đã thanh toán','NV006','PDS0000007',NULL),
+('2025-01-11 11:00',200000,20000,0,220000,N'Ví điện tử',N'Chưa thanh toán','NV023','PDS0000008',NULL),
+('2025-01-11 20:00',400000,310000,0,710000,N'Tiền mặt',N'Đã thanh toán','NV023','PDS0000009',NULL),
+('2025-01-12 09:30',300000,20000,0,320000,N'Ví điện tử',N'Đã thanh toán','NV026','PDS0000010',NULL),
+('2025-01-12 18:00',300000,550000,0,850000,N'Tiền mặt',N'Đã thanh toán','NV026','PDS0000011',NULL),
+('2025-01-13 12:30',250000,20000,0,270000,N'Ví điện tử',N'Đã thanh toán','NV041','PDS0000012',NULL),
+('2025-01-13 20:30',350000,500000,0,850000,N'Tiền mặt',N'Đã thanh toán','NV041','PDS0000013',NULL),
+('2025-01-14 10:00',200000,0,0,200000,N'Ví điện tử',N'Đã thanh toán','NV049','PDS0000014',NULL),
+('2025-01-14 20:00',300000,40000,0,340000,N'Tiền mặt',N'Đã thanh toán','NV049','PDS0000015',NULL),
 
 -- ===== Hóa đơn cho Phiếu Thuê Tài Sản =====
-('2025-01-01 10:00',0,1700000,0,1700000,N'Tiền mặt',N'Đã thanh toán','NV006',NULL,'PTS01'),
-('2025-01-05 14:00',0,900000,0,900000,N'Ví điện tử',N'Đã thanh toán','NV003',NULL,'PTS02'),
-('2025-01-10 16:00',0,500000,0,500000,N'Tiền mặt',N'Chưa thanh toán','NV006',NULL,'PTS03'),
-('2025-01-12 09:00',0,2900000,0,2900000,N'Ví điện tử',N'Đã thanh toán','NV023',NULL,'PTS04'),
-('2025-01-15 08:00',0,500000,0,500000,N'Tiền mặt',N'Đã thanh toán','NV026',NULL,'PTS06'),
-('2025-01-18 18:00',0,1200000,0,1200000,N'Ví điện tử',N'Đã thanh toán','NV049',NULL,'PTS07');
+('2025-01-01 10:00',0,1700000,0,1700000,N'Tiền mặt',N'Đã thanh toán','NV006',NULL,'PT00000001'),
+('2025-01-05 14:00',0,900000,0,900000,N'Ví điện tử',N'Đã thanh toán','NV003',NULL,'PT00000002'),
+('2025-01-10 16:00',0,500000,0,500000,N'Tiền mặt',N'Chưa thanh toán','NV006',NULL,'PT00000003'),
+('2025-01-12 09:00',0,2900000,0,2900000,N'Ví điện tử',N'Đã thanh toán','NV023',NULL,'PT00000004'),
+('2025-01-15 08:00',0,500000,0,500000,N'Tiền mặt',N'Đã thanh toán','NV026',NULL,'PT00000006'),
+('2025-01-18 18:00',0,1200000,0,1200000,N'Ví điện tử',N'Đã thanh toán','NV049',NULL,'PT00000007');
 
 
 INSERT INTO ApDung (MaKhachHang, MaUuDai, NgayBatDau, NgayKetThuc, TrangThai) VALUES
