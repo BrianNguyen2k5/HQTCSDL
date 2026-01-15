@@ -165,53 +165,11 @@
         <div id="bookingStep3" class="booking-step-content" style="display: none; min-height: 400px;">
             <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--color-gray-900);">Bước 3: Thêm dịch vụ</h3>
             
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span>🏃 Huấn luyện viên</span>
-                        <span>50.000 VNĐ/buổi</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('coach', -1)">-</button>
-                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonCoach" value="0" readonly />
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('coach', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span>👕 Áo đồng phục</span>
-                        <span>10.000 VNĐ/bộ</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('uniform', -1)">-</button>
-                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonUniform" value="0" readonly />
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('uniform', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span>🥤 Nước uống</span>
-                        <span>3.000 VNĐ/chai</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('drink', -1)">-</button>
-                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonDrink" value="0" readonly />
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('drink', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span>🔐 Tủ đồ</span>
-                        <span>5.000 VNĐ/tủ</span>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('locker', -1)">-</button>
-                        <input type="number" class="input" style="width: 60px; text-align: center;" id="addonLocker" value="0" readonly />
-                        <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateAddon('locker', 1)">+</button>
-                    </div>
+            <div id="servicesContainer" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                <!-- Services will be loaded dynamically -->
+                <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--color-gray-500);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <p>Đang tải dịch vụ...</p>
                 </div>
             </div>
         </div>

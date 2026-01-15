@@ -279,6 +279,13 @@
 
         function openNewBookingDialog() {
             document.getElementById('newBookingModal').style.display = 'flex';
+            // Call the real implementation from new-booking-dialog.js
+            if (typeof resetBookingForm === 'function') {
+                resetBookingForm();
+            }
+            if (typeof showStep === 'function') {
+                showStep(1);
+            }
         }
     </script>
 }
