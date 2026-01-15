@@ -51,6 +51,8 @@ builder.Services.AddScoped<DAL.NhanVien>();
 builder.Services.AddScoped<DAL.Dashboard>();
 builder.Services.AddScoped<DAL.TaiKhoan>();
 builder.Services.AddScoped<DAL.KhachHang>();
+builder.Services.AddScoped<DAL.DichVuDAL>();
+builder.Services.AddScoped<DAL.CoSo>();
 
 // Đăng ký BLL
 

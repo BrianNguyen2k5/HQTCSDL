@@ -65,12 +65,32 @@ namespace DAL
               TenDichVu = reader["TenDichVu"].ToString() ?? string.Empty,
               LoaiDichVu = reader["LoaiDichVu"].ToString() ?? string.Empty,
               DonGia = reader.GetInt32(reader.GetOrdinal("DonGia")),
-              DonViTinh = reader["DonViTinh"].ToString() ?? string.Empty
+              DonViTinh = reader["DonViTinh"].ToString() ?? string.Empty,
+							SoLuongTonKho = 0
             }
         );
       }
 
       return danhSach;
+    }
+
+    public bool UpdateGiaDichVu(string maDichVu, int giaMoi)
+    {
+      try
+      {
+        using SqlConnection conn = new SqlConnection(_connectionString);
+        conn.Open();
+        string query = "UPDATE DichVu SET DonGia = @GiaMoi WHERE MaDichVu = @MaDichVu";
+        using SqlCommand cmd = new SqlCommand(query, conn);
+        cmd.Parameters.AddWithValue("@GiaMoi", giaMoi);
+        cmd.Parameters.AddWithValue("@MaDichVu", maDichVu);
+        int rows = cmd.ExecuteNonQuery();
+        return rows > 0;
+      }
+      catch
+      {
+        return false;
+      }
     }
   }
 }

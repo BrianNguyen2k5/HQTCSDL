@@ -1,0 +1,28 @@
+@model DTO.DichVu
+
+<div class="service-field-item">
+	<p class="font-bold">@Model.MaDichVu - @Model.TenDichVu</p>
+	<p class="service-field-type">Tên: @Model.LoaiDichVu</p>
+	<p class="service-field-price">Giá: @Model.DonGia / @Model.DonViTinh</p>
+	<button 
+		class="blue-button-decor" 
+		onclick="toggleServicePriceChanging('@Model.MaDichVu')"
+		id="service-info-button-@Model.MaDichVu"
+		>Cập nhật giá</button>
+
+	<div id="service-price-changing-@Model.MaDichVu" class="service-price-changing hidden">
+		<input 
+			type="text"
+			placeholder="Nhập giá mới" 
+			class="p-2 border border-gray-300 rounded outline-none"
+			id="service-new-price-@Model.MaDichVu"
+		/>
+		<button 
+			onclick="cancelServicePriceChanging('@Model.MaDichVu')"
+			class="white-button-decor"
+		>Hủy</button>
+		<button 
+			onclick="updateServicePrice('@Model.MaDichVu')"
+			class="blue-button-decor">Cập nhật</button>
+	</div>
+</div>

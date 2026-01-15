@@ -1,3 +1,5 @@
+@model List<DTO.CoSo>
+
 @{
 	Layout = "_EmployerLayout";
 }
@@ -24,9 +26,50 @@
 			</select>
 
 			<button type="button" onclick="loadRevenue()" class="blue-button-decor">Xem Doanh Thu</button>
+			
 		</div>
 		<div class="mt-4">
 			<h3>Tổng doanh thu: <span id="lblDoanhThu" class="text-success font-bold">0 VNĐ</span></h3>
+		</div>
+	</div>
+
+	<p class="title mt-8">Báo cáo doanh thu theo cơ sở</p>
+	<div class="statistics-report mt-2">
+		<div class="date-picker-group">
+			<select id="dp_co_so" name="NamSinh" class="dp-select">
+				<option value="">Cơ sở</option>
+				@foreach (var item in Model)
+				{
+					<option value="@item.MaCoSo">@item.MaCoSo - @item.TenCoSo</option>
+				}
+			</select>
+			<select id="dp_coso_year" name="NamSinh" class="dp-select">
+				<option value="">Năm</option>
+			</select>
+			<button 
+				type="button" 
+				onclick="loadRevenueByCoSo()"
+				id="btn_load_revenue_by_co_so"
+				class="blue-button-decor"
+			>Xem Doanh Thu</button>
+		</div>
+	</div>
+
+	<div id="revenue-detail-modal" class="modal hidden">
+		<div class="modal-content">
+			<p 
+				class="close-button text-right font-bold text-2xl" 
+				onclick="closeRevenueDetailModal()"
+			>
+				&times;
+			</p>
+			<p class="text-xl font-bold mb-4 text-center">Chi tiết doanh thu</p>
+			<div class="modal-header mt-8">
+				<p>Số lượng hóa đơn: <span id="totalBillCount"></span></p>
+				<p>Tổng doanh thu: <span id="totalBillRevenue"></span></p>
+			</div>
+			<div id="revenue-detail-content" class="mt-2">
+			</div>
 		</div>
 	</div>
 
@@ -43,4 +86,5 @@
 
 @section Scripts {
 	<script src="~/js/Employer/Dashboard.js" asp-append-version="true"></script>
+	<script src="~/js/Employer/Report.js" asp-append-version="true"></script>
 }

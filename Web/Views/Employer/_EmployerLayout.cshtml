@@ -9,7 +9,7 @@
 
 <div class="employer-dsb bg-background font-sans">
 	<div class="content-container">
-		<div class="navigate-bar">
+		<div class="navigate-bar fixed">
 			<div class="navigate-bar bg-white border-r p-4">
 				<div class="navigate-items space-y-2">
 					<a href="@Url.Action("Dashboard", "Employer")">
@@ -69,12 +69,10 @@
 			</div>
 		</div>
 
-    <main class="w-full p-4">
+    <main class="w-full p-4 ml-[300px]">
       @RenderBody()
     </main>
 	</div>
-
-	
 </div>
 
 @section Scripts {

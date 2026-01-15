@@ -1,4 +1,7 @@
 ﻿-- Các hàm bổ sung tùy theo ý muốn mọi người
+use VietSport
+go
+
 create or alter function F_ThongKeSoLuong ()
 returns @statistics table (
 	TenThongKe nvarchar(50),
@@ -198,12 +201,14 @@ create or alter proc sp_QL_DoanhThuNam
 	@output int output
 as
 begin
+	set transaction isolation level read committed
+	begin tran
 		-- Lấy thống kê
 		declare @doanhthu int
 		select @doanhthu = sum(hd.TongThanhToan)
 		from HoaDon hd
 		where year(hd.NgayXuat) = @nam
-		
+	commit tran
 	set @output = isnull(@doanhthu, 0)
 end
 go
@@ -241,7 +246,17 @@ end
 go
 
 --select * from HoaDon
-declare @output int
-exec sp_QL_DoanhThuNam 2025, @output output
-print @output
+--declare @output int
+--exec sp_QL_DoanhThuNam 2025, @output output
+--print @output
 --go
+
+-- Lấy danh sách Store Procedure và Function
+--SELECT 
+--    name AS [Name], 
+--    type_desc AS [Type], 
+--    create_date AS [Created Date],
+--    modify_date AS [Last Modified]
+--FROM sys.objects
+--WHERE type IN ('P', 'FN', 'IF', 'TF') -- P: Procedure, FN: Scalar Function, IF/TF: Table-valued Function
+--ORDER BY type, name;
