@@ -12,6 +12,26 @@ body {
 	font-size: 16px;
 }
 
+.blue-button-decor {
+  background-color: #00ADEF;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.white-button-decor {
+  background-color: white;
+  color: #777;
+  border: 1px solid #bbb;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
 /* ...existing code... */
 
 .btn:focus,

@@ -1,5 +1,4 @@
 ﻿-- Các hàm bổ sung tùy theo ý muốn mọi người
-
 create or alter function F_ThongKeSoLuong ()
 returns @statistics table (
 	TenThongKe nvarchar(50),
@@ -52,7 +51,6 @@ begin
 	return
 end
 go
-
 
 -- Lost update (Tranh chấp No7)
 -- T1: NVKT thay đổi tình trạng của sân A qua “Bảo trì”
@@ -196,19 +194,54 @@ go
 -- Dirty read (Tranh chấp No8)
 --T2: NVQL xem doanh thu để lập báo cáo doanh thu hiện tại
 create or alter proc sp_QL_DoanhThuNam
+	@nam int,
 	@output int output
 as
 begin
-	set transaction isolation level read uncommitted
-	declare @nam int = year(getdate())
-	begin tran
 		-- Lấy thống kê
 		declare @doanhthu int
 		select @doanhthu = sum(hd.TongThanhToan)
 		from HoaDon hd
 		where year(hd.NgayXuat) = @nam
 		
-	commit tran
-	set @output = @doanhthu
+	set @output = isnull(@doanhthu, 0)
 end
 go
+
+create or alter proc sp_QL_DoanhThuNamThang
+	@nam int,
+	@thang int,
+	@output int output
+as
+begin
+	declare @doanhthu int
+	select @doanhthu = sum(hd.TongThanhToan)
+	from HoaDon hd
+	where year(hd.NgayXuat) = @nam
+		and month(hd.NgayXuat) = @thang
+	set @output = isnull(@doanhthu, 0)
+end
+go
+
+create or alter proc sp_QL_DoanhThuNamThangNgay
+	@nam int,
+	@thang int,
+	@ngay int,
+	@output int output
+as
+begin
+	declare @doanhthu int
+	select @doanhthu = sum(hd.TongThanhToan)
+	from HoaDon hd
+	where year(hd.NgayXuat) = @nam
+		and month(hd.NgayXuat) = @thang
+		and day(hd.NgayXuat) = @ngay
+	set @output = isnull(@doanhthu, 0)
+end
+go
+
+--select * from HoaDon
+declare @output int
+exec sp_QL_DoanhThuNam 2025, @output output
+print @output
+--go

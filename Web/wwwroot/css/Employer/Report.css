@@ -1,0 +1,29 @@
+.revenue-report {
+	border: 1px solid #eee;
+	border-radius: 20px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	padding: 20px;
+
+	.date-picker-group {
+		display: flex;
+		flex-direction: row;
+		gap: 10px;
+		
+		select {
+			padding: 5px;
+			border: 1px solid #bbb;
+			border-radius: 10px;
+		}
+	}
+	
+}
+
+.statistics-report {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	border: 1px solid #eee;
+	border-radius: 20px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	padding: 20px;
+}

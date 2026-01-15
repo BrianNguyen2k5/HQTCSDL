@@ -1,0 +1,46 @@
+@{
+	Layout = "_EmployerLayout";
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/Employer/Dashboard.css" />
+	<link rel="stylesheet" href="~/css/Employer/Report.css" />
+}
+
+<div id="tab-content-report" class="text-left p-8">
+	<p class="title">Báo cáo doanh thu</p>
+	<div class="revenue-report mt-2">
+		<div class="date-picker-group">
+			<select id="dp_year" name="NamSinh" class="dp-select">
+				<option value="">Năm</option>
+			</select>
+
+			<select id="dp_month" name="ThangSinh" class="dp-select" disabled>
+				<option value="">Tháng</option>
+			</select>
+
+			<select id="dp_day" name="NgaySinh" class="dp-select" disabled>
+				<option value="">Ngày</option>
+			</select>
+
+			<button type="button" onclick="loadRevenue()" class="blue-button-decor">Xem Doanh Thu</button>
+		</div>
+		<div class="mt-4">
+			<h3>Tổng doanh thu: <span id="lblDoanhThu" class="text-success font-bold">0 VNĐ</span></h3>
+		</div>
+	</div>
+
+	<p class="title mt-8">Báo cáo thống kê dịch vụ</p>
+	<div class="statistics-report mt-2">
+		<p>Tổng số lượt đặt sân: <span id="San_total"></span></p> 
+		<p>Tổng số lượt đặt dịch vụ: <span id="DichVu_total"></span></p> 
+		<p>Tổng số lượt đặt tài sản: <span id="TaiSan_total"></span></p>
+		<p>Tổng số lần sân bị hủy: <span id="San_cancel"></span></p>
+		<p>Tổng số lần dịch vụ bị hủy: <span id="DichVu_cancel"></span></p>
+	</div>
+</div>
+
+
+@section Scripts {
+	<script src="~/js/Employer/Dashboard.js" asp-append-version="true"></script>
+}

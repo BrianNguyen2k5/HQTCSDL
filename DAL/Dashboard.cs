@@ -20,9 +20,13 @@ namespace DAL
             using SqlConnection conn = new SqlConnection(_connectionString);
             conn.Open();
 
-            string spName = "SP_ThayDoiGiaSan";
+            string spName = @"
+								update LoaiSan
+								set GiaGoc = @giamoi
+								where MaLoaiSan = @maloaisan
+							";
             using SqlCommand cmd = new SqlCommand(spName, conn);
-            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandType = CommandType.Text;
             cmd.Parameters.AddWithValue("@maloaisan", maLoaiSan);
             cmd.Parameters.AddWithValue("@giamoi", giaMoi);
             int rowsAffected = cmd.ExecuteNonQuery();
@@ -40,8 +44,8 @@ namespace DAL
             string spName = "";
 
             // 1. LOGIC CHỌN STORED PROCEDURE
-            // Ưu tiên kiểm tra từ chi tiết nhất (Ngày) -> Tháng -> Năm
-            if (thang.HasValue && ngay.HasValue)
+            // Ưu tiên kiểm tra từ chi tiết nhất Ngày -> Tháng -> Năm
+            if (ngay.HasValue)
             {
                 spName = "sp_QL_DoanhThuNamThangNgay";
             }
@@ -55,7 +59,7 @@ namespace DAL
             }
 
             using SqlCommand cmd = new SqlCommand(spName, conn);
-            cmd.CommandType = CommandType.StoredProcedure; // QUAN TRỌNG: Báo đây là SP
+            cmd.CommandType = CommandType.StoredProcedure; // Phải là StoredProcedure vì spName là tên SP
 
             // 2. TRUYỀN THAM SỐ (Parameters)
             // Tham số @nam luôn luôn có
@@ -64,14 +68,19 @@ namespace DAL
             // Tham số @thang (chỉ truyền nếu SP cần)
             if (thang.HasValue)
             {
-                cmd.Parameters.AddWithValue("@thang", thang.Value);
+                cmd.Parameters.AddWithValue("@thang", thang);
             }
 
             // Tham số @ngay (chỉ truyền nếu SP cần)
-            if (thang.HasValue && ngay.HasValue)
+            if (ngay.HasValue)
             {
-                cmd.Parameters.AddWithValue("@ngay", ngay.Value);
+                cmd.Parameters.AddWithValue("@ngay", ngay);
             }
+
+						Console.WriteLine("nam: " + nam);
+						Console.WriteLine("thang: " + thang);
+						Console.WriteLine("ngay: " + ngay);
+						Console.WriteLine("spName: " + spName);
 
             // 3. XỬ LÝ OUTPUT PARAMETER (Phần quan trọng nhất với SP của bạn)
             // Vì SP của bạn trả về qua biến @output, không phải qua câu SELECT
@@ -84,12 +93,7 @@ namespace DAL
 
             // 5. LẤY KẾT QUẢ TỪ OUTPUT
             // Kiểm tra DBNull để tránh lỗi nếu không có doanh thu (NULL)
-            if (outputParam.Value != DBNull.Value)
-            {
-                ketQua = Convert.ToDecimal(outputParam.Value);
-            }
-
-            return ketQua;
+            return Convert.ToDecimal(outputParam.Value);
         }
 
         public decimal GetThongKe(string type)
