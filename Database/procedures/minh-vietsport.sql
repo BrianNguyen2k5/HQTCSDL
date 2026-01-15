@@ -289,19 +289,15 @@ BEGIN
 END;
 
 CREATE OR ALTER PROCEDURE sp_TaoHoaDon
-    @MaPhieuDat CHAR(10)
+    @MaPhieuDat CHAR(10),
+    @MaNhanVien CHAR(10)
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
         BEGIN TRANSACTION;
 
-        -- 1. Khai báo các biến để tính tiền
-        DECLARE @TongTienSan INT = 0;
-        DECLARE @TongTienDichVu INT = 0;
-        DECLARE @TongTienGiamGia INT = 0;
-        DECLARE @TongThanhToan INT = 0;
-        
+        -- 1. Lấy thông tin & Validate
         DECLARE @TrangThaiPhieu NVARCHAR(20);
         DECLARE @MaKhachHang CHAR(10);
         DECLARE @MaSan CHAR(10);
@@ -310,7 +306,6 @@ BEGIN
         DECLARE @GioBatDau TIME;
         DECLARE @GioKetThuc TIME;
 
-        -- 2. Lấy thông tin cơ bản của phiếu đặt
         SELECT @TrangThaiPhieu = P.TrangThaiPhieu,
                @MaKhachHang = P.MaKhachHang,
                @MaSan = P.MaSan,
@@ -329,132 +324,124 @@ BEGIN
             RETURN;
         END
 
-        -- 3. TÍNH TIỀN DỊCH VỤ (Luôn tính dù trạng thái nào)
-        -- Query từ ChiTietPhieuDatSan
-        SELECT @TongTienDichVu = ISNULL(SUM(ThanhTien), 0)
-        FROM ChiTietPhieuDatSan
-        WHERE MaPhieuDat = @MaPhieuDat;
-
-        -- 4. PHÂN NHÁNH LOGIC THEO TRẠNG THÁI
-        
-        ---------------------------------------------------------
-        -- TRƯỜNG HỢP A: CHỜ XÁC NHẬN -> TÍNH TIỀN SÂN + PHỤ THU + GIẢM GIÁ
-        ---------------------------------------------------------
-        IF @TrangThaiPhieu = N'Chờ xác nhận'
+        IF @TrangThaiPhieu NOT IN (N'Chờ xác nhận', N'Đang sử dụng')
         BEGIN
-            -- A1. Tính tiền gốc theo thời gian đá
-            DECLARE @SoPhut INT;
-            DECLARE @GiaGoc INT;
-            DECLARE @DonViTinhPhut INT;
-
-            SET @SoPhut = DATEDIFF(MINUTE, @GioBatDau, @GioKetThuc);
-            
-            SELECT @GiaGoc = GiaGoc, @DonViTinhPhut = DonViTinhTheoPhut
-            FROM LoaiSan WHERE MaLoaiSan = @MaLoaiSan;
-
-            -- Công thức: (Số phút / Đơn vị tính) * Giá gốc
-            SET @TongTienSan = (@SoPhut / @DonViTinhPhut) * @GiaGoc;
-
-            -- A2. Tính phụ thu Cuối Tuần (Thứ 7, CN)
-            -- DATEPART(dw, Date): 1 là CN, 7 là Thứ 7 
-            IF DATEPART(dw, @NgayNhanSan) IN (1, 7)
-            BEGIN
-                DECLARE @PhuThuCuoiTuan INT = 0;
-                SELECT @PhuThuCuoiTuan = ISNULL(GiaTang, 0)
-                FROM BangGiaTangCuoiTuan
-                WHERE MaLoaiSan = @MaLoaiSan;
-                
-                SET @TongTienSan = @TongTienSan + @PhuThuCuoiTuan;
-            END
-
-            -- A3. Tính phụ thu Ngày Lễ
-            DECLARE @PhuThuLe INT = 0;
-            SELECT @PhuThuLe = ISNULL(GiaTang, 0)
-            FROM BangGiaTangNgayLe
-            WHERE MaLoaiSan = @MaLoaiSan AND MaNgayLe = @NgayNhanSan;
-
-            SET @TongTienSan = @TongTienSan + @PhuThuLe;
-
-            -- A4. Tính phụ thu Khung Giờ (Buổi tối, giờ vàng...)
-            -- Logic: Cộng dồn giá tăng nếu khung giờ đặt có giao thoa với khung giờ tăng giá
-            DECLARE @PhuThuKhungGio INT = 0;
-            
-            SELECT @PhuThuKhungGio = ISNULL(SUM(bg.GiaTang), 0)
-            FROM BangGiaTangKhungGio bg
-            JOIN KhungGio kg ON bg.MaKhungGio = kg.MaKhungGio
-            WHERE bg.MaLoaiSan = @MaLoaiSan
-            AND (
-                (@GioBatDau < kg.GioKetThuc) AND (@GioKetThuc > kg.GioBatDau)
-            );
-
-            SET @TongTienSan = @TongTienSan + @PhuThuKhungGio;
-
-            -- A5. Tính Giảm Giá (Nếu có áp dụng ưu đãi)
-            DECLARE @PhanTramGiam INT = 0;
-            
-            -- Lấy ưu đãi đang áp dụng và còn hạn
-            SELECT TOP 1 @PhanTramGiam = U.PhanTramGiamGia
-            FROM ApDung AD
-            JOIN UuDai U ON AD.MaUuDai = U.MaUuDai
-            WHERE AD.MaKhachHang = @MaKhachHang
-              AND AD.TrangThai = 1
-              AND GETDATE() BETWEEN AD.NgayBatDau AND AD.NgayKetThuc
-            ORDER BY U.PhanTramGiamGia DESC; -- Lấy ưu đãi cao nhất nếu có nhiều
-
-            -- Tính tiền giảm giá (Áp dụng trên tổng tiền sân)
-            SET @TongTienGiamGia = (@TongTienSan * @PhanTramGiam) / 100;
-        END
-        
-        ---------------------------------------------------------
-        -- TRƯỜNG HỢP B: CHỜ THANH TOÁN -> CHỈ TÍNH DỊCH VỤ (TIỀN SÂN = 0)
-        ---------------------------------------------------------
-        ELSE IF @TrangThaiPhieu = N'Chờ thanh toán'
-        BEGIN
-            -- Theo yêu cầu: Nếu chờ thanh toán thì chỉ query chi tiết (dịch vụ)
-            -- Giả định tiền sân đã được xử lý ở đơn khác hoặc cọc, ở đây set = 0
-            SET @TongTienSan = 0;
-            SET @TongTienGiamGia = 0;
-            -- @TongTienDichVu đã tính ở bước 3
-        END
-        ELSE
-        BEGIN
-            RAISERROR(N'Trạng thái phiếu không hợp lệ để xuất hóa đơn (Phải là Chờ xác nhận, hoặc Chờ thanh toán).', 16, 1);
+            RAISERROR(N'Trạng thái phiếu không hợp lệ (Phải là Chờ xác nhận hoặc Đang sử dụng).', 16, 1);
             ROLLBACK TRANSACTION;
             RETURN;
         END
 
-        -- 5. Tổng kết tiền
-        SET @TongThanhToan = (@TongTienSan + @TongTienDichVu) - @TongTienGiamGia;
-        
-        IF @TongThanhToan < 0 SET @TongThanhToan = 0;
+        -- 2. KHỞI TẠO BIẾN
+        DECLARE @TongTienSan INT = 0;
+        DECLARE @TongTienDichVu INT = 0;
+        DECLARE @TongTienGiamGia INT = 0;
+        DECLARE @TongThanhToan INT = 0;
 
-        -- 6. Tạo Hóa Đơn
-        INSERT INTO HoaDon (
-            NgayXuat, 
-            TongTienSan, 
-            TongTienDichVu, 
-            TongTienGiamGia, 
-            TongThanhToan, 
-            HinhThucThanhToan, 
-            TrangThaiThanhToan, 
-            MaNhanVien, 
-            MaPhieuDat, 
-            MaPhieuThue
-        )
-        VALUES (
-            GETDATE(),
-            @TongTienSan,
-            @TongTienDichVu,
-            @TongTienGiamGia,
-            @TongThanhToan,
-            NULL,
-            N'Chờ thanh toán',
-            NULL,
-            @MaPhieuDat,
-            NULL -- Ở đây chỉ xử lý phiếu đặt sân
-        );
+        -- 3. TÍNH TIỀN DỊCH VỤ (Chỉ tính các món CHƯA THANH TOÁN)
+        SELECT @TongTienDichVu = ISNULL(SUM(ThanhTien), 0)
+        FROM ChiTietPhieuDatSan
+        WHERE MaPhieuDat = @MaPhieuDat AND TrangThaiThanhToan = 0;
 
-        COMMIT TRANSACTION;    
+        -- =========================================================================
+        -- LOGIC GIAI ĐOẠN 1: KHÁCH ĐẶT SÂN (Trạng thái: Chờ xác nhận)
+        -- =========================================================================
+        IF @TrangThaiPhieu = N'Chờ xác nhận'
+        BEGIN
+            -- 1. Tính tiền sân
+            DECLARE @SoPhut INT = DATEDIFF(MINUTE, @GioBatDau, @GioKetThuc);
+            DECLARE @GiaGoc INT, @DonViTinhPhut INT;
+            SELECT @GiaGoc = GiaGoc, @DonViTinhPhut = DonViTinhTheoPhut FROM LoaiSan WHERE MaLoaiSan = @MaLoaiSan;
+            SET @TongTienSan = (@SoPhut / @DonViTinhPhut) * @GiaGoc;
+
+            -- 2. Phụ thu Cuối tuần
+            IF DATEPART(dw, @NgayNhanSan) IN (1, 7)
+            BEGIN
+                DECLARE @PhuThuCuoiTuan INT = 0;
+                SELECT @PhuThuCuoiTuan = ISNULL(GiaTang, 0) FROM BangGiaTangCuoiTuan WHERE MaLoaiSan = @MaLoaiSan;
+                SET @TongTienSan += @PhuThuCuoiTuan;
+            END
+
+            -- 3. Phụ thu Ngày lễ
+            DECLARE @PhuThuLe INT = 0;
+            SELECT @PhuThuLe = ISNULL(GiaTang, 0) FROM BangGiaTangNgayLe WHERE MaLoaiSan = @MaLoaiSan AND MaNgayLe = @NgayNhanSan;
+            SET @TongTienSan += @PhuThuLe;
+
+            -- 4. Phụ thu Khung giờ
+            DECLARE @PhuThuKhungGio INT = 0;
+            SELECT @PhuThuKhungGio = ISNULL(SUM(bg.GiaTang), 0)
+            FROM BangGiaTangKhungGio bg
+            JOIN KhungGio kg ON bg.MaKhungGio = kg.MaKhungGio
+            WHERE bg.MaLoaiSan = @MaLoaiSan AND ((@GioBatDau < kg.GioKetThuc) AND (@GioKetThuc > kg.GioBatDau));
+            SET @TongTienSan += @PhuThuKhungGio;
+
+            -- 5. Giảm giá
+            DECLARE @PhanTramGiam INT = 0;
+            SELECT TOP 1 @PhanTramGiam = U.PhanTramGiamGia
+            FROM ApDung AD JOIN UuDai U ON AD.MaUuDai = U.MaUuDai
+            WHERE AD.MaKhachHang = @MaKhachHang AND AD.TrangThai = 1 
+              AND GETDATE() BETWEEN AD.NgayBatDau AND AD.NgayKetThuc
+            ORDER BY U.PhanTramGiamGia DESC;
+            SET @TongTienGiamGia = (@TongTienSan * @PhanTramGiam) / 100;
+            
+            -- Tổng kết
+            SET @TongThanhToan = (@TongTienSan + @TongTienDichVu) - @TongTienGiamGia;
+            IF @TongThanhToan < 0 SET @TongThanhToan = 0;
+
+            -- Tạo hóa đơn cọc/thanh toán trước
+            INSERT INTO HoaDon (NgayXuat, TongTienSan, TongTienDichVu, TongTienGiamGia, TongThanhToan, TrangThaiThanhToan, MaNhanVien, MaPhieuDat)
+            VALUES (GETDATE(), @TongTienSan, @TongTienDichVu, @TongTienGiamGia, @TongThanhToan, N'Chưa thanh toán', @MaNhanVien, @MaPhieuDat);
+            
+            -- Cập nhật trạng thái phiếu để chờ thu ngân
+            UPDATE PhieuDatSan SET TrangThaiPhieu = N'Chờ thanh toán' WHERE MaPhieuDat = @MaPhieuDat;
+            
+            PRINT N'Đã tạo hóa đơn đặt sân (Giai đoạn 1).';
+        END
+
+        -- =========================================================================
+        -- LOGIC GIAI ĐOẠN 2: CHECKOUT (Trạng thái: Đang sử dụng)
+        -- =========================================================================
+        ELSE IF @TrangThaiPhieu = N'Đang sử dụng'
+        BEGIN
+            -- Ở giai đoạn này, tiền sân = 0 (đã trả trước). Chỉ quan tâm dịch vụ phát sinh.
+            SET @TongTienSan = 0;
+            SET @TongTienGiamGia = 0;
+            SET @TongThanhToan = @TongTienDichVu; -- Tổng tiền dịch vụ chưa thanh toán
+
+            -- >>> LOGIC QUAN TRỌNG: KIỂM TRA CÓ PHÁT SINH KHÔNG <<<
+            
+            IF @TongThanhToan > 0
+            BEGIN
+                -- TRƯỜNG HỢP A: CÓ PHÁT SINH TIỀN -> TẠO HÓA ĐƠN
+                INSERT INTO HoaDon (NgayXuat, TongTienSan, TongTienDichVu, TongTienGiamGia, TongThanhToan, TrangThaiThanhToan, MaNhanVien, MaPhieuDat)
+                VALUES (GETDATE(), 0, @TongTienDichVu, 0, @TongThanhToan, N'Chưa thanh toán', @MaNhanVien, @MaPhieuDat);
+
+                -- Chuyển sang chờ thanh toán để thu ngân thu tiền
+                UPDATE PhieuDatSan SET TrangThaiPhieu = N'Chờ thanh toán' WHERE MaPhieuDat = @MaPhieuDat;
+                
+                PRINT N'Có chi phí phát sinh. Đã tạo hóa đơn quyết toán.';
+            END
+            ELSE
+            BEGIN
+                -- TRƯỜNG HỢP B: KHÔNG PHÁT SINH (HOẶC = 0 ĐỒNG) -> HOÀN THÀNH LUÔN
+                -- 1. Cập nhật phiếu thành Hoàn thành
+                UPDATE PhieuDatSan 
+                SET TrangThaiPhieu = N'Hoàn thành',
+                    GioKetThuc = CAST(GETDATE() AS TIME) -- Cập nhật giờ thực tế khách về (nếu cần)
+                WHERE MaPhieuDat = @MaPhieuDat;
+
+                -- 2. Cập nhật trạng thái thanh toán cho các dịch vụ (ví dụ các món giá 0 đồng, khuyến mãi)
+                UPDATE ChiTietPhieuDatSan 
+                SET TrangThaiThanhToan = 1 
+                WHERE MaPhieuDat = @MaPhieuDat AND TrangThaiThanhToan = 0;
+                
+                -- 3. Cập nhật trạng thái Sân về Trống
+                UPDATE San SET TinhTrang = N'Trống' WHERE MaSan = @MaSan;
+
+                PRINT N'Không có chi phí phát sinh. Đã hoàn thành phiếu đặt sân.';
+            END
+        END
+
+        COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
@@ -522,3 +509,8 @@ BEGIN
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
+
+CREATE OR ALTER sp_LeTan_CheckOut 
+AS 
+BEGIN 
+END 
