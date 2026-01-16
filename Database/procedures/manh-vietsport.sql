@@ -201,7 +201,7 @@ create or alter proc sp_QL_DoanhThuNam
 	@output int output
 as
 begin
-	set transaction isolation level read committed
+	set transaction isolation level read uncommitted
 	begin tran
 		-- Lấy thống kê
 		declare @doanhthu int
@@ -211,6 +211,7 @@ begin
 			and hd.TrangThaiThanhToan = N'Đã thanh toán'
 	commit tran
 	set @output = isnull(@doanhthu, 0)
+	set transaction isolation level read committed
 end
 go
 
