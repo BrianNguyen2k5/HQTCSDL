@@ -1,0 +1,53 @@
+.blue-button-decor {
+  background-color: #00ADEF;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.white-button-decor {
+  background-color: white;
+  color: #777;
+  border: 1px solid #bbb;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.field-price-modify, .service-price-modify {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border: 1px solid #eee;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+
+  .fields-list, .services-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px;
+
+    .field-info, .service-field-item {
+      padding: 30px;
+      border: 1px solid #bbb;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .field-info-input, .service-price-changing {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      &.hidden {
+        display: none !important;
+      }
+    }
+  }
+}

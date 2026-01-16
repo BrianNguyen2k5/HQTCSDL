@@ -68,10 +68,19 @@ const VietSport = {
 };
 
 // New Booking Dialog
+// Note: The actual implementation is in new-booking-dialog.js
+// This function is kept here for compatibility but delegates to the real implementation
 function openNewBookingDialog() {
-    const dialog = document.getElementById('newBookingDialog');
+    const dialog = document.getElementById('newBookingModal'); // Fixed: was 'newBookingDialog', should be 'newBookingModal'
     if (dialog) {
         dialog.style.display = 'flex';
+        // Reset and show step 1
+        if (typeof resetBookingForm === 'function') {
+            resetBookingForm();
+        }
+        if (typeof showStep === 'function') {
+            showStep(1);
+        }
     }
 }
 

@@ -1,0 +1,1434 @@
+@{
+    ViewData["Title"] = "Đặt Sân Online";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mx-auto px-4 py-8" id="booking-app">
+    <!-- Tab Navigation -->
+    <div class="flex justify-center mb-8 bg-white p-2 rounded-xl shadow-sm w-fit mx-auto border border-gray-100">
+        <button onclick="switchTab('home')" id="tab-btn-home" class="px-6 py-2 rounded-lg font-bold transition-all bg-blue-600 text-white shadow-md">
+            <i class="bi bi-house-door-fill mr-2"></i>Đặt Sân
+        </button>
+        <button onclick="switchTab('history')" id="tab-btn-history" class="px-6 py-2 rounded-lg font-bold transition-all text-gray-500 hover:bg-gray-50">
+            <i class="bi bi-calendar-check-fill mr-2"></i>Lịch Đặt Của Tôi
+        </button>
+    </div>
+
+    <!-- TAB HOME: Booking Wizard -->
+    <div id="tab-home">
+    <!-- Wizard Progress -->
+    <div class="mb-8">
+        <div class="flex items-center justify-center space-x-2 md:space-x-4">
+            <div class="flex flex-col items-center">
+                <div id="step-1-indicator" class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-white bg-blue-600 transition-colors cursor-pointer" onclick="goToStep(1)">1</div>
+                <div class="text-[10px] md:text-xs mt-1 text-blue-600 font-medium">Tìm Kiếm</div>
+            </div>
+            <div class="w-8 md:w-12 h-1 bg-gray-200">
+                <div id="line-1" class="h-full bg-blue-600 transition-all w-0"></div>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <div id="step-2-indicator" class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-gray-500 bg-gray-200 transition-colors">2</div>
+                <div class="text-[10px] md:text-xs mt-1 text-gray-500 font-medium">Chọn Sân</div>
+            </div>
+            <div class="w-8 md:w-12 h-1 bg-gray-200">
+                <div id="line-2" class="h-full bg-blue-600 transition-all w-0"></div>
+            </div>
+
+            <div class="flex flex-col items-center">
+                <div id="step-3-indicator" class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-gray-500 bg-gray-200 transition-colors">3</div>
+                <div class="text-[10px] md:text-xs mt-1 text-gray-500 font-medium">Thông Tin</div>
+            </div>
+            <div class="w-8 md:w-12 h-1 bg-gray-200">
+                <div id="line-3" class="h-full bg-blue-600 transition-all w-0"></div>
+            </div>
+
+            <div class="flex flex-col items-center">
+                <div id="step-4-indicator" class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-gray-500 bg-gray-200 transition-colors">4</div>
+                <div class="text-[10px] md:text-xs mt-1 text-gray-500 font-medium">Dịch Vụ</div>
+            </div>
+             <div class="w-8 md:w-12 h-1 bg-gray-200">
+                <div id="line-4" class="h-full bg-blue-600 transition-all w-0"></div>
+            </div>
+
+             <div class="flex flex-col items-center">
+                <div id="step-5-indicator" class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-gray-500 bg-gray-200 transition-colors">5</div>
+                <div class="text-[10px] md:text-xs mt-1 text-gray-500 font-medium">Thanh Toán</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 1: Search Criteria -->
+    <div id="step-1" class="step-content max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-4 md:p-8 space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-blue-600 pl-4">Chọn Chi Nhánh & Môn Thể Thao</h2>
+            
+            <!-- Branch Selection -->
+            <div class="space-y-3">
+                <label class="block text-sm font-bold text-gray-700">Chọn Chi Nhánh</label>
+                <div id="branch-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="col-span-3 text-center py-4"><div class="animate-spin inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"></div> Đang tải chi nhánh...</div>
+                </div>
+            </div>
+            
+             <!-- Sport Selection -->
+            <div class="space-y-3 pt-4 border-t">
+                <label class="block text-sm font-bold text-gray-700">Chọn Môn Thể Thao</label>
+                <div id="sport-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                      <p class="text-gray-500 col-span-4 italic">Vui lòng chọn chi nhánh trước.</p>
+                </div>
+            </div>
+
+             <div class="flex justify-end pt-6">
+                <button onclick="goToStep2()" id="btn-step1-next" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md" disabled>
+                    Tiếp theo <i class="bi bi-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Select Court & Time -->
+    <div id="step-2" class="step-content hidden max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Date & Courts & Time -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Date Picker -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                     <h3 class="text-lg font-bold text-gray-800 mb-4">Chọn Ngày</h3>
+                     <div class="flex gap-4 overflow-x-auto pb-2" id="date-scroll">
+                     </div>
+                     <input type="date" id="date-picker-hidden" class="hidden">
+                </div>
+
+                <!-- Court List -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                     <h3 class="text-lg font-bold text-gray-800 mb-4">Chọn Sân</h3>
+                    <div id="court-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p class="text-gray-500">Đang tải danh sách sân...</p>
+                    </div>
+                </div>
+
+                <!-- Time Slots -->
+                <div id="time-slots-container" class="hidden bg-white rounded-xl shadow-sm p-6 animate-fade-in">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span>Chọn Giờ</span>
+                        <span id="selected-court-name-display" class="text-blue-600 font-normal text-sm bg-blue-50 px-2 py-1 rounded"></span>
+                    </h3>
+                    
+                    <div class="mb-4 flex gap-4 text-sm">
+                        <div class="flex items-center gap-2"><div class="w-4 h-4 border rounded bg-white"></div> Trống</div>
+                        <div class="flex items-center gap-2"><div class="w-4 h-4 border rounded bg-red-100 border-red-200"></div> Đã đặt</div>
+                        <div class="flex items-center gap-2"><div class="w-4 h-4 border rounded bg-gray-800"></div> Đang chọn</div>
+                    </div>
+
+                    <div id="time-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        <!-- Time slots injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Summary -->
+            <div class="lg:col-span-1">
+                 <!-- INLINE SUMMARY -->
+                 <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24 border border-blue-100 h-fit">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Tóm Tắt Đặt Sân</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Chi nhánh:</span>
+                            <span class="font-medium text-gray-900 summary-branch-name">...</span>
+                        </div>
+                         <div class="flex justify-between">
+                            <span class="text-gray-500">Sân:</span>
+                            <span class="font-medium text-gray-900 summary-court-name">...</span>
+                        </div>
+                         <div class="flex justify-between">
+                            <span class="text-gray-500">Môn:</span>
+                            <span class="font-medium text-gray-900 summary-sport-name">...</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Thời gian:</span>
+                            <span class="font-medium text-gray-900 summary-date-display">...</span>
+                        </div>
+                        
+                        <div class="pt-3 border-t border-dashed space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Tiền sân (cập nhật):</span>
+                                <span class="font-bold summary-court-price">0 đ</span>
+                            </div>
+                            <div class="summary-service-list space-y-1">
+                                <!-- Services injected -->
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t flex justify-between items-center mt-2">
+                            <span class="text-gray-800 font-bold text-lg">Tổng cộng:</span>
+                            <span class="text-xl font-bold text-red-600 summary-total-price">0 đ</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex flex-col gap-2">
+                         <button onclick="goToStep(3)" class="w-full py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 btn-next-step" disabled>
+                            Tiếp Tục
+                        </button>
+                        <button onclick="goToStep(1)" class="w-full py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50">
+                            Quay lại
+                        </button>
+                    </div>
+                </div>
+                <!-- END SUMMARY -->
+            </div>
+        </div>
+    </div>
+    
+     <!-- Step 3: Customer Info -->
+    <div id="step-3" class="step-content hidden max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
+         <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-4">Thông Tin Khách Hàng</h2>
+         <div class="space-y-4">
+            <div>
+                 <label class="block text-sm font-medium text-gray-700 mb-1">Mã khách hàng</label>
+                <input type="text" id="customer-id" value="@User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value" readonly class="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-100 text-gray-600">
+            </div>
+              <div>
+                 <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên <span class="text-red-500">*</span></label>
+                <input type="text" id="customer-name" value="Nguyễn Văn A" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+              <div>
+                 <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại <span class="text-red-500">*</span></label>
+                <input type="text" id="customer-phone" value="0901234567" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+        </div>
+        <div class="flex justify-between mt-8">
+            <button onclick="showStep(2)" class="px-6 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Quay lại</button>
+            <button onclick="goToStep4()" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-md">Tiếp theo</button>
+        </div>
+    </div>
+
+    <!-- Step 4: Services & Coaches -->
+    <div id="step-4" class="step-content hidden max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-8">
+                
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Dịch Vụ Đi Kèm</h2>
+                    <p class="text-gray-500">Chọn thêm các dịch vụ và tiện ích để trải nghiệm tốt hơn</p>
+                </div>
+
+                <!-- 1. Coach Selection -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-base font-bold text-blue-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                        <i class="bi bi-person-badge-fill"></i> Huấn Luyện Viên
+                    </h3>
+                    
+                    <div id="coach-selection-area">
+                        <!-- Summary Card (Default) -->
+                        <div class="flex items-center justify-between p-4 border rounded-xl bg-gray-50/50">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800">Thuê Huấn Luyện Viên</h4>
+                                    <p class="text-sm text-gray-500">Từ 300,000đ - 1,000,000đ / giờ</p>
+                                </div>
+                            </div>
+                            <button onclick="toggleCoachList()" id="btn-toggle-coach" class="px-4 py-2 bg-white border border-gray-200 shadow-sm rounded-lg text-sm font-medium hover:bg-gray-50 transition-all">
+                                Chọn Huấn Luyện Viên
+                            </button>
+                        </div>
+
+                        <!-- Coach List (Hidden by default) -->
+                        <div id="coach-list" class="hidden mt-4 space-y-3 animate-fade-in-down">
+                             <div class="text-center py-4 text-gray-500">Đang tải HLV...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Facilities -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-base font-bold text-blue-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                        <i class="bi bi-building-fill"></i> Tiện Ích & Cơ Sở Vật Chất
+                    </h3>
+                    <div id="facilities-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- 3. Sports Equipment (Dynamic) -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-base font-bold text-blue-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                        <i class="bi bi-trophy-fill"></i> Dụng Cụ Thể Thao
+                    </h3>
+                    <div id="service-equipment-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                         <div class="text-center py-4 text-gray-500 col-span-4">Đang tải dụng cụ...</div>
+                    </div>
+                </div>
+
+                <!-- 4. Other Services (Dynamic) -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-base font-bold text-blue-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                        <i class="bi bi-bag-plus-fill"></i> Dịch Vụ Khác
+                    </h3>
+                    <div id="service-other-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                         <div class="text-center py-4 text-gray-500 col-span-3">Đang tải dịch vụ...</div>
+                    </div>
+                </div>
+
+            </div>
+
+             <!-- Summary Sidebar -->
+            <div class="lg:col-span-1">
+                 <!-- INLINE SUMMARY -->
+                 <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24 border border-blue-100 h-fit">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Tóm Tắt Đặt Sân</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Chi nhánh:</span>
+                            <span class="font-medium text-gray-900 summary-branch-name">...</span>
+                        </div>
+                         <div class="flex justify-between">
+                            <span class="text-gray-500">Sân:</span>
+                            <span class="font-medium text-gray-900 summary-court-name">...</span>
+                        </div>
+                         <div class="flex justify-between">
+                            <span class="text-gray-500">Môn:</span>
+                            <span class="font-medium text-gray-900 summary-sport-name">...</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Thời gian:</span>
+                            <span class="font-medium text-gray-900 summary-date-display">...</span>
+                        </div>
+                        
+                        <div class="pt-3 border-t border-dashed space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Tiền sân:</span>
+                                <span class="font-bold summary-court-price">0 đ</span>
+                            </div>
+                            <div class="summary-service-list space-y-1">
+                                <!-- Services injected -->
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t flex justify-between items-center mt-2">
+                            <span class="text-gray-800 font-bold text-lg">Tổng cộng:</span>
+                            <span class="text-xl font-bold text-red-600 summary-total-price">0 đ</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex flex-col gap-2">
+                         <button onclick="goToStep(5)" class="w-full py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 btn-next-step">
+                            Tiếp Tục
+                        </button>
+                        <button onclick="goToStep(3)" class="w-full py-2 border border-blue-200 text-blue-600 font-medium rounded-lg hover:bg-blue-50">
+                            Quay lại
+                        </button>
+                    </div>
+                </div>
+                <!-- END SUMMARY -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Step 5: Confirmation & Payment -->
+    <div id="step-5" class="step-content hidden max-w-4xl mx-auto">
+         <!-- Header -->
+         <div class="text-center mb-8">
+             <h2 class="text-3xl font-bold text-gray-800">Xác Nhận & Thanh Toán</h2>
+             <p class="text-gray-500 mt-2">Kiểm tra thông tin và chọn phương thức thanh toán</p>
+         </div>
+
+         <!-- Booking Info Card -->
+         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+             <h3 class="font-bold text-gray-800 mb-4 pb-2 border-b">Thông Tin Đặt Sân</h3>
+             <div class="space-y-4">
+                 <div class="flex items-center gap-4">
+                     <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-2xl">
+                         <i class="bi bi-trophy-fill"></i>
+                     </div>
+                     <div>
+                         <div class="font-bold text-gray-800 text-lg" id="review-court">Sân...</div>
+                         <div class="text-gray-500" id="review-branch">Chi nhánh...</div>
+                     </div>
+                 </div>
+                 <div class="flex items-center gap-4">
+                     <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-2xl">
+                         <i class="bi bi-calendar-event"></i>
+                     </div>
+                     <div>
+                         <div class="font-bold text-gray-800 text-lg" id="review-date-full">Thứ..., ...</div>
+                         <div class="text-gray-500" id="review-time">... - ...</div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
+         <!-- Discount Selection -->
+         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+             <h3 class="font-bold text-gray-800 mb-2">Ưu Đãi & Giảm Giá</h3>
+             
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="discount-list">
+                 <!-- Injected via JS -->
+             </div>
+         </div>
+
+         <!-- Payment Method -->
+         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+               <h3 class="font-bold text-gray-800 mb-4">Phương Thức Thanh Toán</h3>
+               <div class="space-y-3">
+                   <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                       <input type="radio" name="payment-method" value="online" class="w-5 h-5 text-blue-600">
+                       <div class="flex-1">
+                           <div class="font-bold text-gray-800">Thanh Toán Online</div>
+                           <div class="text-sm text-gray-500">Thanh toán qua thẻ hoặc ví điện tử</div>
+                       </div>
+                       <i class="bi bi-credit-card text-2xl text-gray-400"></i>
+                   </label>
+                   
+                   <label class="flex items-center gap-4 p-4 border rounded-xl cursor-pointer hover:bg-gray-50 transition-all has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                       <input type="radio" name="payment-method" value="cash" checked class="w-5 h-5 text-blue-600">
+                       <div class="flex-1">
+                            <div class="font-bold text-gray-800">Thanh Toán Tại Quầy</div>
+                           <div class="text-sm text-gray-500">Thanh toán khi đến sân</div>
+                       </div>
+                       <i class="bi bi-shop text-2xl text-gray-600"></i>
+                   </label>
+               </div>
+         </div>
+
+         <!-- Price Detail Board -->
+         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+             <h3 class="font-bold text-gray-800 mb-4">Chi Tiết Giá</h3>
+             <div class="space-y-3 text-sm">
+                 <div class="flex justify-between">
+                     <span class="text-gray-600">Phí sân (<span id="summary-duration-text">1 khung giờ</span>)</span>
+                     <span class="font-bold text-gray-900 summary-court-price">0đ</span>
+                 </div>
+                 
+                 <!-- Services Injection Point -->
+                 <div class="summary-service-list space-y-2 border-t border-dashed pt-2"></div>
+                 
+                 <!-- Discount Injection Point -->
+                 <div id="summary-discount-row" class="flex justify-between text-green-600 font-medium hidden">
+                     <span>Giảm giá (<span id="summary-discount-name"></span>)</span>
+                     <span id="summary-discount-value">-0đ</span>
+                 </div>
+             </div>
+             
+             <div class="flex justify-between items-center mt-6 pt-4 border-t">
+                 <span class="text-xl font-bold text-gray-800">Tổng Cộng</span>
+                 <span class="text-2xl font-bold text-blue-600 summary-total-price">0đ</span>
+             </div>
+             
+             <div class="flex gap-4 mt-6">
+                  <button onclick="goToStep(4)" class="w-1/3 py-3 border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-50">
+                    Quay lại
+                </button>
+                 <button onclick="submitBooking()" id="btn-confirm-booking" class="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-md">
+                    Xác Nhận Đặt Sân
+                </button>
+             </div>
+         </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center animate-fade-in-up">
+            <div class="mb-4">
+                 <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto animate-bounce">
+                    <i class="bi bi-check-lg text-4xl text-green-600"></i>
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Đặt Sân Thành Công!</h2>
+            <p class="text-gray-500 mb-8 text-sm">Cảm ơn bạn đã tin tưởng VietSport. Vui lòng đến trước giờ đặt 15 phút.</p>
+            
+            <div class="bg-gray-50 rounded-lg p-4 mb-8 text-left text-sm space-y-2">
+                <div class="flex justify-between"><span class="text-gray-500">Mã đặt sân:</span> <span class="font-bold font-mono text-blue-600" id="success-id">...</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Tổng tiền:</span> <span class="font-bold text-red-600" id="success-total">...</span></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                 <button onclick="closeSuccessModal(); switchTab('history')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Lịch sử</button>
+                 <button onclick="closeSuccessModal(); goToStep(1); switchTab('home')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">Về trang chủ</button>
+            </div>
+        </div>
+    </div>
+    </div>
+    <!-- END TAB HOME -->
+
+    <!-- TAB HISTORY: My Bookings -->
+    <div id="tab-history" class="hidden max-w-5xl mx-auto">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-800">Lịch Sử Đặt Sân</h2>
+                <button onclick="loadMyBookings()" class="text-blue-600 hover:text-blue-800"><i class="bi bi-arrow-clockwise text-xl"></i></button>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+                        <tr>
+                            <th class="p-4 font-semibold">Mã Phiếu</th>
+                            <th class="p-4 font-semibold">Ngày Chơi</th>
+                            <th class="p-4 font-semibold">Giờ</th>
+                            <th class="p-4 font-semibold">Sân - Môn</th>
+                            <th class="p-4 font-semibold">Trạng Thái</th>
+                            <th class="p-4 font-semibold">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-list" class="divide-y divide-gray-100 text-sm">
+                         <tr><td colspan="6" class="p-8 text-center text-gray-500">Đang tải dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+<script>
+    // --- APP STATE ---
+    const state = {
+        step: 1,
+        branches: [],
+        sports: [],
+        courts: [],
+        coaches: [],
+        services: [],
+        
+        selection: {
+            branch: null,
+            sport: null,
+            date: (() => {
+                const d = new Date();
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            })(),
+            court: null,
+            timeStart: null,
+            timeEnd: null,
+            coach: null, // {id, name, price}
+            facilities: { locker: null, shower: null }, // 'SESSION' | 'MONTH' | null
+            services: {}, // id -> qty
+            discounts: [] // Array of selected discount objects {id, name, rate}
+        }
+    };
+    
+    // --- STATE ---
+    let promotions = []; // Data from API
+    
+    // --- MOCK DATA ---
+    const MOCK_DISCOUNTS = [
+        { id: 'UD00', name: 'Khách Thường', rate: 0, desc: 'Giá tiêu chuẩn' },
+        { id: 'UD01', name: 'Thành Viên Silver', rate: 0.05, desc: 'Giảm 5%' },
+        { id: 'UD02', name: 'Thành Viên Gold', rate: 0.10, desc: 'Giảm 10%' },
+        { id: 'UD03', name: 'Thành Viên Platinum', rate: 0.20, desc: 'Giảm 20%' },
+        { id: 'UD04', name: 'Học Sinh / Sinh Viên', rate: 0.10, desc: 'Giảm 10% (Cần thẻ HSSV)' },
+        { id: 'UD05', name: 'Người Cao Tuổi (>60)', rate: 0.10, desc: 'Giảm 10% (Cần CCCD)' }
+    ];
+    
+    // --- INIT ---
+    document.addEventListener('DOMContentLoaded', () => {
+        loadBranches();
+        loadPromotions();
+        initDatePicker();
+        renderSummary();
+    });
+
+    // --- API & DATA ---
+    async function loadBranches() {
+        try {
+            const res = await fetch('/api/booking/branches');
+            state.branches = await res.json();
+            renderBranches();
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadPromotions() {
+        try {
+            const res = await fetch('/api/booking/promotions');
+            if(res.ok) {
+                const data = await res.json();
+                
+                // Description Mapping
+                const descMap = {
+                    'UD04': 'Giảm 10% (Cần thẻ HSSV)',
+                    'UD05': 'Giảm 10% (Cần CCCD)'
+                };
+
+                promotions = data.map(p => ({
+                    id: p.maUuDai ? p.maUuDai.trim() : '',
+                    name: p.loaiUuDai ? p.loaiUuDai.trim() : '',
+                    rate: p.phanTramGiamGia / 100.0,
+                    desc: descMap[p.maUuDai ? p.maUuDai.trim() : ''] || `Giảm ${p.phanTramGiamGia}%`
+                }));
+            }
+        } catch (e) { console.error(e); }
+    }
+    
+    async function loadSports() {
+        if(!state.selection.branch) return;
+        try {
+            const res = await fetch('/api/booking/sports'); // Ideally filter by branch but API is generic
+            state.sports = await res.json(); // Filter logic needed? Seed says all branches have all sports mostly.
+            renderSports();
+        } catch(e) {}
+    }
+
+    async function loadCourts() {
+        if(!state.selection.branch || !state.selection.sport) return;
+        const container = document.getElementById('court-list');
+        container.innerHTML = '<div class="col-span-2 text-center py-8"><div class="animate-spin inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"></div></div>';
+        
+        try {
+            const { maCoSo } = state.selection.branch;
+            const { maLoaiSan } = state.selection.sport;
+            const res = await fetch(`/api/booking/courts?branchId=${maCoSo}&sportId=${maLoaiSan}`);
+            state.courts = await res.json();
+            renderCourts();
+        } catch(e) { container.innerHTML = '<p class="text-red-500">Lỗi tải sân</p>'; }
+    }
+
+     async function loadTimeSlots(courtId) {
+        // Fetch Booking Schedule
+        const date = state.selection.date;
+        const branchId = state.selection.branch.maCoSo;
+        const sportId = state.selection.sport.maLoaiSan;
+        
+        try {
+            const res = await fetch(`/api/booking/schedule?date=${date}&branchId=${branchId}&sportId=${sportId}`);
+            const bookings = await res.json();
+            
+            // Filter for current court
+            const courtBookings = bookings.filter(b => b.maSan === courtId);
+            renderTimeGrid(courtBookings);
+        } catch(e) { console.error(e); }
+    }
+    
+    async function loadStep4Data() {
+        const branchId = state.selection.branch.maCoSo;
+        
+        // Load Coaches
+        fetch(`/api/booking/coaches?branchId=${branchId}`)
+            .then(r => r.json())
+            .then(data => { state.coaches = data; renderCoaches(); })
+            .catch(e => console.error(e));
+            
+        // Load Services
+        fetch(`/api/booking/services?branchId=${branchId}`)
+            .then(r => r.json())
+            .then(data => { 
+                // Trim IDs to avoid DB Char(10) issues
+                state.services = data.map(s => ({
+                    ...s,
+                    maDichVu: s.maDichVu ? s.maDichVu.trim() : ''
+                }));
+                renderServices(); 
+            })
+            .catch(e => console.error(e));
+    }
+
+
+    // --- RENDERING ---
+    function renderBranches() {
+        const grid = document.getElementById('branch-grid');
+        grid.innerHTML = state.branches.map(b => `
+            <div onclick="selectBranch('${b.maCoSo}')" 
+                class="cursor-pointer p-4 rounded-xl border-2 transition-all hover:shadow-md ${state.selection.branch?.maCoSo === b.maCoSo ? 'border-blue-600 bg-blue-50' : 'border-gray-100 bg-gray-50'}">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-blue-600 shadow-sm font-bold">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800">${b.tenCoSo}</h3>
+                        <p class="text-xs text-gray-500">${b.diaChi}</p>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderSports() {
+        const grid = document.getElementById('sport-grid');
+        grid.innerHTML = state.sports.map(s => `
+            <div onclick="selectSport('${s.maLoaiSan}')" 
+                class="cursor-pointer p-4 rounded-xl border-2 transition-all hover:shadow-md text-center ${state.selection.sport?.maLoaiSan === s.maLoaiSan ? 'border-green-600 bg-green-50' : 'border-gray-100 bg-white'} relative overflow-hidden group">
+                <div class="mb-2 text-3xl text-gray-700 group-hover:scale-110 transition-transform"><i class="bi bi-trophy-fill"></i></div>
+                <h3 class="font-bold text-gray-800 text-sm">${s.tenLoaiSan}</h3>
+                <p class="text-xs text-green-600 font-bold mt-1">${formatMoney(s.giaGoc)}</p>
+            </div>
+        `).join('');
+    }
+    
+    function initDatePicker() {
+         // Create simple next 7 days list
+         const container = document.getElementById('date-scroll');
+         const today = new Date();
+         let html = '';
+         
+         for(let i=0; i<14; i++) {
+             const d = new Date(today);
+             d.setDate(today.getDate() + i);
+             // Manual local date string to avoid UTC offset issues
+             const year = d.getFullYear();
+             const monthStr = String(d.getMonth() + 1).padStart(2, '0');
+             const dayStr = String(d.getDate()).padStart(2, '0');
+             const dateStr = `${year}-${monthStr}-${dayStr}`;
+             const dayName = i===0 ? 'Hôm nay' : `Thứ ${d.getDay() === 0 ? 'CN' : d.getDay() + 1}`;
+             const dayNum = d.getDate();
+             const month = d.getMonth() + 1;
+             
+             const isSelected = state.selection.date === dateStr;
+             
+             html += `
+                <div onclick="selectDate('${dateStr}')" 
+                    class="flex-shrink-0 w-20 p-2 rounded-xl text-center border-2 cursor-pointer transition-all ${isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-100 bg-white text-gray-600 hover:border-blue-300'}">
+                    <div class="text-xs opacity-80 mb-1">${dayName}</div>
+                    <div class="text-lg font-bold leading-none">${dayNum}/${month}</div>
+                </div>`;
+         }
+         container.innerHTML = html;
+    }
+    
+    function renderCourts() {
+        const list = document.getElementById('court-list');
+        list.innerHTML = state.courts.map(c => `
+             <div onclick="selectCourt('${c.maSan}', '${c.tenSan}')" 
+                class="flex items-center justify-between p-4 border rounded-xl cursor-pointer transition-all hover:border-blue-400 ${state.selection.court?.maSan === c.maSan ? 'bg-blue-600 text-white border-blue-600 shadow-md transform scale-[1.02]' : 'bg-white text-gray-700'}">
+                 <span class="font-bold">${c.tenSan}</span>
+                 <span class="text-xs px-2 py-1 rounded ${state.selection.court?.maSan === c.maSan ? 'bg-white text-blue-600' : 'bg-green-100 text-green-700'}">Sẵn sàng</span>
+            </div>
+        `).join('');
+    }
+
+    function renderTimeGrid(bookings) {
+        const grid = document.getElementById('time-grid');
+        document.getElementById('time-slots-container').classList.remove('hidden');
+        
+        // Debug: Log bookings to see what we're getting
+        console.log('Bookings for court:', bookings);
+        
+        // Get court-specific duration
+        const duration = state.selection.sport?.donViTinhTheoPhut || 60;
+        
+        let html = '';
+        // Operating hours: 07:00 to 22:00
+        for(let h=7; h<=22; h++) {
+            const timeStr = `${h.toString().padStart(2,'0')}:00`;
+            
+            // Calculate end time based on duration
+            const endHour = h + Math.floor(duration / 60);
+            const endMin = duration % 60;
+            const timeEndStr = `${endHour.toString().padStart(2,'0')}:${endMin.toString().padStart(2,'0')}`;
+            
+            // Check if this time slot is booked - simplified and more robust
+            const isBooked = bookings.some(b => {
+                if (!b || !b.gioBatDau) return false;
+                
+                // Convert gioBatDau to string and extract HH:MM
+                let startTime = String(b.gioBatDau);
+                
+                // Handle TimeSpan format "08:00:00" or "8:00:00"
+                if (startTime.includes(':')) {
+                    const parts = startTime.split(':');
+                    if (parts.length >= 2) {
+                        const hours = parts[0].padStart(2, '0');
+                        const minutes = parts[1].padStart(2, '0');
+                        startTime = `${hours}:${minutes}`;
+                    }
+                }
+                
+                const match = startTime === timeStr;
+                if (match) {
+                    console.log(`Found booking at ${timeStr}`);
+                }
+                return match;
+            });
+            
+            const isSelected = state.selection.timeStart === timeStr;
+            
+            // Build the time slot button
+            if (isBooked) {
+                html += `
+                    <button disabled class="p-4 rounded-lg border-2 border-red-200 bg-red-50 cursor-not-allowed transition-all">
+                        <div class="font-semibold text-sm text-red-400 mb-1">${timeStr} - ${timeEndStr}</div>
+                        <div class="text-xs text-red-300">Đã đặt</div>
+                    </button>`;
+            } else {
+                html += `
+                    <button onclick="selectTime('${timeStr}')" 
+                        class="p-4 rounded-lg border-2 transition-all hover:border-blue-400 hover:shadow-md ${
+                            isSelected 
+                                ? 'bg-gray-800 border-gray-800 text-white shadow-lg' 
+                                : 'bg-white border-gray-200 text-gray-700'
+                        }">
+                        <div class="font-semibold text-sm mb-1">${timeStr} - ${timeEndStr}</div>
+                        <div class="text-xs ${isSelected ? 'text-gray-300' : 'text-gray-500'}">Trống</div>
+                    </button>`;
+            }
+        }
+        grid.innerHTML = html;
+    }
+
+    function renderCoaches() {
+        const list = document.getElementById('coach-list');
+        if(state.coaches.length === 0) {
+            list.innerHTML = '<div class="text-gray-400 text-center text-sm">Không có HLV phù hợp tại chi nhánh này.</div>';
+            return;
+        }
+        
+        list.innerHTML = state.coaches.map(c => `
+             <div class="flex items-center justify-between p-4 border rounded-xl bg-white hover:shadow-sm transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xl"><i class="bi bi-person-fill"></i></div>
+                    <div>
+                        <h4 class="font-bold text-gray-800">${c.tenNhanVien}</h4>
+                        <p class="text-xs text-gray-500">${c.monTheThao} • ${c.kinhNghiem}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-blue-600 font-bold mb-1">${formatMoney(c.giaThue)}/giờ</div>
+                    <button onclick="selectCoach('${c.maNhanVien}')" 
+                        class="px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${state.selection.coach?.maNhanVien === c.maNhanVien ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}">
+                        ${state.selection.coach?.maNhanVien === c.maNhanVien ? 'Hủy chọn' : 'Thuê HLV'}
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderServices() {
+        const listEquipment = document.getElementById('service-equipment-grid');
+        const listOther = document.getElementById('service-other-grid');
+        
+        if(state.services.length === 0) {
+            if(listEquipment) listEquipment.innerHTML = '<div class="text-gray-400 text-center text-sm col-span-4">Không có dụng cụ.</div>';
+            if(listOther) listOther.innerHTML = '<div class="text-gray-400 text-center text-sm col-span-3">Không có dịch vụ khác.</div>';
+            return;
+        }
+        
+        const equipment = state.services.filter(s => s.loaiDichVu === 'Dụng cụ thể thao');
+        const others = state.services.filter(s => s.loaiDichVu !== 'Dụng cụ thể thao');
+        
+        const renderCard = (s) => {
+            const qty = state.selection.services[s.maDichVu] || 0;
+            return `
+             <div class="bg-white border rounded-xl p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full">
+                <div class="text-center mb-3">
+                     <div class="w-12 h-12 mx-auto bg-gray-50 rounded-full flex items-center justify-center text-gray-400 text-xl mb-2">
+                        <i class="bi bi-box-seam"></i>
+                     </div>
+                     <h4 class="font-bold text-gray-800 text-sm line-clamp-2 min-h-[40px]">${s.tenDichVu}</h4>
+                     <p class="text-green-600 font-bold text-sm mt-1">${formatMoney(s.donGia)} <span class="text-gray-400 text-xs font-normal">/ ${s.donViTinh}</span></p>
+                </div>
+                
+                <div class="mt-2 pt-2 border-t border-gray-50 flex justify-center w-full">
+                     ${qty === 0 
+                        ? `<button onclick="updateService('${s.maDichVu}', 1)" class="w-full py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium">Thêm</button>`
+                        : `<div class="flex items-center justify-between w-full bg-blue-50 rounded-lg p-1">
+                                <button onclick="updateService('${s.maDichVu}', -1)" class="w-8 h-8 rounded bg-white text-gray-600 shadow-sm flex items-center justify-center hover:bg-gray-50">-</button>
+                                <span class="font-bold text-blue-600 mx-2">${qty}</span>
+                                <button onclick="updateService('${s.maDichVu}', 1)" class="w-8 h-8 rounded bg-blue-600 text-white shadow-sm flex items-center justify-center hover:bg-blue-700">+</button>
+                           </div>`
+                     }
+                </div>
+            </div>`;
+        };
+        
+        if(listEquipment) listEquipment.innerHTML = equipment.map(s => renderCard(s)).join('');
+        if(listOther) listOther.innerHTML = others.map(s => renderCard(s)).join('');
+    }
+
+    function renderFacilities() {
+        const container = document.getElementById('facilities-list');
+        if(!container) return;
+        
+        const renderOption = (type, mode, label, price) => {
+             const current = state.selection.facilities[type]; // 'SESSION', 'MONTH', null
+             const isSelected = current === mode;
+             
+             return `
+             <div onclick="toggleFacility('${type}', '${mode}')" 
+                  class="flex items-center justify-between p-2 rounded-lg cursor-pointer border transition-all mb-1 ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-transparent hover:bg-gray-50'}">
+                <div class="flex items-center gap-2">
+                    <i class="bi ${isSelected ? 'bi-check-circle-fill text-blue-600' : 'bi-circle text-gray-300'}"></i>
+                    <span class="text-sm text-gray-700">${label}</span>
+                </div>
+                <span class="font-bold text-sm text-gray-900">${formatMoney(price)}</span>
+             </div>`;
+        };
+        
+        container.innerHTML = `
+            <!-- Locker -->
+            <div class="border rounded-xl p-4 bg-white shadow-sm">
+                <div class="mb-3 flex justify-between items-center">
+                    <h4 class="font-bold text-gray-800">Tủ Đồ Cá Nhân</h4>
+                    <span class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">Sẵn sàng</span>
+                </div>
+                <div class="space-y-1">
+                    ${renderOption('locker', 'SESSION', 'Theo lượt', 20000)}
+                    ${renderOption('locker', 'MONTH', 'Theo tháng', 300000)}
+                </div>
+            </div>
+            
+             <!-- Shower -->
+            <div class="border rounded-xl p-4 bg-white shadow-sm">
+                <div class="mb-3 flex justify-between items-center">
+                    <h4 class="font-bold text-gray-800">Phòng Tắm VIP</h4>
+                    <span class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-medium">Sẵn sàng</span>
+                </div>
+                <div class="space-y-1">
+                    ${renderOption('shower', 'SESSION', 'Theo lượt', 50000)}
+                    ${renderOption('shower', 'MONTH', 'Theo tháng', 500000)}
+                </div>
+            </div>
+        `;
+    }
+
+    async function autoApplyDiscounts() {
+        try {
+            console.log('=== AUTO APPLY DISCOUNTS START ===');
+            
+            const res = await fetch('/api/booking/customer-discounts');
+            console.log('API Response status:', res.status);
+            
+            if (!res.ok) {
+                console.log('API call failed');
+                return;
+            }
+            
+            const discounts = await res.json();
+            console.log('Customer discounts from database:', discounts);
+            
+            // Convert to the format expected by the UI
+            const applied = discounts.map(d => ({
+                id: d.maUuDai,
+                name: d.loaiUuDai,
+                rate: d.phanTramGiamGia / 100  // Convert percentage to decimal
+            }));
+            
+            console.log('Applied discounts:', applied);
+            
+            // Update State
+            state.selection.discounts = applied;
+            
+            // Render specific display for discounts
+            const container = document.getElementById('discount-list');
+            console.log('Container element:', container);
+            
+            if(container) {
+                if (applied.length > 0) {
+                    container.innerHTML = applied.map(d => `
+                        <div class="border border-green-200 bg-green-50 rounded-xl p-4 flex items-center gap-3">
+                            <i class="bi bi-gift-fill text-green-600 text-xl"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm">Ưu đãi được áp dụng: ${d.name}</h4>
+                                <p class="text-xs text-green-700">Giảm ${(d.rate * 100)}% trên tổng hóa đơn</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `
+                         <div class="border border-gray-100 bg-gray-50 rounded-xl p-4 text-center text-gray-500 text-sm italic">
+                            Bạn chưa có ưu đãi thành viên phù hợp. (Khách thường)
+                        </div>
+                    `;
+                }
+            }
+            
+            renderSummary();
+            console.log('=== AUTO APPLY DISCOUNTS END ===');
+
+        } catch (e) {
+            console.error("Auto discount error", e);
+        }
+    }
+
+    // Call this inside loadWizard or where appropriate AFTER fetching promotions
+    // Note: renderDiscounts function is replaced by this logic mostly. 
+    function renderDiscounts() {
+        // No-op or call autoApply logic if not called elsewhere
+        // But better to call autoApplyDiscounts ONE TIME when step 5 loads or wizard initializes
+        autoApplyDiscounts();
+    }
+
+    function toggleDiscount(id) {
+        const fullList = [{id: 'REGULAR', name: 'Khách Thường', rate: 0, desc: 'Giá tiêu chuẩn'}, ...promotions];
+        const target = fullList.find(d => d.id === id);
+        if(!target) return;
+
+        let currentdev = state.selection.discounts;
+        const isSelected = currentdev.some(d => d.id === id);
+
+        // Group definitions
+        const tierIds = ['UD01', 'UD02', 'UD03'];
+        const ageIds = ['UD04', 'UD05'];
+
+        if (id === 'REGULAR') {
+            // If selecting Regular, clear everything else
+            if(!isSelected) {
+                state.selection.discounts = [target];
+            } else {
+                 // Allow unselect to empty?
+                state.selection.discounts = [];
+            }
+        } else {
+            // Normal Item
+            if (isSelected) {
+                // Unselect
+                state.selection.discounts = currentdev.filter(d => d.id !== id);
+            } else {
+                // SELECTING
+                
+                // 1. If Regular was checked, remove it (Auto-switch preference) OR block?
+                // Logic above said Regular makes others disabled. 
+                // If user clicks, assumes we handle 'disabled' in UI. 
+                // But if they bypass or we want to be nice: Clear Regular.
+                if (currentdev.some(d => d.id === 'REGULAR')) {
+                    currentdev = [];
+                }
+
+                // 2. Check Group Conflicts (Should be disabled by UI, but enforce here)
+                const isTier = tierIds.includes(id);
+                const isAge = ageIds.includes(id);
+
+                // If picking Tier, and already have Tier -> Block (UI should prevent, but good to be safe)
+                if (isTier && currentdev.some(d => tierIds.includes(d.id))) return;
+                if (isAge && currentdev.some(d => ageIds.includes(d.id))) return;
+
+                // 3. Check Max 2
+                if (currentdev.length >= 2) return;
+
+                state.selection.discounts = [...currentdev, target];
+            }
+        }
+        
+        renderDiscounts();
+        renderSummary(); 
+    }
+
+    function renderSummary() {
+        // Logic to calculate totals and inject into ALL summary instances (Step 2, 4, 5 sidebars)
+        const branchName = state.selection.branch?.tenCoSo || 'Chưa chọn';
+        const sportName = state.selection.sport?.tenLoaiSan || '...';
+        const courtName = state.selection.court?.tenSan || 'Chưa chọn';
+        const dateStr = state.selection.date.split('-').reverse().join('/');
+        const timeStr = state.selection.timeStart ? `${state.selection.timeStart} - ${state.selection.timeEnd}` : '--:--';
+        
+        // Calc Price
+        let courtPrice = 0;
+        if(state.selection.sport && state.selection.timeStart) {
+            // Price is already per session/duration defined in DB
+            courtPrice = state.selection.sport.giaGoc; 
+        }
+        
+        let coachPrice = state.selection.coach ? state.selection.coach.giaThue : 0;
+        
+        let servicePrice = 0;
+        let serviceHtml = '';
+        for(const [id, qty] of Object.entries(state.selection.services)) {
+            if(qty > 0) {
+                const s = state.services.find(x => x.maDichVu === id);
+                if(s) {
+                    const total = s.donGia * qty;
+                    servicePrice += total;
+                    serviceHtml += `<div class="flex justify-between text-xs text-gray-500"><span>${s.tenDichVu} x${qty}</span><span>${formatMoney(total)}</span></div>`;
+                }
+            }
+        }
+        
+        if(state.selection.coach) {
+             serviceHtml = `<div class="flex justify-between text-xs text-gray-500"><span>Thuê HLV: ${state.selection.coach.tenNhanVien}</span><span>${formatMoney(coachPrice)}</span></div>` + serviceHtml;
+        }
+        
+        // Facility
+        let facilityPrice = 0;
+        const prices = {
+            locker: { SESSION: 20000, MONTH: 300000 },
+            shower: { SESSION: 50000, MONTH: 500000 }
+        };
+        
+        if(state.selection.facilities.locker) {
+             const mode = state.selection.facilities.locker;
+             const price = prices.locker[mode];
+             facilityPrice += price;
+             serviceHtml += `<div class="flex justify-between text-xs text-gray-500"><span>Tủ đồ (${mode === 'SESSION' ? 'Lượt' : 'Tháng'})</span><span>${formatMoney(price)}</span></div>`;
+        }
+        if(state.selection.facilities.shower) {
+             const mode = state.selection.facilities.shower;
+             const price = prices.shower[mode];
+             facilityPrice += price;
+             serviceHtml += `<div class="flex justify-between text-xs text-gray-500"><span>Phòng tắm (${mode === 'SESSION' ? 'Lượt' : 'Tháng'})</span><span>${formatMoney(price)}</span></div>`;
+        }
+
+        let subTotal = courtPrice + coachPrice + servicePrice + facilityPrice;
+        
+        let discountAmount = 0;
+        let discountNames = [];
+        
+        if(state.selection.discounts && state.selection.discounts.length > 0) {
+             // Calculate total rate. Assuming additive? 5% + 10% = 15%? 
+             // Or compound? Usually additive for promotional mix unless stated.
+             // Let's sum the rates.
+             
+             let totalRate = 0;
+             state.selection.discounts.forEach(d => {
+                 totalRate += d.rate;
+                 discountNames.push(d.name);
+             });
+             
+             // Cap at 100%?
+             if(totalRate > 1) totalRate = 1;
+
+             discountAmount = courtPrice * totalRate; 
+        }
+        
+        const grandTotal = subTotal - discountAmount;
+
+        // INJECT (using class query because multiple duplicate summaries exist in hidden divs)
+        // Ideally we used a Portal/Sticky, but pure JS:
+        document.querySelectorAll('.summary-branch-name').forEach(el => el.innerText = branchName);
+        document.querySelectorAll('.summary-date-display').forEach(el => el.innerText = `${dateStr} | ${timeStr}`);
+        document.querySelectorAll('.summary-sport-name').forEach(el => el.innerText = sportName);
+        document.querySelectorAll('.summary-court-name').forEach(el => el.innerText = courtName);
+        
+        document.querySelectorAll('.summary-court-price').forEach(el => el.innerText = formatMoney(courtPrice));
+        document.querySelectorAll('.summary-service-list').forEach(el => el.innerHTML = serviceHtml);
+        document.querySelectorAll('.summary-total-price').forEach(el => el.innerText = formatMoney(grandTotal));
+        
+        // Step 5 Review
+         document.getElementById('review-branch').innerText = branchName;
+         document.getElementById('review-court').innerText = `${courtName} - ${sportName}`; // Combined
+         document.getElementById('review-date-full').innerText = `Thứ ${new Date(state.selection.date).getDay() === 0 ? 'CN' : new Date(state.selection.date).getDay() + 1}, ${state.selection.date.split('-').reverse().join('/')}`;
+         document.getElementById('review-time').innerText = timeStr;
+         
+         // Step 5 Price Board specific
+         const discountRow = document.getElementById('summary-discount-row');
+         if(discountRow) {
+             if(discountAmount > 0) {
+                 discountRow.classList.remove('hidden');
+                 document.getElementById('summary-discount-name').innerText = discountNames.join(' + ');
+                 document.getElementById('summary-discount-value').innerText = `-${formatMoney(discountAmount)}`;
+             } else {
+                 discountRow.classList.add('hidden');
+             }
+         }
+         
+         // Final Modal
+         document.getElementById('success-total').innerText = formatMoney(grandTotal);
+    }
+
+    // --- ACTIONS ---
+    function selectBranch(id) {
+        state.selection.branch = state.branches.find(b => b.maCoSo === id);
+        renderBranches();
+        loadSports();
+        renderSummary();
+        checkStep1();
+    }
+    
+    function selectSport(id) {
+        state.selection.sport = state.sports.find(s => s.maLoaiSan === id);
+        renderSports();
+        renderSummary();
+        checkStep1();
+    }
+    
+    function checkStep1() {
+        document.getElementById('btn-step1-next').disabled = !(state.selection.branch && state.selection.sport);
+    }
+    
+    function selectDate(d) {
+        state.selection.date = d;
+        initDatePicker();
+        if(state.selection.court) loadTimeSlots(state.selection.court.maSan); // reload slots
+        renderSummary();
+    }
+    
+    function selectCourt(id, name) {
+        state.selection.court = { maSan: id, tenSan: name };
+        document.getElementById('selected-court-name-display').innerText = name;
+        renderCourts();
+        loadTimeSlots(id);
+        renderSummary();
+    }
+    
+    function selectTime(start) {
+        state.selection.timeStart = start;
+        
+        // Calculate end time based on sport duration
+        const duration = state.selection.sport?.donViTinhTheoPhut || 60;
+        
+        const [h, m] = start.split(':').map(Number);
+        const totalMinutes = h * 60 + m + duration;
+        const endHours = Math.floor(totalMinutes / 60);
+        const endMins = totalMinutes % 60;
+        state.selection.timeEnd = `${endHours.toString().padStart(2,'0')}:${endMins.toString().padStart(2,'0')}`;
+        
+         // Reload grid to show highlight
+        if(state.selection.court) loadTimeSlots(state.selection.court.maSan); 
+        renderSummary();
+        // Validation for Next button?
+        const btn = document.querySelector('#step-2 .btn-next-step');
+        if(btn) btn.disabled = false;
+    }
+    
+    function selectCoach(id) {
+        if(state.selection.coach?.maNhanVien === id) {
+            state.selection.coach = null; // deselect
+        } else {
+            state.selection.coach = state.coaches.find(c => c.maNhanVien === id);
+        }
+        renderCoaches();
+        renderSummary();
+    }
+    
+    function updateService(id, delta) {
+        const curr = state.selection.services[id] || 0;
+        const next = Math.max(0, curr + delta);
+        state.selection.services[id] = next;
+        renderServices();
+        renderSummary();
+    }
+    
+    function toggleFacility(type, mode) {
+        if(state.selection.facilities[type] === mode) {
+            state.selection.facilities[type] = null; // Toggle off
+        } else {
+            state.selection.facilities[type] = mode; // Set mode
+        }
+        renderFacilities();
+        renderSummary();
+    }
+    
+    function toggleCoachList() {
+        const list = document.getElementById('coach-list');
+        list.classList.toggle('hidden');
+    }
+
+    // --- NAVIGATION ---
+    function goToStep(step) {
+        // Validation checks
+        if(step === 2 && !state.selection.sport) return;
+        if(step === 3 && !state.selection.timeStart) { alert('Vui lòng chọn giờ'); return; }
+        if(step === 4) {
+             loadStep4Data();
+             renderFacilities();
+        }
+        if(step === 5) {
+             renderDiscounts();
+             renderSummary();
+        }
+
+        // UI Update
+        document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById(`step-${step}`).classList.remove('hidden');
+        
+        // Progress Bar
+        for(let i=1; i<=5; i++) {
+             const dot = document.getElementById(`step-${i}-indicator`);
+             const line = document.getElementById(`line-${i-1}`);
+             
+             if(i <= step) {
+                 dot.classList.remove('bg-gray-200', 'text-gray-500');
+                 dot.classList.add('bg-blue-600', 'text-white');
+                 if(line) line.classList.replace('w-0', 'w-full');
+             } else {
+                 dot.classList.add('bg-gray-200', 'text-gray-500');
+                 dot.classList.remove('bg-blue-600', 'text-white');
+                 dot.classList.remove('bg-blue-600'); 
+                 if(line) line.classList.replace('w-full', 'w-0');
+             }
+        }
+        
+        // Auto-apply discounts when reaching step 5
+        if(step === 5) {
+            autoApplyDiscounts();
+        }
+        
+        window.scrollTo(0, 0);
+    }
+    
+    function goToStep2() { goToStep(2); loadCourts(); }
+    function goToStep4() { goToStep(4); }
+    window.showStep = goToStep; // Global for inline onclick
+
+    // --- SUBMIT ---
+    async function submitBooking() {
+         const btn = document.getElementById('btn-confirm-booking');
+         const originalText = btn.innerHTML;
+         btn.disabled = true;
+         btn.innerHTML = '<div class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div> Đang xử lý...';
+         
+         try {
+             const req = {
+                 MaKhachHang: document.getElementById('customer-id').value,
+                 MaSan: state.selection.court.maSan,
+                 NgayNhanSan: state.selection.date,
+                 GioBatDau: state.selection.timeStart + ':00',
+                 GioKetThuc: state.selection.timeEnd + ':00'
+             };
+             
+             const res = await fetch('/api/booking/create', {
+                 method: 'POST',
+                 headers: {'Content-Type': 'application/json'},
+                 body: JSON.stringify(req)
+             });
+             const data = await res.json();
+             
+             if(!data.success) throw new Error(data.message);
+             const bookingId = data.maPhieuDat;
+             
+             // Add Services (Sequential to avoid PK Race Condition in SP)
+             for(const [svcId, qty] of Object.entries(state.selection.services)) {
+                 if(qty > 0) {
+                      const r = await fetch('/api/booking/add-service', {
+                             method: 'POST',
+                             headers: {'Content-Type': 'application/json'},
+                             body: JSON.stringify({
+                                 maPhieuDat: bookingId,
+                                 maDichVu: svcId,
+                                 soLuong: qty,
+                                 maNhanVien: null 
+                             })
+                     });
+                     
+                     const d = await r.json();
+                     // Inspect multiple casing possibilities for Message
+                     const msg = d.message || d.Message || JSON.stringify(d);
+                     
+                     if(!r.ok || !d.success) {
+                         throw new Error(`Lỗi thêm dịch vụ ${svcId}: ${msg}`);
+                     }
+                 }
+             }
+             
+             // Success UI
+             document.getElementById('success-id').innerText = bookingId;
+             document.getElementById('success-modal').classList.remove('hidden');
+             
+         } catch(e) {
+             alert('Lỗi: ' + e.message);
+             btn.innerHTML = originalText;
+             btn.disabled = false;
+         }
+    }
+    
+    // Global format
+    function formatMoney(n) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
+    }
+    
+    // --- TAB LOGIC ---
+    function switchTab(tab) {
+        state.currentTab = tab;
+        
+        // UI Toggle
+        document.getElementById('tab-home').classList.toggle('hidden', tab !== 'home');
+        document.getElementById('tab-history').classList.toggle('hidden', tab !== 'history');
+        
+        // Button Styles
+        const btnHome = document.getElementById('tab-btn-home');
+        const btnHistory = document.getElementById('tab-btn-history');
+        
+        if (tab === 'home') {
+            btnHome.className = "px-6 py-2 rounded-lg font-bold transition-all bg-blue-600 text-white shadow-md";
+            btnHistory.className = "px-6 py-2 rounded-lg font-bold transition-all text-gray-500 hover:bg-gray-50";
+        } else {
+            btnHome.className = "px-6 py-2 rounded-lg font-bold transition-all text-gray-500 hover:bg-gray-50";
+            btnHistory.className = "px-6 py-2 rounded-lg font-bold transition-all bg-blue-600 text-white shadow-md";
+            loadMyBookings();
+        }
+    }
+    
+    async function loadMyBookings() {
+        const userId = document.getElementById('customer-id').value || 'KH001';
+        const tbody = document.getElementById('history-list');
+        tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500"><div class="animate-spin inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div> Đang tải...</td></tr>';
+        
+        try {
+            const res = await fetch(`/api/booking/my-bookings?maKhachHang=${userId}`);
+            if(!res.ok) throw new Error('Failed to fetch');
+            const bookings = await res.json();
+            renderHistory(bookings);
+        } catch(e) {
+            tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">Lỗi tải dữ liệu: ${e.message}</td></tr>`;
+        }
+    }
+    
+    function renderHistory(bookings) {
+        const tbody = document.getElementById('history-list');
+        if(bookings.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400 italic">Bạn chưa có lịch đặt sân nào.</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = bookings.map(b => {
+             // Create Status Badge
+             let statusClass = 'bg-gray-100 text-gray-600';
+             if(b.trangThaiPhieu === 'Chờ thanh toán') statusClass = 'bg-yellow-100 text-yellow-700';
+             else if(b.trangThaiPhieu === 'Hoàn thành') statusClass = 'bg-green-100 text-green-700';
+             else if(b.trangThaiPhieu === 'Đã hủy') statusClass = 'bg-red-100 text-red-700';
+             
+             // Check if cancellable (Simple logic: Not cancelled/completed/absent)
+             const isCancellable = !['Đã hủy', 'Hoàn thành', 'Vắng mặt'].includes(b.trangThaiPhieu);
+             
+             return `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="p-4 font-mono text-blue-600 font-bold">${b.maPhieuDat}</td>
+                    <td class="p-4">
+                        <div class="font-bold text-gray-800">${b.ngayNhanSan.split('T')[0].split('-').reverse().join('/')}</div>
+                        <div class="text-xs text-gray-500">Tạo: ${b.ngayDat.split('T')[0].split('-').reverse().join('/')}</div>
+                    </td>
+                    <td class="p-4 font-bold text-gray-700">${b.gioBatDau.substring(0,5)} - ${b.gioKetThuc.substring(0,5)}</td>
+                    <td class="p-4">
+                        <div class="font-bold text-sm">${b.tenSan}</div>
+                        <div class="text-xs text-gray-500">${b.tenLoaiSan} (${b.tenCoSo})</div>
+                        ${b.danhSachDichVu ? `<div class="mt-1 text-xs text-blue-600 font-medium border-t border-gray-100 pt-1"><i class="bi bi-basket2-fill mr-1"></i>${b.danhSachDichVu}</div>` : ''}
+                    </td>
+                    <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${statusClass}">${b.trangThaiPhieu}</span></td>
+                    <td class="p-4">
+                        ${isCancellable ? `
+                            <button onclick="cancelBooking('${b.maPhieuDat}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded transition-all text-xs font-bold border border-red-200">
+                                <i class="bi bi-x-circle-fill mr-1"></i>Huỷ
+                            </button>
+                        ` : ''}
+                    </td>
+                </tr>
+             `;
+        }).join('');
+    }
+    
+    async function cancelBooking(id) {
+        if(!confirm('Bạn có chắc chắn muốn hủy đặt sân này không? Hành động này không thể hoàn tác.')) return;
+        
+        try {
+             const res = await fetch('/api/booking/cancel', {
+                 method: 'POST',
+                 headers: {'Content-Type': 'application/json'},
+                 body: JSON.stringify({ maPhieuDat: id, lyDoHuy: 'Khách hủy online' })
+             });
+             const data = await res.json();
+             if(data.success) {
+                 alert('Hủy thành công!');
+                 loadMyBookings(); // Reload list
+             } else {
+                 alert('Lỗi: ' + data.message);
+             }
+        } catch(e) {
+            alert('Lỗi hệ thống: ' + e.message);
+        }
+    }
+    
+    function closeSuccessModal() {
+        document.getElementById('success-modal').classList.add('hidden');
+    }
+
+    // Export global for HTML
+    window.switchTab = switchTab;
+    window.loadMyBookings = loadMyBookings;
+    window.cancelBooking = cancelBooking;
+</script>
+}

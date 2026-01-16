@@ -193,7 +193,7 @@ CREATE TABLE PhieuDatSan (
     GioBatDau TIME NOT NULL,
     GioKetThuc TIME NOT NULL,
     HinhThucDat NVARCHAR (50) NOT NULL, --Hình thức: 'Online', 'Tại quầy'
-    TrangThaiPhieu NVARCHAR (20) NOT NULL, --Trạng thái: 'Chờ thanh toán', 'Hoàn thành', 'Đã hủy', 'Vắng mặt'
+    TrangThaiPhieu NVARCHAR (20) NOT NULL, --Trạng thái: 'Chờ xác nhận', 'Đã xác nhận', 'Đang sử dụng', 'Chờ thanh toán', 'Hoàn thành', 'Đã hủy', 'Vắng mặt'
     ThoiGianCheckin TIME,
     MaKhachHang CHAR(10) NOT NULL,
     MaNhanVien CHAR(10),
@@ -228,11 +228,11 @@ CREATE TABLE ChiTietPhieuDatSan (
     ThoiDiemTao DATETIME,
     SoLuong INT NOT NULL,
     ThanhTien INT NOT NULL,
-    LoaiYeuCau NVARCHAR (100) NOT NULL,
     MaPhieuDat CHAR(10) NOT NULL,
     MaNhanVien CHAR(10),
     MaDichVu CHAR(10) NOT NULL,
-    MaHLV CHAR(10)
+    MaHLV CHAR(10),
+    TrangThaiThanhToan BIT NOT NULL
 );
 
 CREATE TABLE LichSuThayDoi (
@@ -297,7 +297,7 @@ CREATE TABLE HoaDon (
     TongThanhToan INT NOT NULL,
     HinhThucThanhToan NVARCHAR (50), -- HinhThucThanhToan = 'Ví điện tử', 'Tiền mặt'
     TrangThaiThanhToan NVARCHAR (50), -- TrangThaiThanhToan = 'Chưa thanh toán', 'Đã thanh toán'
-    MaNhanVien CHAR(10) NOT NULL,
+    MaNhanVien CHAR(10),
     MaPhieuDat CHAR(10),
     MaPhieuThue CHAR(10)
 );
@@ -557,6 +557,9 @@ ADD CONSTRAINT CK_PDS_HinhThuc CHECK (
 ALTER TABLE PhieuDatSan
 ADD CONSTRAINT CK_PDS_TrangThai CHECK (
     TrangThaiPhieu IN (
+        N'Chờ xác nhận',
+        N'Đã xác nhận',
+        N'Đang sử dụng',
         N'Chờ thanh toán',
         N'Hoàn thành',
         N'Đã hủy',
@@ -652,4 +655,3 @@ alter table GoiDichVu
 add check (
     LoaiTaiSan in (N'Phòng tắm VIP', N'Tủ đồ')
 );
-

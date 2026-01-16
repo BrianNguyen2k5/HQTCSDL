@@ -24,17 +24,12 @@
             
             <select class="input" style="flex: 0 0 150px;" id="statusFilter">
                 <option value="">Tất cả trạng thái</option>
-                <option value="booked">Đã đặt</option>
-                <option value="active">Đang hoạt động</option>
-                <option value="completed">Hoàn thành</option>
-                <option value="cancelled">Đã hủy</option>
-            </select>
-
-            <select class="input" style="flex: 0 0 150px;" id="paymentFilter">
-                <option value="">Thanh toán</option>
-                <option value="paid-online">Đã thanh toán</option>
-                <option value="pay-at-counter">Thanh toán tại quầy</option>
-                <option value="unpaid">Chưa thanh toán</option>
+                <option value="Chờ xác nhận">Chờ xác nhận</option>
+                <option value="Đang sử dụng">Đang sử dụng</option>
+                <option value="Hoàn thành">Hoàn thành</option>
+                <option value="Đã hủy">Đã hủy</option>
+                <option value="Vắng mặt">Vắng mặt</option>
+                <option value="Chờ thanh toán">Chờ thanh toán</option>
             </select>
 
             <button class="btn btn-outline">
@@ -62,7 +57,6 @@
                         <th>Thời gian</th>
                         <th>Thành viên</th>
                         <th>Trạng thái</th>
-                        <th>Thanh toán</th>
                         <th>Tổng tiền</th>
                         <th>Thao tác</th>
                     </tr>
@@ -70,14 +64,15 @@
                 <tbody id="bookingsTableBody">
                     @foreach (var booking in Model)
                     {
-                        var totalAmount = booking.CourtFee + booking.Tax - booking.Discount;
+                        var totalAmount = booking.CourtFee + booking.ServiceFee - booking.Discount;
                         var statusBadge = booking.Status switch
                         {
-                            "active" => "badge-primary",
-                            "booked" => "badge-warning",
+                            "Đang sử dụng" => "badge-primary",
+                            "Chờ xác nhận" => "badge-warning",
+                            "Chờ thanh toán" => "badge-warning",
+                            "Hoàn thành" => "badge-success",
                             _ => "badge-outline"
                         };
-                        var paymentBadge = booking.PaymentStatus == "paid-online" ? "badge-success" : "badge-warning";
 
                         <tr data-booking-id="@booking.Id">
                             <td style="font-weight: 600;">#@booking.Id</td>
@@ -108,14 +103,7 @@
                             </td>
                             <td>
                                 <span class="badge @statusBadge">
-                                    @(booking.Status == "active" ? "Đang hoạt động" :
-                                      booking.Status == "booked" ? "Đã đặt" : "Khác")
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge @paymentBadge">
-                                    @(booking.PaymentStatus == "paid-online" ? "✓ Đã TT" :
-                                      booking.PaymentStatus == "pay-at-counter" ? "Tại quầy" : "Chưa TT")
+                                    @booking.Status
                                 </span>
                             </td>
                             <td style="font-weight: 600; color: var(--color-primary);">
@@ -123,7 +111,7 @@
                             </td>
                             <td>
                                 <div style="display: flex; gap: 0.5rem;">
-                                    @if (booking.Status == "booked")
+                                    @if (booking.Status == "Đã xác nhận")
                                     {
                                         <button class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
                                                 onclick="checkIn('@booking.Id')">
@@ -134,7 +122,7 @@
                                             onclick="viewBookingDetail('@booking.Id')">
                                         Chi tiết
                                     </button>
-                                    @if (booking.Status != "completed" && booking.Status != "cancelled")
+                                    @if (booking.Status != "Hoàn thành" && booking.Status != "Đã hủy" && booking.Status != "Vắng mặt")
                                     {
                                         <button class="btn btn-ghost" style="padding: 0.25rem 0.5rem; color: var(--color-danger);"
                                                 onclick="cancelBooking('@booking.Id')">
@@ -151,7 +139,12 @@
     </div>
 </div>
 
+<!-- Include Modal -->
+<partial name="_BookingDetailModal" />
+
 @section Scripts {
+    <script src="~/js/receptionist/new-booking-dialog.js"></script>
+    <script src="~/js/receptionist/booking-detail.js"></script>
     <script>
         // Search functionality
         document.getElementById('searchInput').addEventListener('input', function(e) {
@@ -168,11 +161,9 @@
 
         // Filter functionality
         document.getElementById('statusFilter').addEventListener('change', filterBookings);
-        document.getElementById('paymentFilter').addEventListener('change', filterBookings);
 
         function filterBookings() {
             const statusFilter = document.getElementById('statusFilter').value;
-            const paymentFilter = document.getElementById('paymentFilter').value;
             const rows = document.querySelectorAll('#bookingsTableBody tr');
             
             rows.forEach(row => {
@@ -180,14 +171,7 @@
                 
                 if (statusFilter) {
                     const statusBadge = row.querySelector('td:nth-child(7) .badge');
-                    if (!statusBadge || !statusBadge.textContent.includes(getStatusText(statusFilter))) {
-                        show = false;
-                    }
-                }
-                
-                if (paymentFilter && show) {
-                    const paymentBadge = row.querySelector('td:nth-child(8) .badge');
-                    if (!paymentBadge || !paymentBadge.textContent.includes(getPaymentText(paymentFilter))) {
+                    if (!statusBadge || !statusBadge.textContent.includes(statusFilter)) {
                         show = false;
                     }
                 }
@@ -203,36 +187,21 @@
             document.getElementById('totalBookings').textContent = visibleRows;
         }
 
-        function getStatusText(status) {
-            const map = {
-                'booked': 'Đã đặt',
-                'active': 'Đang hoạt động',
-                'completed': 'Hoàn thành',
-                'cancelled': 'Đã hủy'
-            };
-            return map[status] || '';
-        }
-
-        function getPaymentText(payment) {
-            const map = {
-                'paid-online': 'Đã TT',
-                'pay-at-counter': 'Tại quầy',
-                'unpaid': 'Chưa TT'
-            };
-            return map[payment] || '';
-        }
-
-        function checkIn(bookingId) {
-            if (confirm('Xác nhận check-in cho đặt sân #' + bookingId + '?')) {
+        function checkIn(maPhieuDat) {
+            if (confirm('Xác nhận check-in cho đặt sân ' + maPhieuDat + '?')) {
                 fetch('/Receptionist/CheckIn', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ bookingId })
+                    body: JSON.stringify({ maPhieuDat: maPhieuDat })
                 })
                 .then(response => response.json())
                 .then(data => {
                     alert(data.message);
                     if (data.success) location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi check-in');
                 });
             }
         }
@@ -252,13 +221,17 @@
             }
         }
 
-        function viewBookingDetail(bookingId) {
-            // TODO: Open modal or navigate to detail page
-            alert('Chi tiết đặt sân #' + bookingId);
-        }
+        // viewBookingDetail is now handled in booking-detail.js
 
         function openNewBookingDialog() {
             document.getElementById('newBookingModal').style.display = 'flex';
+            // Call the real implementation from new-booking-dialog.js
+            if (typeof resetBookingForm === 'function') {
+                resetBookingForm();
+            }
+            if (typeof showStep === 'function') {
+                showStep(1);
+            }
         }
     </script>
 }

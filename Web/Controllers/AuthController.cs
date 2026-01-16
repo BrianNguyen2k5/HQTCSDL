@@ -29,6 +29,14 @@ public class AuthController : Controller
     {
         // 1. Gọi BLL/DAL kiểm tra username/pass
         var user = _taiKhoanDAL.KiemTraDangNhap(loginId, password);
+        if (user != null)
+        {
+            Console.WriteLine($"User: {user.TenDangNhap} - KH: {user.MaKhachHang}");
+        }
+        else
+        {
+            Console.WriteLine("User NULL (Login failed)");
+        }
 
         if (user != null)
         {
@@ -68,6 +76,20 @@ public class AuthController : Controller
                 new Claim("UserId", userId),
             };
 
+            // Add MaCoSo and MaNhanVien for employees
+            if (!string.IsNullOrEmpty(user.MaNhanVien))
+            {
+                // Add MaNhanVien claim
+                claims.Add(new Claim("MaNhanVien", user.MaNhanVien));
+                
+                // Add MaCoSo claim
+                string? maCoSo = _taiKhoanDAL.LayMaCoSo(user.MaNhanVien);
+                if (!string.IsNullOrEmpty(maCoSo))
+                {
+                    claims.Add(new Claim("MaCoSo", maCoSo));
+                }
+            }
+
             var identity = new ClaimsIdentity(claims, "MyCookieAuth");
             var principal = new ClaimsPrincipal(identity);
 
@@ -75,6 +97,13 @@ public class AuthController : Controller
             await HttpContext.SignInAsync("MyCookieAuth", principal);
 
             // 7. Chuyển hướng trang
+            Console.WriteLine($"LOGIN SUCCESS: {user.id}");
+
+            if (!string.IsNullOrEmpty(user.MaKhachHang))
+            {
+                return RedirectToAction("Index", "Booking");
+            }
+
             if (role == "Quản lý")
             {
                 return RedirectToAction("Dashboard", "Employer");
@@ -89,14 +118,14 @@ public class AuthController : Controller
             }
             else if (role == "Thu ngân")
             {
-                return RedirectToAction("", "Cashier");
+                return RedirectToAction("Bill", "Cashier");
             }
             else if (role == "Huấn luyện viên")
             {
                 return RedirectToAction("", "Gymnast");
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("", "Home");
         }
 
         ViewBag.Error = "Sai tài khoản hoặc mật khẩu";
@@ -124,18 +153,19 @@ public class AuthController : Controller
             return View();
         }
 
-        bool result = _taiKhoanDAL.ThemTaiKhoan(username, email, password);
+        string result = _taiKhoanDAL.ThemTaiKhoan(username, email, password);
 
-        if (result)
+        if (result == "Success")
         {
             // Đăng ký thành công -> Chuyển qua trang login
             return RedirectToAction("Login");
         }
         else
         {
-            ViewBag.Error = "Đăng ký thất bại. Tên đăng nhập hoặc Email có thể đã tồn tại.";
+            ViewBag.Error = result; // Hiển thị lỗi cụ thể từ DAL
             return View();
         }
+
     }
 
     [Route("logout")]
@@ -153,7 +183,7 @@ public class AuthController : Controller
     private string GenerateJwtToken(string username, string role, string userId)
     {
         var jwtSettings = _configuration.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "VerifyKey123123123");
 
         var claims = new List<Claim>
         {
