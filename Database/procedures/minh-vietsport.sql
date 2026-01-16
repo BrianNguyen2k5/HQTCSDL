@@ -18,7 +18,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE sp_LeTan_CheckIn
+CREATE OR ALTER PROCEDURE sp_LeTan_CheckIn
     @MaPhieuDat CHAR(10)
 AS
 BEGIN
@@ -167,7 +167,7 @@ BEGIN
 END;
 GO
 
-CREATE PROCEDURE sp_LeTan_ThemDichVu
+CREATE or alter PROCEDURE sp_LeTan_ThemDichVu
     @MaPhieuDat CHAR(10),
     @MaDichVu CHAR(10),
     @SoLuong INT,
@@ -287,6 +287,7 @@ BEGIN
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
+go
 
 CREATE OR ALTER PROCEDURE sp_TaoHoaDon
     @MaPhieuDat CHAR(10),
@@ -500,8 +501,4 @@ BEGIN
         RAISERROR(@ErrorMessage, 16, 1);
     END CATCH
 END;
-
-CREATE OR ALTER sp_LeTan_CheckOut 
-AS 
-BEGIN 
-END 
+go
