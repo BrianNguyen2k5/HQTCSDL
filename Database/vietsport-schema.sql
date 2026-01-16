@@ -5,8 +5,8 @@ DATABASE SCHEMA - SPORTS CENTER
 --ALTER DATABASE VietSport SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
 --DROP DATABASE VietSport;
 
---CREATE DATABASE VietSport
-
+CREATE DATABASE VietSport
+go
 USE VietSport
 -- 1. BẢNG: QUẢN LÝ NGƯỜI DÙNG --
 
@@ -653,3 +653,5 @@ add check (
     LoaiTaiSan in (N'Phòng tắm VIP', N'Tủ đồ')
 );
 
+ALTER TABLE HoaDon
+ALTER COLUMN MaNhanVien char(10) NULL;
