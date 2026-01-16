@@ -167,7 +167,7 @@ BEGIN
 END;
 GO
 
-CREATE or alter PROCEDURE sp_LeTan_ThemDichVu
+CREATE OR ALTER PROCEDURE sp_LeTan_ThemDichVu
     @MaPhieuDat CHAR(10),
     @MaDichVu CHAR(10),
     @SoLuong INT,
@@ -175,6 +175,7 @@ CREATE or alter PROCEDURE sp_LeTan_ThemDichVu
 AS
 BEGIN
     SET NOCOUNT ON;
+
     BEGIN TRY
         BEGIN TRANSACTION;
 
@@ -186,7 +187,7 @@ BEGIN
             RETURN;
         END
 
-        -- 2. Lấy thông tin phiếu đặt và Cơ sở (để trừ kho đúng chỗ)
+        -- 2. Lấy thông tin phiếu đặt và Cơ sở
         DECLARE @TrangThaiPhieu NVARCHAR(20);
         DECLARE @MaSan CHAR(10);
         DECLARE @MaCoSo CHAR(10);
@@ -205,77 +206,53 @@ BEGIN
             RETURN;
         END
 
-        -- 3. VALIDATION: Chỉ được thêm khi trạng thái là 'Chờ xác nhận' hoặc 'Đang sử dụng'
+        -- 3. Kiểm tra trạng thái phiếu
         IF @TrangThaiPhieu NOT IN (N'Chờ xác nhận', N'Đang sử dụng')
         BEGIN
-            RAISERROR(N'Chỉ được thêm dịch vụ khi phiếu đang ở trạng thái Chờ xác nhận hoặc Đang sử dụng.', 16, 1);
+            RAISERROR(N'Trạng thái phiếu không hợp lệ để thêm dịch vụ.', 16, 1);
             ROLLBACK TRANSACTION;
             RETURN;
         END
 
-        -- 4. Lấy đơn giá dịch vụ
-        DECLARE @DonGia INT;
-        SELECT @DonGia = DonGia FROM DichVu WHERE MaDichVu = @MaDichVu;
-
-        IF @DonGia IS NULL
-        BEGIN
-            RAISERROR(N'Mã dịch vụ không tồn tại.', 16, 1);
-            ROLLBACK TRANSACTION;
-            RETURN;
-        END
-
-        -- 5. Kiểm tra Tồn Kho
+        -- 4. Đọc số lượng tồn kho hiện tại (R-Lock được giải phóng ngay sau khi đọc ở mức Read Committed)
         DECLARE @TonKhoHienTai INT;
         SELECT @TonKhoHienTai = SoLuong 
         FROM TonKho 
         WHERE MaDichVu = @MaDichVu AND MaCoSo = @MaCoSo AND TrangThaiKhaDung = 1;
 
+        -- 5. Kiểm tra xem có đáp ứng được số lượng thuê không
         IF @TonKhoHienTai IS NULL OR @TonKhoHienTai < @SoLuong
         BEGIN
-            RAISERROR(N'Số lượng trong kho không đủ hoặc dịch vụ không khả dụng tại cơ sở này.', 16, 1);
+            RAISERROR(N'Số lượng trong kho không đủ hoặc dịch vụ không khả dụng.', 16, 1);
             ROLLBACK TRANSACTION;
             RETURN;
         END
 
-        -- 6. Sinh MaChiTietPDS theo format: CTPDS + 5 số (tổng 10 ký tự)
-        -- Lấy mã lớn nhất hiện tại và tăng lên 1
+        -- GIẢ LẬP TRỄ: Đây là lúc T2 sẽ nhảy vào đọc cùng giá trị @TonKhoHienTai
+        WAITFOR DELAY '00:00:05';
+
+        -- 6. Tính toán tồn kho mới trên biến cục bộ
+        DECLARE @TonKhoMoi INT;
+        SET @TonKhoMoi = @TonKhoHienTai - @SoLuong;
+
+        -- 7. Lấy đơn giá dịch vụ
+        DECLARE @DonGia INT;
+        SELECT @DonGia = DonGia FROM DichVu WHERE MaDichVu = @MaDichVu;
+
+        -- 8. Sinh MaChiTietPDS
         DECLARE @MaxNumber INT;
         DECLARE @NewMaChiTiet CHAR(10);
-        
-        SELECT @MaxNumber = ISNULL(MAX(CAST(RIGHT(MaChiTietPDS, 5) AS INT)), 0)
-        FROM ChiTietPhieuDatSan
-        WHERE MaChiTietPDS LIKE 'CTPDS%';
-        
+        SELECT @MaxNumber = ISNULL(MAX(CAST(RIGHT(MaChiTietPDS, 5) AS INT)), 0) FROM ChiTietPhieuDatSan;
         SET @MaxNumber = @MaxNumber + 1;
         SET @NewMaChiTiet = 'CTPDS' + RIGHT('00000' + CAST(@MaxNumber AS VARCHAR(5)), 5);
 
-        -- 7. Thêm vào bảng ChiTietPhieuDatSan
-        INSERT INTO ChiTietPhieuDatSan (
-            MaChiTietPDS, 
-            ThoiDiemTao, 
-            SoLuong, 
-            ThanhTien, 
-            MaPhieuDat, 
-            MaNhanVien, 
-            MaDichVu, 
-            MaHLV, -- Null vì đây là thêm dịch vụ, không phải HLV
-            TrangThaiThanhToan
-        )
-        VALUES (
-            @NewMaChiTiet,
-            GETDATE(),
-            @SoLuong,
-            @SoLuong * @DonGia, -- Thành tiền
-            @MaPhieuDat,
-            @MaNhanVien,
-            @MaDichVu,
-            NULL, 
-            0 -- Mặc định chưa thanh toán (sẽ thanh toán khi xuất hóa đơn tổng)
-        );
+        -- 9. Thêm vào bảng ChiTietPhieuDatSan
+        INSERT INTO ChiTietPhieuDatSan (MaChiTietPDS, ThoiDiemTao, SoLuong, ThanhTien, MaPhieuDat, MaNhanVien, MaDichVu, TrangThaiThanhToan)
+        VALUES (@NewMaChiTiet, GETDATE(), @SoLuong, @SoLuong * @DonGia, @MaPhieuDat, @MaNhanVien, @MaDichVu, 0);
 
-        -- 8. Trừ Tồn Kho
+        -- 10. Cập nhật kho bằng giá trị đã tính toán (Gây lỗi Lost Update)
         UPDATE TonKho
-        SET SoLuong = SoLuong - @SoLuong
+        SET SoLuong = @TonKhoMoi
         WHERE MaDichVu = @MaDichVu AND MaCoSo = @MaCoSo;
 
         COMMIT TRANSACTION;
@@ -290,8 +267,7 @@ END;
 go
 
 CREATE OR ALTER PROCEDURE sp_TaoHoaDon
-    @MaPhieuDat CHAR(10),
-    @MaNhanVien CHAR(10)
+    @MaPhieuDat CHAR(10)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -390,7 +366,7 @@ BEGIN
 
             -- Tạo hóa đơn cọc/thanh toán trước
             INSERT INTO HoaDon (NgayXuat, TongTienSan, TongTienDichVu, TongTienGiamGia, TongThanhToan, TrangThaiThanhToan, MaNhanVien, MaPhieuDat)
-            VALUES (GETDATE(), @TongTienSan, @TongTienDichVu, @TongTienGiamGia, @TongThanhToan, N'Chưa thanh toán', @MaNhanVien, @MaPhieuDat);
+            VALUES (GETDATE(), @TongTienSan, @TongTienDichVu, @TongTienGiamGia, @TongThanhToan, N'Chưa thanh toán', NULL, @MaPhieuDat);
         END
 
         -- =========================================================================
@@ -409,7 +385,7 @@ BEGIN
             BEGIN
                 -- TRƯỜNG HỢP A: CÓ PHÁT SINH TIỀN -> TẠO HÓA ĐƠN
                 INSERT INTO HoaDon (NgayXuat, TongTienSan, TongTienDichVu, TongTienGiamGia, TongThanhToan, TrangThaiThanhToan, MaNhanVien, MaPhieuDat)
-                VALUES (GETDATE(), 0, @TongTienDichVu, 0, @TongThanhToan, N'Chưa thanh toán', @MaNhanVien, @MaPhieuDat);
+                VALUES (GETDATE(), 0, @TongTienDichVu, 0, @TongThanhToan, N'Chưa thanh toán', NULL, @MaPhieuDat);
 
                 -- Chuyển sang chờ thanh toán để thu ngân thu tiền
                 UPDATE PhieuDatSan SET TrangThaiPhieu = N'Chờ thanh toán' WHERE MaPhieuDat = @MaPhieuDat;

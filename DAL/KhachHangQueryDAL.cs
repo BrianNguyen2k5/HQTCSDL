@@ -45,7 +45,7 @@ namespace DAL
                     {
                         MaKhachHang = reader["MaKhachHang"].ToString() ?? string.Empty,
                         HoTen = reader["HoTen"].ToString() ?? string.Empty,
-                        NgaySinh = reader.GetDateTime(reader.GetOrdinal("NgaySinh")),
+                        NgaySinh = reader.IsDBNull(reader.GetOrdinal("NgaySinh")) ? null : reader.GetDateTime(reader.GetOrdinal("NgaySinh")),
                         SoCCCD = reader["SoCCCD"].ToString() ?? string.Empty,
                         SoDienThoai = reader["SoDienThoai"].ToString() ?? string.Empty,
                         Email = reader["Email"].ToString()
@@ -93,7 +93,7 @@ namespace DAL
                     {
                         MaKhachHang = reader["MaKhachHang"].ToString() ?? string.Empty,
                         HoTen = reader["HoTen"].ToString() ?? string.Empty,
-                        NgaySinh = reader.GetDateTime(reader.GetOrdinal("NgaySinh")),
+                        NgaySinh = reader.IsDBNull(reader.GetOrdinal("NgaySinh")) ? null : reader.GetDateTime(reader.GetOrdinal("NgaySinh")),
                         SoCCCD = reader["SoCCCD"].ToString() ?? string.Empty,
                         SoDienThoai = reader["SoDienThoai"].ToString() ?? string.Empty,
                         Email = reader["Email"].ToString()
@@ -149,7 +149,7 @@ namespace DAL
                     {
                         MaKhachHang = reader["MaKhachHang"].ToString() ?? string.Empty,
                         HoTen = reader["HoTen"].ToString() ?? string.Empty,
-                        NgaySinh = reader.GetDateTime(reader.GetOrdinal("NgaySinh")),
+                        NgaySinh = reader.IsDBNull(reader.GetOrdinal("NgaySinh")) ? null : reader.GetDateTime(reader.GetOrdinal("NgaySinh")),
                         SoCCCD = reader["SoCCCD"].ToString() ?? string.Empty,
                         SoDienThoai = reader["SoDienThoai"].ToString() ?? string.Empty,
                         Email = reader["Email"].ToString(),
@@ -180,7 +180,7 @@ namespace DAL
     {
         public required string MaKhachHang { get; set; }
         public required string HoTen { get; set; }
-        public DateTime NgaySinh { get; set; }
+        public DateTime? NgaySinh { get; set; }
         public required string SoCCCD { get; set; }
         public required string SoDienThoai { get; set; }
         public string? Email { get; set; }

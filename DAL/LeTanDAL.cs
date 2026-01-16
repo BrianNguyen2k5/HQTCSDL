@@ -54,7 +54,7 @@ namespace DAL
         /// - Giai đoạn 1: Phiếu "Chờ xác nhận" → Tạo HĐ #1 → "Chờ thanh toán"
         /// - Giai đoạn 4: Phiếu "Đang sử dụng" → Tạo HĐ #2 (nếu có DV phát sinh) hoặc "Hoàn thành"
         /// </summary>
-        public (bool success, string message, int? maHoaDon) TaoHoaDon(string maPhieuDat, string maNhanVien)
+        public (bool success, string message, int? maHoaDon) TaoHoaDon(string maPhieuDat)
         {
             try
             {
@@ -65,7 +65,6 @@ namespace DAL
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.AddWithValue("@MaPhieuDat", maPhieuDat);
-                cmd.Parameters.AddWithValue("@MaNhanVien", maNhanVien);
 
                 cmd.ExecuteNonQuery();
 

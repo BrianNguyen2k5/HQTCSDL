@@ -115,7 +115,16 @@
                                     {
                                         <button class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
                                                 onclick="checkIn('@booking.Id')">
+                                            <i class="fas fa-sign-in-alt" style="margin-right: 0.25rem;"></i>
                                             Check-in
+                                        </button>
+                                    }
+                                    @if (booking.Status == "Đang sử dụng")
+                                    {
+                                        <button class="btn btn-success" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
+                                                onclick="checkOut('@booking.Id')">
+                                            <i class="fas fa-sign-out-alt" style="margin-right: 0.25rem;"></i>
+                                            Check-out
                                         </button>
                                     }
                                     <button class="btn btn-outline" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;"
@@ -202,6 +211,33 @@
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Có lỗi xảy ra khi check-in');
+                });
+            }
+        }
+
+        function checkOut(maPhieuDat) {
+            if (confirm('Xác nhận check-out cho đặt sân ' + maPhieuDat + '?\n\nHệ thống sẽ tạo hóa đơn thanh toán (nếu có dịch vụ phát sinh).')) {
+                fetch('/Receptionist/CheckOut', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ maPhieuDat: maPhieuDat })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let message = data.message;
+                        if (data.coHoaDonPhatSinh && data.maHoaDon) {
+                            message += '\n\nĐã tạo hóa đơn #' + data.maHoaDon + ' cho các dịch vụ phát sinh.';
+                        }
+                        alert(message);
+                        location.reload();
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi check-out');
                 });
             }
         }

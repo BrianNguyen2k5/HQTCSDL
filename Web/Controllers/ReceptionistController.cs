@@ -222,8 +222,7 @@ namespace HQTCSDL.Controllers
             string maNhanVien = GetMaNhanVien();
 
             var (success, message, maHoaDon) = _leTanDAL.TaoHoaDon(
-                request.MaPhieuDat,
-                maNhanVien
+                request.MaPhieuDat
             );
 
             if (success)
@@ -296,8 +295,7 @@ namespace HQTCSDL.Controllers
 
             // Gọi sp_TaoHoaDon với phiếu ở trạng thái "Đang sử dụng"
             var (success, message, maHoaDon) = _leTanDAL.TaoHoaDon(
-                request.MaPhieuDat,
-                maNhanVien
+                request.MaPhieuDat
             );
 
             if (success)
@@ -666,8 +664,7 @@ namespace HQTCSDL.Controllers
 
                 // Create invoice
                 var (invoiceSuccess, invoiceMessage, maHoaDon) = _leTanDAL.TaoHoaDon(
-                    maPhieuDat,
-                    maNhanVien
+                    maPhieuDat
                 );
 
                 return Json(new { 
