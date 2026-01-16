@@ -2,6 +2,7 @@
 
 let currentBookingStep = 1;
 let selectedCustomerData = null;
+let availableServices = []; // Store services from API
 let bookingFormData = {
     customer: null,
     court: null,
@@ -11,19 +12,39 @@ let bookingFormData = {
     startTime: null,
     endTime: null,
     sessions: 1,
-    addons: {
-        coach: 0,
-        uniform: 0,
-        drink: 0,
-        locker: 0
-    },
-    paymentMethod: 'online'
+    services: {} // Dynamic services: { maDichVu: quantity }
 };
 
 function openNewBookingDialog() {
     document.getElementById('newBookingModal').style.display = 'flex';
     resetBookingForm();
     showStep(1);
+    // Services will be loaded when user reaches step 3
+}
+
+function openBookingWithDetails(dateStr, timeStr, courtId) {
+    openNewBookingDialog();
+
+    // Pre-fill data for Step 2
+    const dateInput = document.getElementById('bookingDate');
+    const timeInput = document.getElementById('bookingStartTime');
+
+    // Format date string to YYYY-MM-DD if needed (assuming input is YYYY-MM-DD)
+    if (dateInput) dateInput.value = dateStr;
+    if (timeInput) timeInput.value = timeStr;
+
+    // Select the court based on ID (matching the start of the value string "id|type|price")
+    const courtSelect = document.getElementById('bookingCourt');
+    if (courtSelect) {
+        for (let i = 0; i < courtSelect.options.length; i++) {
+            if (courtSelect.options[i].value.startsWith(courtId + '|')) {
+                courtSelect.selectedIndex = i;
+                // Trigger update to set duration and end time
+                updateCourtInfo();
+                break;
+            }
+        }
+    }
 }
 
 function closeNewBookingDialog() {
@@ -34,6 +55,7 @@ function closeNewBookingDialog() {
 function resetBookingForm() {
     currentBookingStep = 1;
     selectedCustomerData = null;
+    availableServices = [];
     bookingFormData = {
         customer: null,
         court: null,
@@ -43,13 +65,7 @@ function resetBookingForm() {
         startTime: null,
         endTime: null,
         sessions: 1,
-        addons: {
-            coach: 0,
-            uniform: 0,
-            drink: 0,
-            locker: 0
-        },
-        paymentMethod: 'online'
+        services: {}
     };
 
     // Reset form inputs
@@ -63,10 +79,6 @@ function resetBookingForm() {
     document.getElementById('bookingDate').value = '';
     document.getElementById('bookingStartTime').value = '';
     document.getElementById('bookingSessions').value = '1';
-    document.getElementById('addonCoach').value = '0';
-    document.getElementById('addonUniform').value = '0';
-    document.getElementById('addonDrink').value = '0';
-    document.getElementById('addonLocker').value = '0';
 
     switchCustomerTab('search');
 }
@@ -99,6 +111,11 @@ function showStep(step) {
     document.getElementById('submitButton').style.display = step === 4 ? 'block' : 'none';
 
     currentBookingStep = step;
+
+    // Load services when reaching step 3 (only load once)
+    if (step === 3 && availableServices.length === 0) {
+        loadServices();
+    }
 
     if (step === 4) {
         calculateSummary();
@@ -159,15 +176,151 @@ function validateStep(step) {
     }
 
     if (step === 3) {
-        // Store addons
-        bookingFormData.addons.coach = parseInt(document.getElementById('addonCoach').value);
-        bookingFormData.addons.uniform = parseInt(document.getElementById('addonUniform').value);
-        bookingFormData.addons.drink = parseInt(document.getElementById('addonDrink').value);
-        bookingFormData.addons.locker = parseInt(document.getElementById('addonLocker').value);
+        // Services are already stored in bookingFormData.services via updateServiceQuantity
+        // No validation needed here
         return true;
     }
 
     return true;
+}
+
+// Load services from API
+function loadServices() {
+    console.log('Loading services...');
+    fetch('/Receptionist/LayDanhSachDichVu')
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('API Response:', data);
+
+            // Support both camelCase and PascalCase
+            const serviceList = data.danhSach || data.DanhSach;
+            const success = data.success || data.Success;
+
+            console.log('Service list:', serviceList);
+            console.log('Success:', success);
+
+            if (success && serviceList) {
+                availableServices = serviceList;
+                console.log('Available services:', availableServices);
+                renderServices();
+            } else {
+                console.error('Failed to load services. Success:', success, 'ServiceList:', serviceList);
+                document.getElementById('servicesContainer').innerHTML =
+                    `<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--color-gray-500);">
+                        <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                        <p>Không thể tải danh sách dịch vụ</p>
+                    </div>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading services:', error);
+            document.getElementById('servicesContainer').innerHTML =
+                `<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--color-gray-500);">
+                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <p>Có lỗi xảy ra khi tải dịch vụ</p>
+                </div>`;
+        });
+}
+
+// Render services dynamically
+function renderServices() {
+    console.log('renderServices() called, availableServices:', availableServices);
+    const container = document.getElementById('servicesContainer');
+    console.log('servicesContainer element:', container);
+
+    if (!container) {
+        console.error('servicesContainer not found in DOM!');
+        return;
+    }
+
+    if (availableServices.length === 0) {
+        console.log('No services available, showing empty message');
+        container.innerHTML =
+            `<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--color-gray-500);">
+                <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <p>Không có dịch vụ nào</p>
+            </div>`;
+        return;
+    }
+
+    console.log('Rendering', availableServices.length, 'services');
+
+    // Service icons mapping
+    const serviceIcons = {
+        'Nước uống': '🥤',
+        'Đồ uống': '🥤',
+        'Thuê dụng cụ': '⚽',
+        'Dụng cụ': '⚽',
+        'Thuê trang phục': '👕',
+        'Trang phục': '👕',
+        'Phòng tắm': '🚿',
+        'Tủ đồ': '🔐'
+    };
+
+    container.innerHTML = availableServices.map(service => {
+        // Support both camelCase (from new JSON config) and PascalCase (legacy)
+        const tenDichVu = service.tenDichVu || service.TenDichVu;
+        const loaiDichVu = service.loaiDichVu || service.LoaiDichVu;
+        const donGia = service.donGia || service.DonGia;
+        const donViTinh = service.donViTinh || service.DonViTinh;
+        const maDichVu = (service.maDichVu || service.MaDichVu).trim(); // Trim whitespace from database
+        const soLuongTonKho = service.soLuongTonKho || service.SoLuongTonKho;
+
+        // Find matching icon
+        let icon = '📦'; // default
+        for (const [key, value] of Object.entries(serviceIcons)) {
+            if (tenDichVu.includes(key) || loaiDichVu.includes(key)) {
+                icon = value;
+                break;
+            }
+        }
+
+        return `
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span>${icon} ${tenDichVu}</span>
+                    <span>${donGia.toLocaleString()} VNĐ/${donViTinh}</span>
+                </div>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateServiceQuantity('${maDichVu}', -1)">-</button>
+                    <input type="number" class="input" style="width: 60px; text-align: center;" id="service_${maDichVu}" value="0" readonly />
+                    <button class="btn btn-outline" style="padding: 0.25rem 0.75rem;" onclick="updateServiceQuantity('${maDichVu}', 1)">+</button>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--color-gray-500); margin-top: 0.25rem;">
+                    Tồn kho: ${soLuongTonKho}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Update service quantity
+function updateServiceQuantity(maDichVu, change) {
+    maDichVu = maDichVu.trim(); // Trim whitespace
+    const input = document.getElementById('service_' + maDichVu);
+    const service = availableServices.find(s =>
+        ((s.maDichVu || s.MaDichVu) + '').trim() === maDichVu
+    );
+
+    if (!service) {
+        console.error('Service not found:', maDichVu);
+        return;
+    }
+
+    const soLuongTonKho = service.soLuongTonKho || service.SoLuongTonKho;
+    const current = parseInt(input.value) || 0;
+    const newValue = Math.max(0, Math.min(soLuongTonKho, current + change));
+
+    input.value = newValue;
+    bookingFormData.services[maDichVu] = newValue;
+
+    // Remove if quantity is 0
+    if (newValue === 0) {
+        delete bookingFormData.services[maDichVu];
+    }
 }
 
 function switchCustomerTab(tab) {
@@ -218,7 +371,6 @@ function createNewCustomer() {
     const email = document.getElementById('newCustomerEmail').value.trim();
     const dob = document.getElementById('newCustomerDob').value;
     const cccd = document.getElementById('newCustomerCccd').value.trim();
-    const memberType = document.getElementById('newCustomerMemberType').value;
 
     // Validation
     if (!name || !phone || !dob || !cccd) {
@@ -232,25 +384,43 @@ function createNewCustomer() {
         return;
     }
 
-    // Create customer object
-    const newCustomer = {
-        id: 'NEW_' + Date.now(),
-        name: name,
-        phone: phone,
-        email: email,
-        dob: dob,
-        cccd: cccd,
-        memberType: memberType
-    };
+    // CCCD validation
+    if (!/^[0-9]{12}$/.test(cccd)) {
+        alert('Số CCCD không hợp lệ. Vui lòng nhập 12 chữ số.');
+        return;
+    }
 
-    // Select the new customer
-    selectCustomer(newCustomer);
+    // Call API to create customer
+    fetch('/Receptionist/CreateNewCustomer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            name: name,
+            phone: phone,
+            email: email || null,
+            dateOfBirth: dob,
+            cccd: cccd
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Select the new customer
+                selectCustomer(data.customer);
 
-    // Show success message
-    alert('Tạo khách hàng mới thành công!');
+                // Show success message
+                alert(data.message || 'Tạo khách hàng mới thành công!');
 
-    // Switch back to search tab
-    switchCustomerTab('search');
+                // Switch back to search tab
+                switchCustomerTab('search');
+            } else {
+                alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        });
 }
 
 function searchCustomers() {
@@ -265,57 +435,75 @@ function searchCustomers() {
         return;
     }
 
-    // Mock search - replace with actual API call
-    const mockCustomers = [
-        { id: '1', name: 'Nguyễn Văn An', phone: '0901234567', memberType: 'gold' },
-        { id: '2', name: 'Trần Thị Bình', phone: '0912345678', memberType: 'student' },
-        { id: '3', name: 'Lê Minh Châu', phone: '0923456789', memberType: 'platinum' },
-        { id: '4', name: 'Phạm Hoàng Anh', phone: '0934567890', memberType: 'general' }
-    ];
+    // Show loading
+    document.getElementById('customerSearchResults').innerHTML =
+        `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+            <p>Đang tìm kiếm...</p>
+        </div>`;
 
-    const filtered = mockCustomers.filter(c =>
-        c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.phone.includes(searchTerm)
-    );
+    // Call API to search customers
+    fetch(`/Receptionist/SearchCustomers?searchTerm=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                document.getElementById('customerSearchResults').innerHTML =
+                    `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                        <p>${data.message}</p>
+                    </div>`;
+                return;
+            }
 
-    if (filtered.length === 0) {
-        document.getElementById('customerSearchResults').innerHTML =
-            `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
-                <i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
-                <p>Không tìm thấy khách hàng</p>
-                <p style="font-size: 0.875rem;">Thử tìm với từ khóa khác hoặc tạo khách hàng mới</p>
-            </div>`;
-        return;
-    }
+            const customers = data.customers || [];
 
-    const getMemberBadge = (memberType) => {
-        const badges = {
-            'platinum': { icon: '💎', text: 'Platinum', class: 'badge-primary' },
-            'gold': { icon: '🥇', text: 'Gold', class: 'badge-warning' },
-            'silver': { icon: '🥈', text: 'Silver', class: 'badge-outline' },
-            'student': { icon: '🎓', text: 'Sinh viên', class: 'badge-outline' },
-            'general': { icon: '👤', text: 'Thường', class: 'badge-outline' }
-        };
-        const badge = badges[memberType] || badges['general'];
-        return `<span class="badge ${badge.class}">${badge.icon} ${badge.text}</span>`;
-    };
+            if (customers.length === 0) {
+                document.getElementById('customerSearchResults').innerHTML =
+                    `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                        <i class="fas fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                        <p>Không tìm thấy khách hàng</p>
+                        <p style="font-size: 0.875rem;">Thử tìm với từ khóa khác hoặc tạo khách hàng mới</p>
+                    </div>`;
+                return;
+            }
 
-    document.getElementById('customerSearchResults').innerHTML = filtered.map(customer => `
-        <div class="card" style="margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; border: 2px solid transparent;" 
-             onclick='selectCustomer(${JSON.stringify(customer)})'
-             onmouseover="this.style.borderColor='#007BFF'; this.style.backgroundColor='#f0f9ff';"
-             onmouseout="this.style.borderColor='transparent'; this.style.backgroundColor='white';">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; font-size: 1rem; color: var(--color-gray-900); margin-bottom: 0.25rem;">${customer.name}</div>
-                    <div style="font-size: 0.875rem; color: var(--color-gray-600);">
-                        <i class="fas fa-phone" style="margin-right: 0.25rem;"></i>${customer.phone}
+            const getMemberBadge = (memberType) => {
+                const badges = {
+                    'platinum': { icon: '💎', text: 'Platinum', class: 'badge-primary' },
+                    'gold': { icon: '🥇', text: 'Gold', class: 'badge-warning' },
+                    'silver': { icon: '🥈', text: 'Silver', class: 'badge-outline' },
+                    'student': { icon: '🎓', text: 'Sinh viên', class: 'badge-outline' },
+                    'general': { icon: '👤', text: 'Thường', class: 'badge-outline' }
+                };
+                const badge = badges[memberType] || badges['general'];
+                return `<span class="badge ${badge.class}">${badge.icon} ${badge.text}</span>`;
+            };
+
+            document.getElementById('customerSearchResults').innerHTML = customers.map(customer => `
+                <div class="card" style="margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; border: 2px solid transparent;" 
+                     onclick='selectCustomer(${JSON.stringify(customer)})'
+                     onmouseover="this.style.borderColor='#007BFF'; this.style.backgroundColor='#f0f9ff';"
+                     onmouseout="this.style.borderColor='transparent'; this.style.backgroundColor='white';">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 1rem; color: var(--color-gray-900); margin-bottom: 0.25rem;">${customer.name}</div>
+                            <div style="font-size: 0.875rem; color: var(--color-gray-600);">
+                                <i class="fas fa-phone" style="margin-right: 0.25rem;"></i>${customer.phone}
+                            </div>
+                        </div>
+                        ${getMemberBadge(customer.memberType)}
                     </div>
                 </div>
-                ${getMemberBadge(customer.memberType)}
-            </div>
-        </div>
-    `).join('');
+            `).join('');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('customerSearchResults').innerHTML =
+                `<div style="text-align: center; color: var(--color-gray-500); padding: 2rem;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                    <p>Có lỗi xảy ra. Vui lòng thử lại.</p>
+                </div>`;
+        });
 }
 
 function selectCustomer(customer) {
@@ -349,7 +537,9 @@ function updateCourtInfo() {
     const durations = {
         'mini-football': 90,
         'badminton': 60,
-        'tennis': 120
+        'tennis': 120,
+        'basketball': 60,
+        'futsal': 60
     };
 
     const duration = durations[courtType];
@@ -372,7 +562,9 @@ function updateEndTime() {
     const durations = {
         'mini-football': 90,
         'badminton': 60,
-        'tennis': 120
+        'tennis': 120,
+        'basketball': 90,
+        'futsal': 90
     };
 
     const duration = durations[courtType] * sessions;
@@ -387,30 +579,22 @@ function updateEndTime() {
     document.getElementById('endTimeText').textContent = endTime;
 }
 
-function updateAddon(type, change) {
-    const input = document.getElementById('addon' + type.charAt(0).toUpperCase() + type.slice(1));
-    const current = parseInt(input.value);
-    const newValue = Math.max(0, current + change);
-    input.value = newValue;
-}
-
-function updatePaymentMethod() {
-    const method = document.querySelector('input[name="paymentMethod"]:checked').value;
-    bookingFormData.paymentMethod = method;
-
-    document.getElementById('counterPaymentWarning').style.display = method === 'counter' ? 'block' : 'none';
-}
-
 function calculateSummary() {
     const courtFee = bookingFormData.courtPrice * bookingFormData.sessions;
-    const addonsFee =
-        bookingFormData.addons.coach * 50 +
-        bookingFormData.addons.uniform * 10 +
-        bookingFormData.addons.drink * 3 +
-        bookingFormData.addons.locker * 5;
 
-    const subtotal = courtFee + addonsFee;
-    const tax = Math.round(subtotal * 0.1);
+    // Calculate services fee dynamically
+    let servicesFee = 0;
+    for (const [maDichVu, quantity] of Object.entries(bookingFormData.services)) {
+        const service = availableServices.find(s =>
+            ((s.maDichVu || s.MaDichVu) + '').trim() === maDichVu.trim()
+        );
+        if (service && quantity > 0) {
+            const donGia = service.donGia || service.DonGia;
+            servicesFee += donGia * quantity;
+        }
+    }
+
+    const subtotal = courtFee + servicesFee;
 
     // Member discount
     const discountRates = {
@@ -424,11 +608,10 @@ function calculateSummary() {
     const discountRate = discountRates[bookingFormData.customer?.memberType || 'general'];
     const discount = Math.round(subtotal * discountRate);
 
-    const total = subtotal + tax - discount;
+    const total = subtotal - discount;
 
     document.getElementById('summaryCourtFee').textContent = courtFee.toLocaleString() + ' VNĐ';
-    document.getElementById('summaryAddonsFee').textContent = addonsFee.toLocaleString() + ' VNĐ';
-    document.getElementById('summaryTax').textContent = tax.toLocaleString() + ' VNĐ';
+    document.getElementById('summaryAddonsFee').textContent = servicesFee.toLocaleString() + ' VNĐ';
     document.getElementById('summaryDiscount').textContent = '-' + discount.toLocaleString() + ' VNĐ';
     document.getElementById('summaryTotal').textContent = total.toLocaleString() + ' VNĐ';
 }
@@ -441,8 +624,7 @@ function submitBooking() {
         startTime: bookingFormData.startTime,
         endTime: bookingFormData.endTime,
         sessions: bookingFormData.sessions,
-        addons: bookingFormData.addons,
-        paymentMethod: bookingFormData.paymentMethod
+        services: bookingFormData.services
     };
 
     fetch('/Receptionist/CreateBooking', {
@@ -453,7 +635,7 @@ function submitBooking() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Đặt sân thành công!');
+                alert('Đặt sân thành công! Vui lòng thanh toán.');
                 closeNewBookingDialog();
                 location.reload();
             } else {
@@ -466,10 +648,40 @@ function submitBooking() {
         });
 }
 
-// Set default date to today
+// Load courts from API
+function loadCourts() {
+    fetch('/Receptionist/GetAvailableCourts')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.courts) {
+                const courtSelect = document.getElementById('bookingCourt');
+                if (courtSelect) {
+                    // Clear existing options except the first placeholder
+                    courtSelect.innerHTML = '<option value="">-- Chọn sân --</option>';
+
+                    // Add courts
+                    data.courts.forEach(court => {
+                        const option = document.createElement('option');
+                        // Store court info in the value as: maSan|courtType|price
+                        option.value = `${court.id}|${court.type}|${court.price}`;
+                        option.textContent = `${court.name} - ${court.typeName} (${court.price.toLocaleString()} VNĐ/${court.duration} phút)`;
+                        courtSelect.appendChild(option);
+                    });
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading courts:', error);
+        });
+}
+
+// Set default date to today and load courts
 document.addEventListener('DOMContentLoaded', function () {
     const today = new Date().toISOString().split('T')[0];
     if (document.getElementById('bookingDate')) {
         document.getElementById('bookingDate').value = today;
     }
+
+    // Load courts when page loads
+    loadCourts();
 });

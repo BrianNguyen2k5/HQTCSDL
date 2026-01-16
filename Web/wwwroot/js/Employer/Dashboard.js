@@ -1,12 +1,3 @@
-const tabIds = [
-	'dashboard',
-	'employees',
-	'arrangement',
-	'skipform',
-	'modification',
-	'report',
-	'profile'
-];
 
 function loadStatistics(type) {
 	fetch(`/Employer/GetStatisticsReport?type=${type}`)
@@ -15,20 +6,19 @@ function loadStatistics(type) {
 			if (result.success) {
 				if(result.data === -1) {
 					// Type sai hoặc không có type này trong sql
-					document.getElementById(type).innerText = "N/A";
+					let el = document.getElementById(type);
+					if(el) el.innerText = "N/A";
 				}
 				else {
-					document.getElementById(type).innerText = result.data;
+					let el = document.getElementById(type);
+					if(el) el.innerText = result.data;
 				}
 			}
-		})
+		}
+	)
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-	// Lấy tab đã lưu hoặc mặc định là dashboard
-	const savedTab = localStorage.getItem('activeTab') || 'dashboard';
-	switchTab(savedTab);
-
 	const statisticTypes = [
 		'San_total',
 		'DichVu_total',
@@ -37,47 +27,33 @@ document.addEventListener('DOMContentLoaded', function () {
 		'DichVu_cancel'
 	];
 
-	statisticTypes.forEach(type => loadStatistics(type));
+	// Chỉ load thống kê nếu đang ở trang Dashboard (hoặc trang có chứa các element này)
+	// Kiểm tra xem có element đầu tiên không để đỡ call API thừa
+	if(document.getElementById('San_total')) {
+		statisticTypes.forEach(type => loadStatistics(type));
+	}
 })
-
-function switchTab(selectedTabName) {
-	tabIds.forEach(tabName => {
-		const contentEl = document.getElementById('tab-content-' + tabName);
-		const btnEl = document.getElementById('btn-' + tabName);
-
-		if (!contentEl || !btnEl) return;
-
-		if (tabName === selectedTabName) {
-			contentEl.classList.remove('hidden');
-			btnEl.classList.add('tab-active');
-			btnEl.classList.remove('tab-inactive');
-		} else {
-			contentEl.classList.add('hidden');
-			btnEl.classList.add('tab-inactive');
-			btnEl.classList.remove('tab-active');
-		}
-	});
-
-	// Lưu lại tab đang được chọn để dùng sau khi reload trang
-	localStorage.setItem('activeTab', selectedTabName);
-}
 
 function handlePriceChanging(maLoaiSan) {
 	const priceInputForm = document.getElementById(`input-price-${maLoaiSan}`);
-	if(!priceInputForm) {
+  const fieldInfoButton = document.getElementById(`field-info-button-${maLoaiSan}`);
+	if(!priceInputForm || !fieldInfoButton) {
 		alert('Không tìm thấy biểu mẫu thay đổi giá!');
 		return;
 	}
 	priceInputForm.classList.remove('hidden');
+  fieldInfoButton.classList.add('hidden');
 }
 
 function cancelPriceChanging(maLoaiSan) {
 	const priceInputForm = document.getElementById(`input-price-${maLoaiSan}`);
-	if(!priceInputForm) {
+  const fieldInfoButton = document.getElementById(`field-info-button-${maLoaiSan}`);
+	if(!priceInputForm || !fieldInfoButton) { 
 		alert('Không tìm thấy biểu mẫu thay đổi giá!');
 		return;
 	}
 	priceInputForm.classList.add('hidden');
+  fieldInfoButton.classList.remove('hidden');
 }
 
 function updateFieldPrice(maLoaiSan) {
@@ -104,8 +80,7 @@ function updateFieldPrice(maLoaiSan) {
 	.then(result => {
 		if (result.success) {
 			alert(result.message);
-			// Lưu tab cần hiển thị sau khi tải lại
-			localStorage.setItem('activeTab', 'modification');
+			// Reload trang để cập nhật giá mới
 			location.reload();
 		}
 		else {
@@ -184,6 +159,7 @@ function loadRevenue() {
 	const nam = document.getElementById('dp_year').value;
 	const thang = document.getElementById('dp_month').value;
 	const ngay = document.getElementById('dp_day').value;
+	console.log(nam, thang, ngay)
 
 	if (!nam) {
 		alert('Vui lòng chọn ít nhất là Năm!');
@@ -195,12 +171,22 @@ function loadRevenue() {
 	if (ngay) url += `&ngay=${ngay}`;
 
 	fetch(url)
-		.then(response => response.json())
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+			return response.json();
+		})
 		.then(data => {
 			if (data.success) {
+				// Format qua 3.000.000 VND
 				document.getElementById('lblDoanhThu').innerText = data.formatted;
+			} else {
+				console.error(data.message);
 			}
 		})
-		.catch(err => console.error(err));
+		.catch(err => {
+			console.error(err);
+		});
 }
 
