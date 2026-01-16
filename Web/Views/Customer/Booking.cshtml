@@ -187,7 +187,7 @@
          <div class="space-y-4">
             <div>
                  <label class="block text-sm font-medium text-gray-700 mb-1">Mã khách hàng</label>
-                <input type="text" id="customer-id" value="KH001" readonly class="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-100 text-gray-600">
+                <input type="text" id="customer-id" value="@User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value" readonly class="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-100 text-gray-600">
             </div>
               <div>
                  <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên <span class="text-red-500">*</span></label>
@@ -448,8 +448,8 @@
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                 <a href="/Customer/Dashboard" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Lịch sử</a>
-                 <a href="/" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">Về trang chủ</a>
+                 <button onclick="closeSuccessModal(); switchTab('history')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">Lịch sử</button>
+                 <button onclick="closeSuccessModal(); goToStep(1); switchTab('home')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">Về trang chủ</button>
             </div>
         </div>
     </div>
@@ -1411,6 +1411,10 @@
         }
     }
     
+    function closeSuccessModal() {
+        document.getElementById('success-modal').classList.add('hidden');
+    }
+
     // Export global for HTML
     window.switchTab = switchTab;
     window.loadMyBookings = loadMyBookings;

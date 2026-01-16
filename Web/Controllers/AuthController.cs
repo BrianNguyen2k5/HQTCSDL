@@ -85,6 +85,11 @@ public class AuthController : Controller
             // 7. Chuyển hướng trang
             Console.WriteLine($"LOGIN SUCCESS: {user.id}");
 
+            if (user.TenDangNhap == "denoa")
+            {
+                return RedirectToAction("Index", "Booking");
+            }
+
             if (role == "Quản lý")
             {
                 return RedirectToAction("Dashboard", "Employer");
