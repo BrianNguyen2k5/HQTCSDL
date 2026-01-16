@@ -279,5 +279,21 @@ namespace HQTCSDL.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+        [HttpGet("customer-discounts")]
+        public IActionResult GetCustomerDiscounts()
+        {
+            try
+            {
+                var userId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+                var discounts = _bookingDAL.GetCustomerDiscounts(userId);
+                return Ok(discounts);
+            }
+            catch (Exception ex)
+            {
+                 return StatusCode(500, new { message = ex.Message });
+            }
+        }
     }
 }

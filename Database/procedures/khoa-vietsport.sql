@@ -203,12 +203,13 @@ BEGIN
             RETURN;
         END
 
-        -- 3. Kiểm tra tồn kho tại chi nhánh
-        SELECT @SoLuongTonKho = SoLuong, @TrangThaiKhaDung = TrangThaiKhaDung
+        -- 3. Kiểm tra tồn kho tại chi nhánh và đọc số lượng hiện tại
+        DECLARE @TonKhoHienTai INT;
+        SELECT @TonKhoHienTai = SoLuong, @TrangThaiKhaDung = TrangThaiKhaDung
         FROM TonKho
         WHERE MaDichVu = @MaDichVu AND MaCoSo = @MaCoSo;
 
-        IF @SoLuongTonKho IS NULL
+        IF @TonKhoHienTai IS NULL
         BEGIN
             RAISERROR(N'Dịch vụ không có trong kho của chi nhánh này!', 16, 1);
             ROLLBACK TRANSACTION;
@@ -222,17 +223,21 @@ BEGIN
             RETURN;
         END
 
-        IF @SoLuongTonKho < @SoLuong
+        IF @TonKhoHienTai < @SoLuong
         BEGIN
-            RAISERROR(N'Số lượng trong kho không đủ! Chỉ còn %d sản phẩm.', 16, 1, @SoLuongTonKho);
+            RAISERROR(N'Số lượng trong kho không đủ! Chỉ còn %d sản phẩm.', 16, 1, @TonKhoHienTai);
             ROLLBACK TRANSACTION;
             RETURN;
         END
 
-        -- 4. Tính thành tiền
+        -- 4. Tính toán tồn kho mới trên biến cục bộ (giống sp_LeTan_ThemDichVu)
+        DECLARE @TonKhoMoi INT;
+        SET @TonKhoMoi = @TonKhoHienTai - @SoLuong;
+
+        -- 5. Tính thành tiền
         SET @ThanhTien = @SoLuong * @DonGia;
 
-        -- 5. Thêm chi tiết phiếu đặt sân
+        -- 6. Thêm chi tiết phiếu đặt sân
         INSERT INTO ChiTietPhieuDatSan (
             MaChiTietPDS, ThoiDiemTao, SoLuong, ThanhTien, 
             MaPhieuDat, MaNhanVien, MaDichVu, TrangThaiThanhToan
@@ -242,9 +247,9 @@ BEGIN
             @MaPhieuDat, @MaNhanVien, @MaDichVu, 0
         );
 
-        -- 6. Cập nhật tồn kho
+        -- 7. Cập nhật kho bằng giá trị đã tính toán (giống sp_LeTan_ThemDichVu)
         UPDATE TonKho
-        SET SoLuong = SoLuong - @SoLuong
+        SET SoLuong = @TonKhoMoi
         WHERE MaDichVu = @MaDichVu AND MaCoSo = @MaCoSo;
 
         COMMIT TRANSACTION;
@@ -275,7 +280,14 @@ BEGIN
         s.TenSan,
         ls.TenLoaiSan,
         cs.TenCoSo,
-        pds.TrangThaiPhieu
+        pds.TrangThaiPhieu,
+        -- Aggregate Services
+        (
+            SELECT STRING_AGG(CONCAT(dv.TenDichVu, ' (x', ct.SoLuong, ')'), ', ') 
+            FROM ChiTietPhieuDatSan ct
+            JOIN DichVu dv ON ct.MaDichVu = dv.MaDichVu
+            WHERE ct.MaPhieuDat = pds.MaPhieuDat
+        ) AS DanhSachDichVu
     FROM PhieuDatSan pds
     INNER JOIN San s ON pds.MaSan = s.MaSan
     INNER JOIN LoaiSan ls ON s.MaLoaiSan = ls.MaLoaiSan

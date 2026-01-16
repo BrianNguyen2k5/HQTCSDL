@@ -99,6 +99,7 @@ namespace DTO
         public string TenLoaiSan { get; set; }
         public string TenCoSo { get; set; }
         public string TrangThaiPhieu { get; set; }
+        public string? DanhSachDichVu { get; set; } // Nullable, comma separated string
     }
 
     public class CancelBookingRequestDTO
