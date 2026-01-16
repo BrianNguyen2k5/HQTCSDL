@@ -36,10 +36,21 @@ builder
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "VerifyKey123123123")
             ),
         };
     });
+
+// CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowNextJs",
+        policy => policy
+            .WithOrigins("http://localhost:3000") // Next.js URL
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials());
+});
 
 // Đăng ký MVC
 builder.Services.AddControllersWithViews()
@@ -80,6 +91,8 @@ app.UseHttpsRedirection();
 app.UseSession();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseCors("AllowNextJs");
 
 app.UseAuthentication(); // 1. Kiểm tra xem: "Anh là ai?" (Check Cookie)
 app.UseAuthorization(); // 2. Kiểm tra xem: "Anh có được vào đây không?" (Check [Authorize])

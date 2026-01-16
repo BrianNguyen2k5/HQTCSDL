@@ -99,6 +99,11 @@ public class AuthController : Controller
             // 7. Chuyển hướng trang
             Console.WriteLine($"LOGIN SUCCESS: {user.id}");
 
+            if (!string.IsNullOrEmpty(user.MaKhachHang))
+            {
+                return RedirectToAction("Index", "Booking");
+            }
+
             if (role == "Quản lý")
             {
                 return RedirectToAction("Dashboard", "Employer");
@@ -148,18 +153,19 @@ public class AuthController : Controller
             return View();
         }
 
-        bool result = _taiKhoanDAL.ThemTaiKhoan(username, email, password);
+        string result = _taiKhoanDAL.ThemTaiKhoan(username, email, password);
 
-        if (result)
+        if (result == "Success")
         {
             // Đăng ký thành công -> Chuyển qua trang login
             return RedirectToAction("Login");
         }
         else
         {
-            ViewBag.Error = "Đăng ký thất bại. Tên đăng nhập hoặc Email có thể đã tồn tại.";
+            ViewBag.Error = result; // Hiển thị lỗi cụ thể từ DAL
             return View();
         }
+
     }
 
     [Route("logout")]
@@ -177,7 +183,7 @@ public class AuthController : Controller
     private string GenerateJwtToken(string username, string role, string userId)
     {
         var jwtSettings = _configuration.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "VerifyKey123123123");
 
         var claims = new List<Claim>
         {

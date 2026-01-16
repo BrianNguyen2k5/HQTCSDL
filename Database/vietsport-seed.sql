@@ -23,7 +23,6 @@ INSERT INTO LoaiSan (MaLoaiSan, TenLoaiSan, DonViTinhTheoPhut, GiaGoc, MoTa) VAL
 ('LS02', N'Cầu lông', 60, 150000, N'Thuê theo giờ'),
 ('LS03', N'Tennis', 120, 400000, N'Thuê theo ca 2 giờ'),
 ('LS04', N'Bóng rổ', 60, 200000, N'Thuê theo giờ'),
-('LS05', N'Futsal', 60, 500000, N'Thuê theo giờ');
 
 --KhungGio
 INSERT INTO KhungGio (MaKhungGio, GioBatDau, GioKetThuc) VALUES

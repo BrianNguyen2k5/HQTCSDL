@@ -78,13 +78,27 @@ namespace DAL
             return null;
         }
 
-        public bool ThemTaiKhoan(string username, string email, string passwordRaw)
+        public string ThemTaiKhoan(string username, string email, string passwordRaw)
         {
-            // 0. Tạo Khách hàng trước
+             // 0. CHECK DUPLICATES IN TAIKHOAN
+            string checkUserQuery = "SELECT COUNT(*) FROM TaiKhoan WHERE TenDangNhap = @user";
+            SqlParameter[] userParams = { new SqlParameter("@user", username) };
+            int userCount = (int)_dbConnection.ExecuteScalar(checkUserQuery, userParams);
+            if (userCount > 0) return "Tên đăng nhập đã tồn tại";
+
+            string checkEmailQuery = "SELECT COUNT(*) FROM TaiKhoan WHERE Email = @email";
+            SqlParameter[] emailParams = { new SqlParameter("@email", email) };
+            int emailCount = (int)_dbConnection.ExecuteScalar(checkEmailQuery, emailParams);
+            if (emailCount > 0) return "Email đã được sử dụng bởi tài khoản khác";
+
+            // 0. Tạo Khách hàng trước (hoặc lấy ID cũ)
             string maKhachHangMoi = _khachHang.ThemKhachHang(Email: email);
 
-            if (maKhachHangMoi == "Thất bại")
-                return false;
+            if (maKhachHangMoi.StartsWith("Thất bại"))
+            {
+                Console.WriteLine("ThemTaiKhoan -> ThemKhachHang Failed: " + maKhachHangMoi);
+                return maKhachHangMoi;
+            }
 
             // 1. MÃ HÓA MẬT KHẨU TRƯỚC
             string hashPassword = BCrypt.Net.BCrypt.HashPassword(passwordRaw);
@@ -106,12 +120,13 @@ namespace DAL
 
             try
             {
-                return _dbConnection.ExecuteNonQuery(query, parameters) > 0;
+                int rows = _dbConnection.ExecuteNonQuery(query, parameters);
+                return rows > 0 ? "Success" : "Lỗi: Không thể thêm tài khoản vào database";
             }
-            catch
+            catch (Exception ex)
             {
-                // Có thể log lỗi trùng tên đăng nhập hoặc email tại đây
-                return false;
+                Console.WriteLine("Lỗi ThemTaiKhoan (Insert): " + ex.Message);
+                return "Lỗi hệ thống: " + ex.Message;
             }
         }
 
