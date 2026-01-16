@@ -203,6 +203,7 @@ BEGIN
         DECLARE @MaPhieuDat CHAR(10);
         DECLARE @MaPhieuThue CHAR(10);
         DECLARE @TrangThaiPhieuHienTai NVARCHAR(20);
+        DECLARE @paystatus bit;
         
         SELECT 
             @MaPhieuDat = MaPhieuDat,
@@ -210,13 +211,29 @@ BEGIN
         FROM HoaDon 
         WHERE MaHoaDon = @MaHoaDon;
         
-        -- Cập nhật trạng thái hóa đơn
+        
+            -- Cập nhật trạng thái hóa đơn
         UPDATE HoaDon
         SET TrangThaiThanhToan = N'Đã thanh toán',
             HinhThucThanhToan = @HinhThucThanhToan,
             MaNhanVien = @MaNhanVien
         WHERE MaHoaDon = @MaHoaDon;
         
+       
+        if @HinhThucThanhToan = N'Ví điện tử' 
+        --Giả sử kết quả của thanh toán ví điện tử bị lỗi
+        BEGIN
+            WAITFOR DELAY '00:00:10';
+            SET @paystatus = 0;
+        END
+        
+        if @paystatus = 0
+        BEGIN
+            ROLLBACK;
+            RAISERROR(N'Thanh toán thất bại', 16, 1);
+            RETURN;
+        END
+
         -- Xử lý phiếu đặt sân (nếu có)
         IF @MaPhieuDat IS NOT NULL
         BEGIN
