@@ -395,8 +395,7 @@ BEGIN
                 -- TRƯỜNG HỢP B: KHÔNG PHÁT SINH (HOẶC = 0 ĐỒNG) -> HOÀN THÀNH LUÔN
                 -- 1. Cập nhật phiếu thành Hoàn thành
                 UPDATE PhieuDatSan 
-                SET TrangThaiPhieu = N'Hoàn thành',
-                    GioKetThuc = CAST(GETDATE() AS TIME) -- Cập nhật giờ thực tế khách về (nếu cần)
+                SET TrangThaiPhieu = N'Hoàn thành'
                 WHERE MaPhieuDat = @MaPhieuDat;
 
                 -- 2. Cập nhật trạng thái thanh toán cho các dịch vụ (ví dụ các món giá 0 đồng, khuyến mãi)
