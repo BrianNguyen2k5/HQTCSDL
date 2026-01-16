@@ -23,6 +23,7 @@ INSERT INTO LoaiSan (MaLoaiSan, TenLoaiSan, DonViTinhTheoPhut, GiaGoc, MoTa) VAL
 ('LS02', N'Cầu lông', 60, 150000, N'Thuê theo giờ'),
 ('LS03', N'Tennis', 120, 400000, N'Thuê theo ca 2 giờ'),
 ('LS04', N'Bóng rổ', 60, 200000, N'Thuê theo giờ'),
+('LS05', N'Futsal', 50, 500000, N'Thuê theo giờ');
 
 --KhungGio
 INSERT INTO KhungGio (MaKhungGio, GioBatDau, GioKetThuc) VALUES
@@ -589,6 +590,7 @@ INSERT INTO DonNghiPhep VALUES
 ('DN14','2025-01-09',N'Việc riêng',N'Hủy','NV086','NV081',NULL),
 ('DN15','2025-01-12',N'Nghỉ gia đình',N'Đã Duyệt','NV087','NV081','NV088');
 
+select * from LoaiSan
 
 --CS01 – TP HỒ CHÍ MINH (12 SÂN)
 INSERT INTO San VALUES
