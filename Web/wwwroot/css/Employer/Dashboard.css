@@ -6,7 +6,6 @@
 .employer-dsb .content-container {
 	display: flex;
 	flex-direction: row;
-	gap: 20px;
 }
 
 .employer-dsb .content-container .navigate-bar {
@@ -28,23 +27,11 @@
 }
 
 .employer-dsb .tab-active {
-	color: blue;
+	color: #00ADEF;
 	font-weight: bold;
 }
 
 .employer-dsb .title {
 	font-weight: bold;
 	font-size: 1.5rem;
-}
-
-.fields-list {
-	display: flex;
-	flex-direction: row;
-	gap: 20px;
-}
-
-/* _GetFieldList */
-.field-info {
-	padding: 30px;
-	border: 1px solid #eee;
 }

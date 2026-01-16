@@ -53,7 +53,12 @@ builder.Services.AddCors(options =>
 });
 
 // Đăng ký MVC
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        // Sử dụng camelCase cho JSON serialization (maDichVu thay vì MaDichVu)
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
 //Đăng ký DTO
 // Đăng ký DAL (Scoped: Tạo mới mỗi khi có request)
@@ -62,6 +67,8 @@ builder.Services.AddScoped<DAL.NhanVien>();
 builder.Services.AddScoped<DAL.Dashboard>();
 builder.Services.AddScoped<DAL.TaiKhoan>();
 builder.Services.AddScoped<DAL.KhachHang>();
+builder.Services.AddScoped<DAL.DichVuDAL>();
+builder.Services.AddScoped<DAL.CoSo>();
 
 // Đăng ký BLL
 

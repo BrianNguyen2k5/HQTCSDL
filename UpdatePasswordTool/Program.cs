@@ -5,35 +5,29 @@ using Microsoft.Data.SqlClient;
 class Program
 {
     // Cấu hình database
-    const string CONNECTION_STRING = "Server=LAPTOP-EBFPCKGK\\SQLEXPRESS;Database=VietSport;Trusted_Connection=True;TrustServerCertificate=True;";
+    const string CONNECTION_STRING = "Server=.;Database=VietSport;Trusted_Connection=True;TrustServerCertificate=True;";
     
-    // Danh sách nhân viên cần update
-    static readonly string[] EMPLOYEES = { "NV001", "NV006", "NV002", "NV003", "NV009" };
+    // Danh sách nhân viên cần tạo tài khoản
+    static readonly string[] TARGET_EMPLOYEES = { "NV001", "NV006", "NV002", "NV003", "NV009" };
     
-    // Mật khẩu gốc
+    // Mật khẩu gốc cho tất cả tài khoản
     const string RAW_PASSWORD = "123456";
 
     static void Main(string[] args)
     {
         Console.WriteLine("=".PadRight(60, '='));
-        Console.WriteLine("UPDATE BCRYPT PASSWORD TOOL");
+        Console.WriteLine("TẠO TÀI KHOẢN NHÂN VIÊN - BCRYPT TOOL");
         Console.WriteLine("=".PadRight(60, '='));
-        Console.WriteLine($"Mật khẩu gốc: {RAW_PASSWORD}");
-        Console.WriteLine($"Số lượng tài khoản cần update: {EMPLOYEES.Length}");
+        Console.WriteLine($"Mật khẩu mặc định: {RAW_PASSWORD}");
+        Console.WriteLine($"Số lượng tài khoản: {TARGET_EMPLOYEES.Length}");
         Console.WriteLine("=".PadRight(60, '='));
         Console.WriteLine();
 
-        // Tạo BCrypt hash
-        string passwordHash = BCrypt.Net.BCrypt.HashPassword(RAW_PASSWORD, workFactor: 10);
-        Console.WriteLine($"BCrypt Hash được tạo:");
-        Console.WriteLine($"{passwordHash}");
-        Console.WriteLine();
-
-        // Update vào database
-        UpdatePasswords(passwordHash);
+        // Tạo tài khoản vào database
+        CreateAccounts();
     }
 
-    static void UpdatePasswords(string passwordHash)
+    static void CreateAccounts()
     {
         try
         {
@@ -42,43 +36,95 @@ class Program
                 conn.Open();
                 Console.WriteLine("✓ Kết nối database thành công!");
                 Console.WriteLine();
-                Console.WriteLine("Bắt đầu update mật khẩu...");
+                Console.WriteLine("Bắt đầu tạo tài khoản cho nhân viên...");
                 Console.WriteLine();
 
-                string query = @"
-                    UPDATE TaiKhoan 
-                    SET MatKhauMaHoa = @Hash 
-                    WHERE MaNhanVien = @MaNV";
-
-                foreach (string maNV in EMPLOYEES)
+                // Lấy danh sách nhân viên được chỉ định
+                string employeeList = string.Join("','", TARGET_EMPLOYEES);
+                string selectQuery = $"SELECT MaNhanVien, HoTen FROM NhanVien WHERE MaNhanVien IN ('{employeeList}') ORDER BY MaNhanVien";
+                
+                using (SqlCommand selectCmd = new SqlCommand(selectQuery, conn))
+                using (SqlDataReader reader = selectCmd.ExecuteReader())
                 {
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    var employees = new System.Collections.Generic.List<(string MaNV, string HoTen)>();
+                    
+                    while (reader.Read())
                     {
-                        cmd.Parameters.AddWithValue("@Hash", passwordHash);
-                        cmd.Parameters.AddWithValue("@MaNV", maNV);
+                        employees.Add((
+                            reader["MaNhanVien"].ToString(),
+                            reader["HoTen"].ToString()
+                        ));
+                    }
+                    
+                    reader.Close();
 
-                        int rowsAffected = cmd.ExecuteNonQuery();
+                    // Tạo tài khoản cho từng nhân viên
+                    string insertQuery = @"
+                        INSERT INTO TaiKhoan (TenDangNhap, MatKhauMaHoa, Email, TrangThai, NgayTao, MaNhanVien)
+                        VALUES (@Username, @Hash, @Email, 1, GETDATE(), @MaNV)";
 
-                        if (rowsAffected > 0)
+                    int successCount = 0;
+                    int skipCount = 0;
+
+                    foreach (var emp in employees)
+                    {
+                        string username = $"nv_{emp.MaNV.ToLower()}";
+                        string email = $"{username}@vietsport.com";
+
+                        // Kiểm tra xem tài khoản đã tồn tại chưa
+                        string checkQuery = "SELECT COUNT(*) FROM TaiKhoan WHERE MaNhanVien = @MaNV";
+                        using (SqlCommand checkCmd = new SqlCommand(checkQuery, conn))
                         {
-                            Console.WriteLine($"✓ Đã update mật khẩu cho {maNV}");
+                            checkCmd.Parameters.AddWithValue("@MaNV", emp.MaNV);
+                            int count = (int)checkCmd.ExecuteScalar();
+
+                            if (count > 0)
+                            {
+                                Console.WriteLine($"⊘ Bỏ qua {emp.MaNV} ({emp.HoTen}) - Tài khoản đã tồn tại");
+                                skipCount++;
+                                continue;
+                            }
                         }
-                        else
+
+                        // Tạo BCrypt hash riêng cho từng tài khoản (mỗi hash sẽ có salt khác nhau)
+                        string passwordHash = BCrypt.Net.BCrypt.HashPassword(RAW_PASSWORD, workFactor: 10);
+
+                        // Tạo tài khoản mới
+                        try
                         {
-                            Console.WriteLine($"✗ Không tìm thấy tài khoản với MaNhanVien = {maNV}");
+                            using (SqlCommand cmd = new SqlCommand(insertQuery, conn))
+                            {
+                                cmd.Parameters.AddWithValue("@Username", username);
+                                cmd.Parameters.AddWithValue("@Hash", passwordHash);
+                                cmd.Parameters.AddWithValue("@Email", email);
+                                cmd.Parameters.AddWithValue("@MaNV", emp.MaNV);
+
+                                cmd.ExecuteNonQuery();
+                                Console.WriteLine($"✓ Tạo tài khoản: {username,-15} | {emp.HoTen}");
+                                Console.WriteLine($"  Hash: {passwordHash}");
+                                successCount++;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"✗ Lỗi khi tạo tài khoản cho {emp.MaNV}: {ex.Message}");
                         }
                     }
-                }
 
-                Console.WriteLine();
-                Console.WriteLine("=".PadRight(60, '='));
-                Console.WriteLine("Hoàn thành! Tất cả mật khẩu đã được update.");
-                Console.WriteLine("=".PadRight(60, '='));
+                    Console.WriteLine();
+                    Console.WriteLine("=".PadRight(60, '='));
+                    Console.WriteLine($"Hoàn thành!");
+                    Console.WriteLine($"- Tạo mới: {successCount} tài khoản");
+                    Console.WriteLine($"- Bỏ qua: {skipCount} tài khoản");
+                    Console.WriteLine($"- Tổng số nhân viên: {employees.Count}");
+                    Console.WriteLine("=".PadRight(60, '='));
+                }
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Lỗi: {ex.Message}");
+            Console.WriteLine($"Chi tiết: {ex.StackTrace}");
         }
     }
 }

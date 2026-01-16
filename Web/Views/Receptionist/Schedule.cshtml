@@ -5,15 +5,10 @@
     ViewData["CurrentPage"] = "schedule";
     
     var timeSlots = new List<string> { "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00" };
-    var courts = new List<(string Name, string Type)> 
-    { 
-        ("Sân bóng đá Mini 1", "mini-football"),
-        ("Sân bóng đá Mini 2", "mini-football"),
-        ("Sân tennis 1", "tennis"),
-        ("Sân tennis 2", "tennis"),
-        ("Sân cầu lông 1", "badminton"),
-        ("Sân cầu lông 2", "badminton")
-    };
+    
+    // Get courts from database via ViewBag
+    var courts = ViewBag.Courts as List<HQTCSDL.Controllers.CourtViewModel> ?? new List<HQTCSDL.Controllers.CourtViewModel>();
+    var selectedDate = ViewBag.SelectedDate as DateTime? ?? DateTime.Today;
 }
 
 <div style="display: flex; flex-direction: column; gap: 1.5rem; height: 100%;">
@@ -26,7 +21,7 @@
             </button>
             <div style="font-weight: 600; min-width: 200px; text-align: center;">
                 <i class="fas fa-calendar-alt" style="margin-right: 0.5rem;"></i>
-                <span id="currentDate">@DateTime.Today.ToString("dd/MM/yyyy")</span>
+                <span id="currentDate">@selectedDate.ToString("dd/MM/yyyy")</span>
             </div>
             <button class="btn btn-outline" onclick="changeDate(1)">
                 <i class="fas fa-chevron-right"></i>
@@ -79,17 +74,22 @@
                 @foreach (var court in courts)
                 {
                     <div style="display: grid; grid-template-columns: 250px repeat(@timeSlots.Count, 64px); border-bottom: 1px solid var(--border-color);">
-                        <div style="padding: 0.75rem; font-weight: 500; color: var(--color-gray-700); border-right: 1px solid var(--border-color); background-color: var(--background); position: sticky; left: 0; z-index: 10; box-sizing: border-box;" data-court-type="@court.Type">
-                            @court.Name
+                        <div style="padding: 0.75rem; font-weight: 500; color: var(--color-gray-700); border-right: 1px solid var(--border-color); background-color: var(--background); position: sticky; left: 0; z-index: 10; box-sizing: border-box;" data-court-type="@court.CourtType">
+                            @court.TenSan
                         </div>
                         @for (var i = 0; i < timeSlots.Count; i++)
                         {
                             var timeSlot = timeSlots[i];
-                            var booking = Model.FirstOrDefault(b => b.CourtName == court.Name && b.StartTime == timeSlot);
+                            // FIX: Now comparing date, court name, and start time
+                            var booking = Model.FirstOrDefault(b => 
+                                b.BookingDate.Date == selectedDate.Date && 
+                                b.CourtName == court.TenSan && 
+                                b.StartTime == timeSlot);
                             
-                            // Check if this slot is part of a previous booking
+                            // Check if this slot is part of a previous booking (also check date)
                             var isPartOfPreviousBooking = Model.Any(b => {
-                                if (b.CourtName != court.Name) return false;
+                                if (b.BookingDate.Date != selectedDate.Date) return false;
+                                if (b.CourtName != court.TenSan) return false;
                                 var startIndex = timeSlots.IndexOf(b.StartTime);
                                 var span = b.DurationMinutes / 30;
                                 var endIndex = startIndex + span;
@@ -104,29 +104,70 @@
                             if (booking != null)
                             {
                                 var span = booking.DurationMinutes / 30;
-                                var bgColor = booking.Status == "active" ? "#dbeafe" : 
-                                             booking.Status == "booked" ? "#fee2e2" : "#dcfce7";
-                                var borderColor = booking.Status == "active" ? "#3b82f6" : 
-                                                booking.Status == "booked" ? "#ef4444" : "#10b981";
-                                var textColor = booking.Status == "active" ? "#1e40af" : 
-                                              booking.Status == "booked" ? "#991b1b" : "#166534";
-                                
-                                <div style="grid-column: span @span; min-height: 48px; padding: 0.5rem; border-left: 2px solid @borderColor; background-color: @bgColor; color: @textColor; cursor: pointer; transition: opacity 0.2s; box-sizing: border-box;"
-                                     data-court-type="@court.Type"
+                                var bgColor = "#f3f4f6";
+                                var borderColor = "#d1d5db";
+                                var textColor = "#374151";
+
+                                if (booking.Status == "Đang sử dụng")
+                                {
+                                    bgColor = "#dbeafe"; // Blue-100
+                                    borderColor = "#3b82f6"; // Blue-500
+                                    textColor = "#1e40af"; // Blue-800
+                                }
+                                else if (booking.Status == "Đã xác nhận")
+                                {
+                                    bgColor = "#dcfce7"; // Green-100
+                                    borderColor = "#10b981"; // Emerald-500
+                                    textColor = "#166534"; // Green-800
+                                }
+                                else if (booking.Status == "Chờ xác nhận")
+                                {
+                                    bgColor = "#fee2e2"; // Red-100
+                                    borderColor = "#ef4444"; // Red-500
+                                    textColor = "#991b1b"; // Red-800
+                                }
+                                else if (booking.Status == "Hoàn thành" || booking.Status == "Chờ thanh toán")
+                                {
+                                    bgColor = "#fef9c3"; // Yellow-100
+                                    borderColor = "#eab308"; // Yellow-500
+                                    textColor = "#854d0e"; // Yellow-800
+                                }
+
+                                <div style="grid-column: span @span; min-height: 48px; padding: 0.5rem; border-left: 4px solid @borderColor; background-color: @bgColor; color: @textColor; cursor: pointer; transition: opacity 0.2s; box-sizing: border-box; overflow: hidden;"
+                                     data-court-type="@court.CourtType"
                                      onclick="viewBookingDetail('@booking.Id')"
                                      onmouseover="this.style.opacity='0.8'"
                                      onmouseout="this.style.opacity='1'">
-                                    <div style="font-size: 0.875rem; font-weight: 600;">@booking.CustomerName</div>
-                                    <div style="font-size: 0.75rem; margin-top: 0.25rem;">
-                                        @(booking.PaymentStatus == "paid-online" ? "✓ Đã thanh toán" : "⏳ Chưa thanh toán")
+                                    <div style="font-size: 0.875rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@booking.CustomerName</div>
+                                    <div style="font-size: 0.75rem; margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem;">
+                                        @if (booking.Status == "Đang sử dụng")
+                                        {
+                                            <i class="fas fa-play-circle" style="color: @textColor"></i> <span>Đang sử dụng</span>
+                                        }
+                                        else if (booking.Status == "Đã xác nhận")
+                                        {
+                                            <i class="fas fa-check-circle" style="color: @textColor"></i> <span>Đã xác nhận</span>
+                                        }
+                                        else if (booking.Status == "Chờ xác nhận")
+                                        {
+                                            <i class="fas fa-clock" style="color: @textColor"></i> <span>Chờ xác nhận</span>
+                                        }
+                                        else if (booking.Status == "Hoàn thành" || booking.Status == "Chờ thanh toán")
+                                        {
+                                            <i class="fas fa-money-bill-wave" style="color: @textColor"></i> <span>Chờ thanh toán</span>
+                                        }
+                                        else 
+                                        {
+                                            <span>@booking.Status</span>
+                                        }
                                     </div>
                                 </div>
                             }
                             else
                             {
                                 <div style="min-height: 48px; padding: 0.5rem; border-left: 1px solid var(--border-color); background-color: var(--background); cursor: pointer; transition: background-color 0.2s; box-sizing: border-box;"
-                                     data-court-type="@court.Type"
-                                     onclick="quickBook('@court.Name', '@timeSlot')"
+                                     data-court-type="@court.CourtType"
+                                     onclick="quickBook('@selectedDate.ToString("yyyy-MM-dd")', '@timeSlot', '@court.MaSan', '@court.TenSan')"
                                      onmouseover="this.style.backgroundColor='var(--color-gray-50)'"
                                      onmouseout="this.style.backgroundColor='var(--background)'">
                                     <div style="font-size: 0.75rem; color: var(--color-gray-400); text-align: center;">Trống</div>
@@ -146,24 +187,49 @@
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <div style="width: 16px; height: 16px; background-color: #fee2e2; border: 2px solid #ef4444; border-radius: 2px;"></div>
-                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đã đặt</span>
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Chờ xác nhận</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 16px; height: 16px; background-color: #dcfce7; border: 2px solid #10b981; border-radius: 2px;"></div>
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đã xác nhận</span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <div style="width: 16px; height: 16px; background-color: #dbeafe; border: 2px solid #3b82f6; border-radius: 2px;"></div>
-                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đang diễn ra</span>
+
+<!-- Include Modal -->
+<!-- Include Modal -->
+<partial name="_BookingDetailModal" />
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Đang sử dụng</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 16px; height: 16px; background-color: #fef9c3; border: 2px solid #eab308; border-radius: 2px;"></div>
+                <span style="font-size: 0.875rem; color: var(--color-gray-600);">Chờ thanh toán</span>
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
+    <script src="~/js/receptionist/new-booking-dialog.js"></script>
+    <script src="~/js/receptionist/booking-detail.js"></script>
     <script>
-        let selectedDate = new Date();
+        // Initialize with the date from the server
+        let selectedDate = new Date('@selectedDate.ToString("yyyy-MM-dd")');
+
+        function formatDateForUrl(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
 
         function changeDate(days) {
             selectedDate.setDate(selectedDate.getDate() + days);
             document.getElementById('currentDate').textContent = selectedDate.toLocaleDateString('vi-VN');
-            // TODO: Reload schedule for new date
+            
+            // Reload schedule for the new date
+            const dateStr = formatDateForUrl(selectedDate); // Format: YYYY-MM-DD
+            window.location.href = `/Receptionist/Schedule?date=${dateStr}`;
         }
 
         function filterCourtType(courtType) {
@@ -193,20 +259,31 @@
             });
         }
 
-        function quickBook(courtName, timeSlot) {
-            if (confirm(`Đặt sân ${courtName} lúc ${timeSlot}?`)) {
-                // TODO: Open booking dialog with pre-filled data
-                alert('Chức năng đang phát triển');
+        function quickBook(dateStr, timeSlot, courtId, courtName) {
+            // Chuyển định dạng ngày hiển thị cho đẹp
+            const dateParts = dateStr.split('-');
+            const displayDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+            
+            if (confirm(`Đặt sân ${courtName}\nThời gian: ${timeSlot} - Ngày: ${displayDate}?`)) {
+                if (typeof openBookingWithDetails === 'function') {
+                    openBookingWithDetails(dateStr, timeSlot, courtId);
+                } else {
+                    alert('Đang tải dữ liệu, vui lòng thử lại...');
+                }
             }
         }
 
-        function viewBookingDetail(bookingId) {
-            // TODO: Open booking detail modal
-            alert('Chi tiết đặt sân #' + bookingId);
-        }
+        // viewBookingDetail is handled in booking-detail.js
 
         function openNewBookingDialog() {
             document.getElementById('newBookingModal').style.display = 'flex';
+            // Call the real implementation from new-booking-dialog.js
+            if (typeof resetBookingForm === 'function') {
+                resetBookingForm();
+            }
+            if (typeof showStep === 'function') {
+                showStep(1);
+            }
         }
     </script>
 }

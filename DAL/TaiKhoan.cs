@@ -21,10 +21,10 @@ namespace DAL
             // 1. Tìm user theo TenDangNhap trươc
             string query =
                 @"
-				SELECT tk.*
-				FROM TaiKhoan tk
-				WHERE tk.TenDangNhap = @TenDangNhap 
-				AND tk.TrangThai = 1";
+                SELECT tk.*
+                FROM TaiKhoan tk
+                WHERE tk.TenDangNhap = @TenDangNhap 
+                AND tk.TrangThai = 1";
 
             SqlParameter[] parameters = new SqlParameter[]
             {
@@ -39,25 +39,16 @@ namespace DAL
                 string storedHash = row["MatKhauMaHoa"].ToString().Trim();
 
                 // 2. Dùng BCrypt để kiểm tra mật khẩu
-                // Lưu ý: Nếu DB của bạn đang lưu pass thường (chưa hash), lệnh Verify này sẽ false.
-                // Tạm thời để test với pass thường, bạn có thể dùng: if (storedHash == matKhau)
-                // Nhưng đúng chuẩn BCrypt phải là:
                 bool isPasswordValid = false;
 
-                // CHECK TẠM THỜI: Hỗ trợ cả pass thường (cho dữ liệu cũ) và pass đã hash
-                if (storedHash == matKhau)
+                try
                 {
-                    isPasswordValid = true;
+                    isPasswordValid = BCrypt.Net.BCrypt.Verify(matKhau, storedHash);
                 }
-                else
+                catch
                 {
-                    try
-                    {
-                        isPasswordValid = BCrypt.Net.BCrypt.Verify(matKhau, storedHash);
-                    }
-                    catch
-                    { /* Không phải hash BCrypt hợp lệ */
-                    }
+                    // Không phải hash BCrypt hợp lệ
+                    isPasswordValid = false;
                 }
 
                 if (isPasswordValid)
@@ -154,6 +145,22 @@ namespace DAL
 
             object? result = _dbConnection.ExecuteScalar(query, parameters);
             return result != null ? result.ToString() : "NhanVien";
+        }
+
+        public string? LayMaCoSo(string maNhanVien)
+        {
+            if (string.IsNullOrEmpty(maNhanVien))
+                return null;
+
+            string query =
+                @"
+                SELECT MaCoSo 
+                FROM NhanVien 
+                WHERE MaNhanVien = @MaNV";
+            
+            SqlParameter[] parameters = { new SqlParameter("@MaNV", maNhanVien) };
+            object? result = _dbConnection.ExecuteScalar(query, parameters);
+            return result?.ToString();
         }
     }
 }

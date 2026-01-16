@@ -76,3 +76,7 @@ wwwroot/lib/
 *.bak
 *.swp
 node_modules
+
+#appsettings
+appsettings.json
+appsettings.Development.json

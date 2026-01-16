@@ -1,15 +1,31 @@
 @model DTO.LoaiSan
 
-<div class="field-info">
-	<p>@Model.TenLoaiSan</p>
+<div class="field-info text-[18px]">
+	<p class="font-bold">@Model.TenLoaiSan</p>
 	<p>@Model.GiaGoc.ToString("N0") / <span>@Model.DonViTinhTheoPhut</span> phút</p>
 	<p>@Model.MoTa</p>
-	<button onclick="handlePriceChanging('@Model.MaLoaiSan')">Cập nhật giá</button>
+	<button 
+    id="field-info-button-@Model.MaLoaiSan"
+    class="field-info-button blue-button-decor" 
+    onclick="handlePriceChanging('@Model.MaLoaiSan')"
+  >Cập nhật giá</button>
 
-	<div id="input-price-@Model.MaLoaiSan" class="hidden">
-		<input type="number" id="new-price-@Model.MaLoaiSan" placeholder="Nhập giá mới..." />
-		<button id="cancel-price-button" onclick="cancelPriceChanging('@Model.MaLoaiSan')">Hủy</button>
-		<button id="update-price-button" onclick="updateFieldPrice('@Model.MaLoaiSan')">Cập nhật</button>
+	<div id="input-price-@Model.MaLoaiSan" class="hidden mt-5 field-info-input">
+		<input 
+      type="number" 
+      id="new-price-@Model.MaLoaiSan" 
+      placeholder="Nhập giá mới..." 
+      class="p-2 border border-gray-300 rounded outline-none"
+    />
+		<button 
+      id="cancel-price-button" 
+      onclick="cancelPriceChanging('@Model.MaLoaiSan')"
+      class="white-button-decor"
+    >Hủy</button>
+		<button 
+      id="update-price-button" 
+      onclick="updateFieldPrice('@Model.MaLoaiSan')"
+      class="blue-button-decor"
+    >Cập nhật</button>
 	</div>
 </div>
-
