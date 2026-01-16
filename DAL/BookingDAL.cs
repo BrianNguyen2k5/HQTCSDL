@@ -304,7 +304,8 @@ namespace DAL
                                 TenSan = reader["TenSan"].ToString(),
                                 TenLoaiSan = reader["TenLoaiSan"].ToString(),
                                 TenCoSo = reader["TenCoSo"].ToString(),
-                                TrangThaiPhieu = reader["TrangThaiPhieu"].ToString()
+                                TrangThaiPhieu = reader["TrangThaiPhieu"].ToString(),
+                                DanhSachDichVu = reader["DanhSachDichVu"] != DBNull.Value ? reader["DanhSachDichVu"].ToString() : ""
                             });
                         }
                     }
@@ -409,6 +410,44 @@ namespace DAL
             }
 
             return promotions;
+        }
+        // Get customer's active discounts from ApDung table
+        public List<PromotionDTO> GetCustomerDiscounts(string maKhachHang)
+        {
+            var discounts = new List<PromotionDTO>();
+
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                string query = @"
+                    SELECT ud.MaUuDai, ud.LoaiUuDai, ud.PhanTramGiamGia
+                    FROM ApDung ad
+                    INNER JOIN UuDai ud ON ad.MaUuDai = ud.MaUuDai
+                    WHERE ad.MaKhachHang = @MaKhachHang 
+                        AND ad.TrangThai = 1
+                        AND GETDATE() BETWEEN ad.NgayBatDau AND ad.NgayKetThuc
+                ";
+
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@MaKhachHang", maKhachHang);
+                    conn.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            discounts.Add(new PromotionDTO
+                            {
+                                MaUuDai = reader["MaUuDai"].ToString(),
+                                LoaiUuDai = reader["LoaiUuDai"].ToString(),
+                                PhanTramGiamGia = Convert.ToDouble(reader["PhanTramGiamGia"])
+                            });
+                        }
+                    }
+                }
+            }
+
+            return discounts;
         }
     }
 }

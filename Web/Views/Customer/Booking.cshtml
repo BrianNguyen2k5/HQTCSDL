@@ -365,7 +365,6 @@
          <!-- Discount Selection -->
          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
              <h3 class="font-bold text-gray-800 mb-2">Ưu Đãi & Giảm Giá</h3>
-             <p class="text-gray-500 text-sm mb-4">Chọn các loại ưu đãi phù hợp với bạn. (Ví dụ: Thành viên Vàng + Sinh viên)</p>
              
              <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="discount-list">
                  <!-- Injected via JS -->
@@ -888,66 +887,71 @@
         `;
     }
 
-    function renderDiscounts() {
-        const container = document.getElementById('discount-list');
-        if(!container) return;
-        
-        if(!promotions.length) return;
-
-        const fullList = [{id: 'REGULAR', name: 'Khách Thường', rate: 0, desc: 'Giá tiêu chuẩn'}, ...promotions];
-
-        // Identify current selections
-        const selectedIds = state.selection.discounts.map(d => d.id);
-        const hasRegular = selectedIds.includes('REGULAR');
-        const tierIds = ['UD01', 'UD02', 'UD03'];
-        const ageIds = ['UD04', 'UD05'];
-        
-        const hasTier = selectedIds.some(id => tierIds.includes(id));
-        const hasAge = selectedIds.some(id => ageIds.includes(id));
-        
-        const count = selectedIds.length;
-
-        container.innerHTML = fullList.map(d => {
-            const isSelected = selectedIds.includes(d.id);
-            let isDisabled = false;
+    async function autoApplyDiscounts() {
+        try {
+            console.log('=== AUTO APPLY DISCOUNTS START ===');
             
-            // Logic for disabling
-            if (d.id === 'REGULAR') {
-                // Regular is strictly exclusive. 
-                // If anything else is selected, can we select Regular? Yes, to switch back.
-                // But user logic: "If Regular is selected, cannot select others". 
-                // Ideally, Regular is always available to "Reset".
-                isDisabled = false; 
-            } else {
-                // For normal items
-                if (hasRegular) {
-                    isDisabled = true; // Regular is dominant
+            const res = await fetch('/api/booking/customer-discounts');
+            console.log('API Response status:', res.status);
+            
+            if (!res.ok) {
+                console.log('API call failed');
+                return;
+            }
+            
+            const discounts = await res.json();
+            console.log('Customer discounts from database:', discounts);
+            
+            // Convert to the format expected by the UI
+            const applied = discounts.map(d => ({
+                id: d.maUuDai,
+                name: d.loaiUuDai,
+                rate: d.phanTramGiamGia / 100  // Convert percentage to decimal
+            }));
+            
+            console.log('Applied discounts:', applied);
+            
+            // Update State
+            state.selection.discounts = applied;
+            
+            // Render specific display for discounts
+            const container = document.getElementById('discount-list');
+            console.log('Container element:', container);
+            
+            if(container) {
+                if (applied.length > 0) {
+                    container.innerHTML = applied.map(d => `
+                        <div class="border border-green-200 bg-green-50 rounded-xl p-4 flex items-center gap-3">
+                            <i class="bi bi-gift-fill text-green-600 text-xl"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm">Ưu đãi được áp dụng: ${d.name}</h4>
+                                <p class="text-xs text-green-700">Giảm ${(d.rate * 100)}% trên tổng hóa đơn</p>
+                            </div>
+                        </div>
+                    `).join('');
                 } else {
-                     // Group Logic: Frozen if another in same group is selected
-                     if (tierIds.includes(d.id) && hasTier && !isSelected) isDisabled = true;
-                     if (ageIds.includes(d.id) && hasAge && !isSelected) isDisabled = true;
-                     
-                     // Max 2 Rule (if not already selected and not disabled by group)
-                     if (!isSelected && !isDisabled && count >= 2) isDisabled = true;
+                    container.innerHTML = `
+                         <div class="border border-gray-100 bg-gray-50 rounded-xl p-4 text-center text-gray-500 text-sm italic">
+                            Bạn chưa có ưu đãi thành viên phù hợp. (Khách thường)
+                        </div>
+                    `;
                 }
             }
-
-            // Styling for disabled state
-            const disabledClass = isDisabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:bg-gray-50';
-            const borderClass = isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200';
             
-            return `
-            <div onclick="${isDisabled ? '' : `toggleDiscount('${d.id}')`}" 
-                 class="border rounded-xl p-4 flex items-start gap-3 transition-all ${disabledClass} ${borderClass}">
-                <div class="mt-1">
-                    <i class="bi ${isSelected ? 'bi-check-square-fill text-blue-600' : (isDisabled ? 'bi-x-square text-gray-300' : 'bi-square text-gray-300')} text-xl"></i>
-                </div>
-                <div>
-                    <h4 class="font-bold text-gray-800 text-sm">${d.name}</h4>
-                     <p class="text-xs text-gray-500 mt-1">${d.desc}</p>
-                </div>
-            </div>`;
-        }).join('');
+            renderSummary();
+            console.log('=== AUTO APPLY DISCOUNTS END ===');
+
+        } catch (e) {
+            console.error("Auto discount error", e);
+        }
+    }
+
+    // Call this inside loadWizard or where appropriate AFTER fetching promotions
+    // Note: renderDiscounts function is replaced by this logic mostly. 
+    function renderDiscounts() {
+        // No-op or call autoApply logic if not called elsewhere
+        // But better to call autoApplyDiscounts ONE TIME when step 5 loads or wizard initializes
+        autoApplyDiscounts();
     }
 
     function toggleDiscount(id) {
@@ -1238,6 +1242,12 @@
                  if(line) line.classList.replace('w-full', 'w-0');
              }
         }
+        
+        // Auto-apply discounts when reaching step 5
+        if(step === 5) {
+            autoApplyDiscounts();
+        }
+        
         window.scrollTo(0, 0);
     }
     
@@ -1376,6 +1386,7 @@
                     <td class="p-4">
                         <div class="font-bold text-sm">${b.tenSan}</div>
                         <div class="text-xs text-gray-500">${b.tenLoaiSan} (${b.tenCoSo})</div>
+                        ${b.danhSachDichVu ? `<div class="mt-1 text-xs text-blue-600 font-medium border-t border-gray-100 pt-1"><i class="bi bi-basket2-fill mr-1"></i>${b.danhSachDichVu}</div>` : ''}
                     </td>
                     <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${statusClass}">${b.trangThaiPhieu}</span></td>
                     <td class="p-4">
