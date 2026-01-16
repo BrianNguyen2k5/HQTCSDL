@@ -4,7 +4,7 @@ namespace DTO
 	{
 		public required string MaKhachHang { get; set; }
 		public required string HoTen { get; set; }
-		public DateTime NgaySinh { get; set; }
+		public DateTime? NgaySinh { get; set; }
 		public required string SoCCCD { get; set; }
 		public required string SoDienThoai { get; set; }
 		public string? Email { get; set; }
