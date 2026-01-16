@@ -590,7 +590,6 @@ INSERT INTO DonNghiPhep VALUES
 ('DN14','2025-01-09',N'Việc riêng',N'Hủy','NV086','NV081',NULL),
 ('DN15','2025-01-12',N'Nghỉ gia đình',N'Đã Duyệt','NV087','NV081','NV088');
 
-select * from LoaiSan
 
 --CS01 – TP HỒ CHÍ MINH (12 SÂN)
 INSERT INTO San VALUES
@@ -1016,10 +1015,5 @@ INSERT INTO ApDung (MaKhachHang, MaUuDai, NgayBatDau, NgayKetThuc, TrangThai) VA
 
 -- 1 KH có nhiều ưu đãi (để test chọn ưu đãi)
 ('KH019','UD01','2024-01-01','2024-12-31',0),
-('KH019','UD04','2024-09-01','2025-06-30',0),
+('KH019','UD04','2024-09-01','2025-06-30',0);
 
-('KH302','UD01','2026-01-01','2026-12-31',1),
-('KH302','UD04','2026-01-01','2026-12-31',1),
-
-('KH301','UD01','2026-01-01','2026-12-31',1),
-('KH301','UD04','2026-01-01','2026-12-31',1)
