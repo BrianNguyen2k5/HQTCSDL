@@ -85,7 +85,7 @@ public class AuthController : Controller
             // 7. Chuyển hướng trang
             Console.WriteLine($"LOGIN SUCCESS: {user.id}");
 
-            if (user.TenDangNhap == "denoa")
+            if (!string.IsNullOrEmpty(user.MaKhachHang))
             {
                 return RedirectToAction("Index", "Booking");
             }
@@ -139,18 +139,19 @@ public class AuthController : Controller
             return View();
         }
 
-        bool result = _taiKhoanDAL.ThemTaiKhoan(username, email, password);
+        string result = _taiKhoanDAL.ThemTaiKhoan(username, email, password);
 
-        if (result)
+        if (result == "Success")
         {
             // Đăng ký thành công -> Chuyển qua trang login
             return RedirectToAction("Login");
         }
         else
         {
-            ViewBag.Error = "Đăng ký thất bại. Tên đăng nhập hoặc Email có thể đã tồn tại.";
+            ViewBag.Error = result; // Hiển thị lỗi cụ thể từ DAL
             return View();
         }
+
     }
 
     [Route("logout")]

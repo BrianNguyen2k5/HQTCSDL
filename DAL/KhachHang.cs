@@ -28,6 +28,18 @@ namespace DAL
 
             string maKhachHangMoi = "KH001"; // Default nếu chưa có ai
 
+            // 0. CHECK IF EMAIL EXISTS -> REUSE
+            if (!string.IsNullOrEmpty(Email))
+            {
+                string checkEmailQuery = "SELECT MaKhachHang FROM KhachHang WHERE Email = @Email";
+                SqlParameter[] emailParams = { new SqlParameter("@Email", Email) };
+                object existingId = _dbConnection.ExecuteScalar(checkEmailQuery, emailParams);
+                if (existingId != null && existingId != DBNull.Value)
+                {
+                    return existingId.ToString();
+                }
+            }
+
             if (!string.IsNullOrEmpty(maKhachHangMax))
             {
                 // Cắt ra để lấy MaKhachHang tiep theo, VD: KH003
@@ -77,7 +89,32 @@ namespace DAL
             }
             catch (Exception ex)
             {
-                return "Thất bại";
+                // Catch-all for DB errors to attempt auto-fix
+                if (ex.Message.Contains("UNIQUE KEY constraint") && ex.Message.Contains("<NULL>"))
+                {
+                     Console.WriteLine("Detected UNIQUE constraint violation for NULL. Attempting to fix DB...");
+                     try 
+                     {
+                         string fixSql = @"
+                            DECLARE @ConstraintName nvarchar(200)
+                            SELECT @ConstraintName = Name FROM sys.key_constraints WHERE type = 'UQ' AND parent_object_id = OBJECT_ID('KhachHang')
+                            IF @ConstraintName IS NOT NULL
+                                EXEC('ALTER TABLE KhachHang DROP CONSTRAINT ' + @ConstraintName)
+                         ";
+                         _dbConnection.ExecuteNonQuery(fixSql);
+                         
+                         // Retry insertion
+                         _dbConnection.ExecuteNonQuery(insertQuery, parameters);
+                         return maKhachHangMoi;
+                     }
+                     catch (Exception fixEx)
+                     {
+                         Console.WriteLine("Auto-fix failed: " + fixEx.Message);
+                     }
+                }
+
+                Console.WriteLine("Lỗi ThemKhachHang: " + ex.Message);
+                return "Thất bại: " + ex.Message;
             }
         }
     }
