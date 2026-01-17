@@ -189,6 +189,7 @@ namespace DAL
                 {
                     conn.Open();
                     
+                    // Bước 1: Tạo phiếu đặt sân
                     using (SqlCommand cmd = new SqlCommand("sp_KhachHang_DatSanOnline", conn))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
@@ -201,26 +202,36 @@ namespace DAL
                         cmd.ExecuteNonQuery();
                     }
                     
-                    // Lấy mã phiếu đặt vừa tạo (SP không trả về trực tiếp)
+                    // Bước 2: Lấy mã phiếu đặt vừa tạo
+                    string? maPhieuDat = null;
                     using (SqlCommand cmdSelect = new SqlCommand("SELECT TOP 1 MaPhieuDat FROM PhieuDatSan WHERE MaKhachHang = @MaKhachHang ORDER BY NgayDat DESC", conn))
                     {
                         cmdSelect.CommandType = CommandType.Text;
                         cmdSelect.Parameters.AddWithValue("@MaKhachHang", request.MaKhachHang);
                         
-                        var maPhieuDat = cmdSelect.ExecuteScalar();
-                        
-                        if (maPhieuDat != null)
-                        {
-                            response.MaPhieuDat = maPhieuDat.ToString();
-                            response.Success = true;
-                            response.Message = "Đặt sân thành công";
-                        }
-                        else
-                        {
-                            response.Success = false;
-                            response.Message = "Không thể lấy mã phiếu đặt";
-                        }
+                        var result = cmdSelect.ExecuteScalar();
+                        maPhieuDat = result?.ToString();
                     }
+                    
+                    if (string.IsNullOrEmpty(maPhieuDat))
+                    {
+                        response.Success = false;
+                        response.Message = "Không thể lấy mã phiếu đặt";
+                        return response;
+                    }
+                    
+                    // Bước 3: Tạo hóa đơn cho phiếu đặt
+                    using (SqlCommand cmdHoaDon = new SqlCommand("sp_TaoHoaDon", conn))
+                    {
+                        cmdHoaDon.CommandType = CommandType.StoredProcedure;
+                        cmdHoaDon.Parameters.AddWithValue("@MaPhieuDat", maPhieuDat);
+                        
+                        cmdHoaDon.ExecuteNonQuery();
+                    }
+                    
+                    response.MaPhieuDat = maPhieuDat;
+                    response.Success = true;
+                    response.Message = "Đặt sân và tạo hóa đơn thành công";
                 }
             }
             catch (SqlException ex)

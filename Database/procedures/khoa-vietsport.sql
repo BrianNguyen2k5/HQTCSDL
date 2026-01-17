@@ -103,7 +103,7 @@ BEGIN
         )
         VALUES (
             @MaPhieuDat, GETDATE(), @NgayNhanSan, @GioBatDau, @GioKetThuc,
-            N'Online', N'Chờ thanh toán', @MaKhachHang, @MaSan
+            N'Online', N'Chờ xác nhận', @MaKhachHang, @MaSan
         );
 
         COMMIT TRANSACTION;
