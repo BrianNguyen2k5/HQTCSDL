@@ -37,13 +37,14 @@
       border: 1px solid #bbb;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 5px;
+			font-size: 16px;
     }
 
     .field-info-input, .service-price-changing {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 5px;
 
       &.hidden {
         display: none !important;
