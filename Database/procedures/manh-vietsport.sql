@@ -144,11 +144,11 @@ begin
 	begin tran
 		--B1: Đếm số phiếu huỷ 
 		SELECT COUNT(*) AS SoLuong
-		FROM PhieuDatSan 
-		WHERE year(NgayNhanSan) = @nam 
-			AND TrangThaiPhieu = N'Đã huỷ'
+		FROM PhieuDatSan
+		WHERE year(NgayNhanSan) = @nam
+			AND TrangThaiPhieu = N'Đã hủy'
 
-		waitfor delay '00:00:10'
+		waitfor delay '00:00:05'
 
 		select p.MaPhieuDat, p.NgayDat, p.NgayNhanSan, p.HinhThucDat
 		from PhieuDatSan p
