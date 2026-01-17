@@ -83,8 +83,8 @@ namespace DAL
         string query = "sp_CapNhatGiaDV";
         using SqlCommand cmd = new SqlCommand(query, conn);
         cmd.CommandType = CommandType.StoredProcedure;
-        cmd.Parameters.AddWithValue("@GiaMoi", giaMoi);
-        cmd.Parameters.AddWithValue("@MaDichVu", maDichVu);
+        cmd.Parameters.AddWithValue("@giamoi", giaMoi);
+        cmd.Parameters.AddWithValue("@madv", maDichVu);
         int rows = cmd.ExecuteNonQuery();
         return rows > 0;
       }
