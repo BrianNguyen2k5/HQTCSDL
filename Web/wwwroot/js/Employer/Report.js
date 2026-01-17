@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
 									<td class="py-2 px-4 border-b text-center">${stt++}</td>
 									<td class="py-2 px-4 border-b text-center">${phieu.maPhieuDat}</td>
 									<td class="py-2 px-4 border-b text-center">${phieu.nguoiDat}</td>
-									<td class="py-2 px-4 border-b text-center">${phieu.ngayDat}</td>
+									<td class="py-2 px-4 border-b text-center">${new Date(phieu.ngayDat).toLocaleDateString('vi-VN')}</td>
 									<td class="py-2 px-4 border-b text-center">${phieu.hinhThucDat}</td>
 									<td class="py-2 px-4 border-b text-center">${phieu.trangThaiPhieu}</td>
 								</tr>
@@ -173,7 +173,7 @@ function handleServiceCancelModal() {
 					const totalCancellations = document.getElementById("total-cancellations");
 					const cancellationList = document.getElementById("cancellation-list");
 
-					if (totalCancellations) totalCancellations.innerText = data.data.tongSoPhieu;
+					if (totalCancellations) totalCancellations.innerText = data.data.soLuong;
 					if (cancellationList) {
 						let html = `
 							<div class="overflow-x-auto">
@@ -196,13 +196,13 @@ function handleServiceCancelModal() {
 									<tr class="hover:bg-gray-50">
 										<td class="py-2 px-4 border-b text-center">${stt++}</td>
 										<td class="py-2 px-4 border-b text-center">${phieu.maPhieuDat}</td>
-										<td class="py-2 px-4 border-b text-center">${phieu.ngayDat}</td>
-										<td class="py-2 px-4 border-b text-center">${phieu.ngayNhanSan}</td>
+										<td class="py-2 px-4 border-b text-center">${new Date(phieu.ngayDat).toLocaleDateString('vi-VN')}</td>
+										<td class="py-2 px-4 border-b text-center">${new Date(phieu.ngayNhanSan).toLocaleDateString('vi-VN')}</td>
 										<td class="py-2 px-4 border-b text-center">${phieu.hinhThucDat}</td>
 									</tr>
 								`;
 							});
-						} 
+						}
 						else {
 							html += `<tr><td colspan="5" class="py-4 text-center text-gray-500">Không có dữ liệu phiếu hủy nào.</td></tr>`;
 						}

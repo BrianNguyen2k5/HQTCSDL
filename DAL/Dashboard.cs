@@ -149,7 +149,7 @@ namespace DAL
 
 		public class PhieuHuyResult
 		{
-			public int tongSoPhieu { get; set; }
+			public int SoLuong { get; set; }
 			public List<DTO.DanhSachPhieuHuy> dsPhieuHuy { get; set; } = new List<DTO.DanhSachPhieuHuy>();
 		}
 
@@ -166,7 +166,7 @@ namespace DAL
 			if (reader.Read())
 			{
 				// Result set đầu tiên chỉ có 1 cột: COUNT(*) AS SoLuong => index 0
-				result.tongSoPhieu = reader.GetInt32(0);
+				result.SoLuong = reader.GetInt32(0);
 			}
 			// Danh sách phiếu
 			if (reader.NextResult())
