@@ -80,10 +80,11 @@ namespace DAL
       {
         using SqlConnection conn = new SqlConnection(_connectionString);
         conn.Open();
-        string query = "UPDATE DichVu SET DonGia = @GiaMoi WHERE MaDichVu = @MaDichVu";
+        string query = "sp_CapNhatGiaDV";
         using SqlCommand cmd = new SqlCommand(query, conn);
-        cmd.Parameters.AddWithValue("@GiaMoi", giaMoi);
-        cmd.Parameters.AddWithValue("@MaDichVu", maDichVu);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.AddWithValue("@giamoi", giaMoi);
+        cmd.Parameters.AddWithValue("@madv", maDichVu);
         int rows = cmd.ExecuteNonQuery();
         return rows > 0;
       }

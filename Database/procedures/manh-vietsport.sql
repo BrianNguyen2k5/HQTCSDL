@@ -25,14 +25,10 @@ begin
 	insert into @statistics values (N'TaiSan_total', @thongkets)
 
 	declare @huysan int
-	select @huysan = count(MaPhieuDat)
-	from LichSuThayDoi 
+	select @huysan = count(p.MaPhieuDat)
+	from PhieuDatSan p
+	where p.TrangThaiPhieu = N'Đã hủy'
 	insert into @statistics values (N'San_cancel', @huysan)
-
-	declare @huydv int
-	select @huydv = count(MaChiTietPDS)
-	from LichSuHuyDichVu
-	insert into @statistics values (N'DichVu_cancel', @huydv)
 
 	return
 end
@@ -111,7 +107,7 @@ begin
 end
 go
 
--- Phantom (Xem chi tiết hóa đơn giai đoạn 1 và 2 của quản lý
+-- Phantom (Xem chi tiết hóa đơn giai đoạn 1 và 2 của quản lý) (My)
 create or alter proc sp_ChiTietThongKeDoanhThu
 	@macoso char(10),
 	@nam int
@@ -135,9 +131,64 @@ begin
 			and hd.TrangThaiThanhToan = N'Đã thanh toán'
 			and year(hd.NgayXuat) = @nam
 	commit tran
+	set transaction isolation level read committed
 end
 go
 
+-- Thống kê phiếu hủy (Minh)
+create or alter proc sp_ChiTietThongKePhieuHuy
+	@nam int
+as
+begin
+	SET TRANSACTION ISOLATION LEVEL SERIALIZABLE
+	begin tran
+		--B1: Đếm số phiếu huỷ 
+		SELECT COUNT(*) AS SoLuong
+		FROM PhieuDatSan 
+		WHERE year(NgayNhanSan) = @nam 
+			AND TrangThaiPhieu = N'Đã huỷ'
+
+		waitfor delay '00:00:10'
+
+		select p.MaPhieuDat, p.NgayDat, p.NgayNhanSan, p.HinhThucDat
+		from PhieuDatSan p
+		where year(p.NgayNhanSan) = @nam
+			and TrangThaiPhieu = N'Đã hủy'
+
+	commit tran
+	SET TRANSACTION ISOLATION LEVEL read committed
+end
+go
+
+-- Khải
+-- Đổi giá sân, dịch vụ
+create or alter proc sp_CapNhatGiaSan
+	@maloaisan char(10),
+	@giamoi int
+as
+begin
+	update LoaiSan set GiaGoc = @giamoi where MaLoaiSan = @maloaisan
+end
+go
+
+create or alter proc sp_CapNhatGiaDV
+	@madv char(10),
+	@giamoi int
+as
+begin
+	update DichVu set DonGia = @giamoi where MaDichVu = @madv
+end
+go
+
+create or alter proc sp_LayPhieuDatSan
+as
+begin
+	select p.MaPhieuDat, kh.HoTen as NguoiDat, p.NgayDat, p.HinhThucDat, p.TrangThaiPhieu
+	from PhieuDatSan p, KhachHang kh
+	where p.MaKhachHang = kh.MaKhachHang
+end
+go
+select * from PhieuDatSan
 --select * from HoaDon
 --declare @output int
 --exec sp_QL_DoanhThuNam 2025, @output output

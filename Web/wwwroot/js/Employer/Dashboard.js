@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		'DichVu_total',
 		'TaiSan_total',
 		'San_cancel',
-		'DichVu_cancel'
 	];
 
 	// Chỉ load thống kê nếu đang ở trang Dashboard (hoặc trang có chứa các element này)

@@ -166,5 +166,27 @@ namespace HQTCSDL.Web.Controllers
 				return Json(new { success = false, message = ex.Message });
 			}
 		}
-  }
+  
+		[HttpGet]
+		public IActionResult GetServiceCancelReport(int nam) {
+			try {
+				var list = _dashboardDAL.GetDanhSachPhieuHuy(nam);
+				return Json(new { success = true, data = list });
+			}
+			catch (Exception ex) {
+				return Json(new { success = false, message = ex.Message });
+			}
+		}
+	
+		[HttpGet]
+		public IActionResult GetFieldBookings() {
+			try {
+				var list = _dashboardDAL.GetDanhSachPhieuDat();
+				return Json(new { success = true, data = list });
+			}
+			catch (Exception ex) {
+				return Json(new { success = false, message = ex.Message });
+			}
+		}
+	}
 }
